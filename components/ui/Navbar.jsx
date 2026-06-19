@@ -6,7 +6,8 @@ import { useCart } from "../../context/CartContext";
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
-  const { isCartOpen, setIsCartOpen } = useCart();
+  const { isCartOpen, setIsCartOpen, cartItems } = useCart();
+  const cartCount = cartItems ? cartItems.reduce((sum, item) => sum + item.quantity, 0) : 0;
 
   return (
     <nav className="bg-[#fbc5db] px-4 md:px-6 py-4 flex items-center shadow-md w-full">
@@ -76,9 +77,11 @@ export default function Navbar() {
           >
             <img src="/img/navbar/icon-nav/cart.svg" alt="Cart" className="w-4 h-4" />
             {/* Cart Badge */}
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
-              2
-            </span>
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center animate-in scale-in duration-200">
+                {cartCount}
+              </span>
+            )}
           </button>
 
           {/* User profile pill */}
