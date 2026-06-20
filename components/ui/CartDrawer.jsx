@@ -8,6 +8,7 @@ export default function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("transfer");
 
   useEffect(() => {
     if (isOpen) {
@@ -46,7 +47,6 @@ export default function CartDrawer() {
       {/* Trigger Button */}
       <button 
         onClick={() => setIsOpen(true)} 
-        className="text-white hover:text-slate-200 transition-colors relative"
       >
         <ShoppingCart />
         {cartItemCount > 0 && (
@@ -143,30 +143,43 @@ export default function CartDrawer() {
           <div className="p-4 flex-1 ">
             <form id="checkout-form" onSubmit={handleCheckoutSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-                <input required type="text" className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black" placeholder="John Doe" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
-                <input required type="email" className="w-full p-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black" placeholder="john@example.com" />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Shipping Address</label>
-                <textarea required className="w-full p-2 border border-slate-300 h-[70px] rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 text-black" rows="3" placeholder="123 Main St, City, Country"></textarea>
+                <label className="block text-sm font-medium text-slate-700 mb-2">Payment Method</label>
+                <div className="flex flex-col gap-2">
+                  <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="transfer"
+                      checked={paymentMethod === "transfer"}
+                      onChange={() => setPaymentMethod("transfer")}
+                    />
+                    โอนเงิน / บัตรเครดิต
+                  </label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="cod"
+                      checked={paymentMethod === "cod"}
+                      onChange={() => setPaymentMethod("cod")}
+                    />
+                    เก็บเงินปลายทาง (COD)
+                  </label>
+                </div>
               </div>
             </form>
           </div>
           <div className="p-4 border-t border-slate-100 bg-white">
             <div className="flex justify-between items-center mb-4 font-semibold text-lg text-slate-800">
-              <span>Pay:</span>
+              <span>{paymentMethod === "cod" ? "ยอดชำระปลายทาง:" : "Pay:"}</span>
               <span>{cartTotal}.00 AUD</span>
             </div>
-            <button 
+            <button
               type="submit"
               form="checkout-form"
               className="w-full bg-slate-900 text-white py-3 rounded-md font-medium hover:bg-slate-800 transition-colors"
             >
-              Confirm Payment
+              {paymentMethod === "cod" ? "ยืนยันคำสั่งซื้อ" : "Confirm Payment"}
             </button>
           </div>
         </div>
