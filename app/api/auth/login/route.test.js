@@ -9,6 +9,7 @@ const TEST_PASSWORD = "mySecret123";
 beforeEach(async () => {
   await prisma.user.create({
     data: {
+      name: "Test User",
       email: TEST_EMAIL,
       password: await hashPassword(TEST_PASSWORD),
     },

@@ -13,6 +13,7 @@ describe("POST /api/auth/register", () => {
     const request = new Request("http://localhost/api/auth/register", {
       method: "POST",
       body: JSON.stringify({
+        name: "Test User",
         email: TEST_EMAIL,
         password: "mySecret123",
       }),
@@ -28,12 +29,13 @@ describe("POST /api/auth/register", () => {
 
   it("rejects registration when the email already exists", async () => {
     await prisma.user.create({
-      data: { email: TEST_EMAIL, password: "irrelevant" },
+      data: { name: "Existing User", email: TEST_EMAIL, password: "irrelevant" },
     });
 
     const request = new Request("http://localhost/api/auth/register", {
       method: "POST",
       body: JSON.stringify({
+        name: "Test User",
         email: TEST_EMAIL,
         password: "mySecret123",
       }),
@@ -47,7 +49,7 @@ describe("POST /api/auth/register", () => {
   it("rejects registration when required fields are missing", async () => {
     const request = new Request("http://localhost/api/auth/register", {
       method: "POST",
-      body: JSON.stringify({ email: TEST_EMAIL }), // ไม่ส่ง password มา
+      body: JSON.stringify({ email: TEST_EMAIL }), // ไม่ส่ง name กับ password มา
     });
 
     const response = await POST(request);
