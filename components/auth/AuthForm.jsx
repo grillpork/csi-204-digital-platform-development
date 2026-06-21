@@ -6,7 +6,6 @@ import Link from "next/link";
 
 export default function AuthForm({ mode }) {
   const router = useRouter();
-  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +17,7 @@ export default function AuthForm({ mode }) {
     setError("");
 
     const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
-    const body = isRegister ? { name, email, password } : { email, password };
+    const body = { email, password };
 
     const response = await fetch(endpoint, {
       method: "POST",
@@ -42,15 +41,6 @@ export default function AuthForm({ mode }) {
         </h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-          {isRegister && (
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-400 outline-none focus:border-gray-500"
-            />
-          )}
           <input
             type="email"
             placeholder="Email"

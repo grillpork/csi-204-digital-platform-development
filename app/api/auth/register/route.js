@@ -5,12 +5,12 @@ import { Prisma } from "@prisma/client";
 
 
 export async function POST(request) {
-  const { name, email, password } = await request.json();
+  const { email, password } = await request.json();
 
-  if (!name || !email || !password) {
+  if (!email || !password) {
     return Response.json(
-     { error: "name, email, and password are required" },
-     { status: 400 }, 
+     { error: "email and password are required" },
+     { status: 400 },
     )
   }
 
@@ -18,7 +18,7 @@ export async function POST(request) {
   let user;
   try {
     user = await prisma.user.create({
-      data: { name, email, password: hashedPassword },
+      data: { email, password: hashedPassword },
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
