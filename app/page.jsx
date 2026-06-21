@@ -2,6 +2,7 @@
 import CartDrawer from "../components/ui/CartDrawer";
 import { useProductStore } from "../store/product";
 import { useState } from "react";
+import Link from "next/link";
 import {
   Search,
   Upload,
@@ -47,10 +48,12 @@ function NavbarA({ lang, onLangToggle }) {
           size={20}
           className=" hover:text-black cursor-pointer transition-colors"
         />
-        <User
-          size={20}
-          className=" hover:text-black cursor-pointer transition-colors"
-        />
+        <Link href="/login">
+          <User
+            size={20}
+            className=" hover:text-black cursor-pointer transition-colors"
+          />
+        </Link>
         <button
           onClick={onLangToggle}
           className="text-xs border border-gray-300 rounded px-2 py-1 hover:border-black hover:text-black transition-colors"

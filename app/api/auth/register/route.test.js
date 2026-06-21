@@ -1,0 +1,47 @@
+import { describe, it, expect, afterEach } from "vitest";
+import { POST } from "@/app/api/auth/register/route";
+import { prisma } from "@/lib/prisma";
+
+const TEST_EMAIL = "test-register@example.com";
+
+afterEach(async () => {
+  await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
+});
+
+describe("POST /api/auth/register", () => {
+  it("creates a new user and returns it without the password", async () => {
+    const request = new Request("http://localhost/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        name: "Test User",
+        email: TEST_EMAIL,
+        password: "mySecret123",
+      }),
+    });
+
+    const response = await POST(request);
+    const body = await response.json();
+
+    expect(response.status).toBe(201);
+    expect(body.user.email).toBe(TEST_EMAIL);
+    expect(body.user.password).toBeUndefined();
+  });
+});
+it("rejects registration when the email already exists", async () => {
+  await prisma.user.create({
+    data: { name: "Existing User", email: TEST_EMAIL, password: "irrelevant" },
+  });
+
+  const request = new Request("http://localhost/api/auth/register", {
+    method: "POST",
+    body: JSON.stringify({
+      name: "Test User",
+      email: TEST_EMAIL,
+      password: "mySecret123",
+    }),
+  });
+
+  const response = await POST(request);
+
+  expect(response.status).toBe(409);
+});

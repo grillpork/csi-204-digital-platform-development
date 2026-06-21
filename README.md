@@ -62,7 +62,7 @@ csi-204-digital-platform-development/
 | password | string | รหัสผ่าน (hashed) |
 | address | string | ที่อยู่จัดส่ง |
 | phone | string | เบอร์โทร |
-| role | enum | customer / admin |
+| role | enum | custuomer|
 | created_at | datetime | วันที่สมัคร |
 
 ### `products`
