@@ -1,29 +1,29 @@
 export const NavbarMenu = [
     {
-        label: "Home",
+        label: "หน้าแรก",
         href: "/"
     },
     {
-        label: "About",
+        label: "เกี่ยวกับเรา",
         href: "/#"
     },
     {
-        label: "Contact",
+        label: "ติดต่อเรา",
         href: "/#"
     }
 ]
 
 export const FooterMenu = [
     {
-        label: "Privacy Policy",
-        href: "/#"
+        label: "นโยบายความเป็นส่วนตัว",
+        href: "/docs/policy#privacy"
     },
     {
-        label: "Terms of Service",
-        href: "/#"
+        label: "ข้อตกลงการใช้บริการ",
+        href: "/docs/policy"
     },
     {
-        label: "Support",
+        label: "ช่วยเหลือ",
         href: "/#"
     }
 ]
