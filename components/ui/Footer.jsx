@@ -8,7 +8,7 @@ export default function Footer() {
     <footer className="border-t border-slate-200 bg-slate-50 px-4 py-6 text-sm text-slate-600">
       <ul className="flex flex-wrap gap-4">
         {FooterMenu.map((item) => (
-          <li key={item.href}>
+          <li key={item.label}>
             <Link href={item.href} className="hover:text-slate-900">
               {item.label}
             </Link>
