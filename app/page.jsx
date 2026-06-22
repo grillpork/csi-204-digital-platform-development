@@ -16,119 +16,10 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-// แถบ navbar ของหน้าสินค้า: เป็น nav สีดำแบบ fixed (โลโก้, เมนู, ไอคอนตะกร้า/หัวใจ/โปรไฟล์, ปุ่มเปลี่ยนภาษา)
-// ลอยอยู่เหนือรูปแบนเนอร์ จุดที่แก้ width: ต้องใส่ inset-x-0 ที่ nav เองเลย เพราะ "fixed" จะไม่ยืดตาม parent ให้
-function NavbarA({ lang, onLangToggle }) {
-  return (
-    <header className="w-full bg-yellow-50/10 border-b border-gray-200  flex items-center ">
-      
-      <div className="max-w-[1440px] bg-red-500 mx-auto">
-        
-        <nav className=" py-8  bg-white rounded-b-2xl text-black justify-around z-999 fixed inset-x-0 max-w-7xl mx-auto flex items-center gap-8">
-          <div className="text-xl font-bold tracking-tight">
-        The Shirtsy
-      </div> 
-      <div className="flex gap-12">
-        {["Home", "Shop", "Blog", "About"].map((item) => (
-            <div
-              key={item}
-              className="text-sm hover:text-black cursor-pointer transition-colors"
-            >
-              {item}
-            </div>
-          ))}
-      </div>
-          
-          <div className="flex items-center gap-4">
-        <CartDrawer
-          size={20}
-          className=" hover:text-black cursor-pointer transition-colors"
-        />
-        <Heart
-          size={20}
-          className=" hover:text-black cursor-pointer transition-colors"
-        />
-        <Link href="/login">
-          <User
-            size={20}
-            className=" hover:text-black cursor-pointer transition-colors"
-          />
-        </Link>
-        <button
-          onClick={onLangToggle}
-          className="text-xs border border-gray-300 rounded px-2 py-1 hover:border-black hover:text-black transition-colors"
-        >
-          {lang === "EN" ? "EN" : "TH"}
-        </button>
-      </div>
-        </nav>
-      </div>
+import NavbarA from "../components/ui/NavbarA";
+import HeroBanner from "../components/ui/HeroBanner";
+import Pagination from "../components/ui/Pagination";
 
-      
-      {
-        <div className=" absolute top-0 w-full h-[550px] overflow-clip">
-          <img
-            className="w-full"
-            src="https://i.pinimg.com/736x/d8/ee/0a/d8ee0a2e063132ba0867b4242add1391.jpg"
-            alt=""
-          />
-        </div>
-      }
-    </header>
-  );
-}
-
-// Pagination ตามดีไซน์ที่อ้างอิง (@SCR-20260618-msaz.png):
-// ปุ่ม Previous/Next แบบ pill อยู่หัว-ท้าย เลขหน้าอยู่กลาง หน้าที่เลือกอยู่จะถูก highlight
-function getPageNumbers(totalPages) {
-  if (totalPages <= 6) return Array.from({ length: totalPages }, (_, i) => i + 1);
-  return [1, 2, 3, "...", totalPages - 2, totalPages - 1, totalPages];
-}
-
-function Pagination({ currentPage, totalPages, onPageChange }) {
-  const pages = getPageNumbers(totalPages);
-  return (
-    <div className="flex items-center justify-between mt-10">
-      <button
-        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-        className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-700 hover:border-black transition-colors"
-      >
-        <ArrowLeft size={16} />
-        Previous
-      </button>
-
-      <div className="flex items-center gap-1">
-        {pages.map((p, i) =>
-          p === "..." ? (
-            <span key={`dots-${i}`} className="px-2 text-sm text-gray-400">
-              ...
-            </span>
-          ) : (
-            <button
-              key={p}
-              onClick={() => onPageChange(p)}
-              className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm transition-colors ${
-                p === currentPage
-                  ? "bg-gray-200 text-gray-900 font-medium"
-                  : "text-gray-400 hover:bg-gray-100"
-              }`}
-            >
-              {p}
-            </button>
-          ),
-        )}
-      </div>
-
-      <button
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-        className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-700 hover:border-black transition-colors"
-      >
-        Next
-        <ArrowRight size={16} />
-      </button>
-    </div>
-  );
-}
 
 // รายการสินค้าจำลอง — ทำแค่ UI ยังไม่ได้เชื่อม backend
 const mockProducts = [
@@ -215,7 +106,7 @@ const mockProducts = [
   },
 ];
 
-const categories = ["T-Shirt", "Polo", "Hoodie", "Long Sleeve", "Tank Top"];
+const categories = ["เสื้อยืด", "เสื้อโปโล", "ฮู้ดดี้", "แขนยาว", "เสื้อกล้าม"];
 const colors = [
   "#000000",
   "#ffffff",
@@ -228,7 +119,7 @@ const colors = [
   "#A855F7",
 ];
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-const sleeveTypes = ["Long Sleeve", "Short Sleeve", "No Sleeve"];
+const sleeveTypes = ["แขนยาว", "แขนสั้น", "ไม่มีแขน"];
 
 export default function ProductsPage() {
   const [lang, setLang] = useState("EN");
@@ -263,13 +154,14 @@ export default function ProductsPage() {
   return (
     <div className="min-h-screen bg-white">
       <NavbarA lang={lang} onLangToggle={toggleLang} />
+      <HeroBanner />
 
       {/* max-w-7xl mx-auto: จัดให้ส่วน "All Product" ทั้งหมด (sidebar + grid) อยู่กลางจอ ขอบซ้าย-ขวาเท่ากัน */}
       <div className="max-w-7xl mx-auto px-6 py-8 flex gap-8">
-        {/* Filters sidebar — mt-140 ดันลงมาให้พ้น fixed navbar + รูปแบนเนอร์ */}
-        <aside className="w-64 mt-140 flex-shrink-0">
-          <div className="flex  justify-between items-center mb-5 pb-4 border-b border-gray-200">
-            <h2 className="font-bold text-lg text-gray-800">Filters</h2>
+        {/* Filters sidebar */}
+        <aside className="w-64 mt-8 flex-shrink-0">
+          <div className="flex justify-between items-center mb-5 pb-4 border-b border-gray-200">
+            <h2 className="font-bold text-lg text-gray-800">ตัวกรอง</h2>
             <button
               onClick={() => {
                 setSelectedCategory(null);
@@ -280,13 +172,13 @@ export default function ProductsPage() {
               }}
               className="text-sm text-gray-400 hover:text-black transition-colors"
             >
-              Reset
+              ล้างค่า
             </button>
           </div>
 
           {/* หมวดหมู่สินค้า */}
           <div className="mb-6 pb-5 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3">Categories</h3>
+            <h3 className="font-semibold text-gray-800 mb-3">หมวดหมู่สินค้า</h3>
             <ul className="space-y-1">
               {categories.map((cat) => (
                 <li key={cat}>
@@ -309,7 +201,7 @@ export default function ProductsPage() {
 
           {/* ประเภทแขนเสื้อ */}
           <div className="mb-6 pb-5 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3">Sleeve Type</h3>
+            <h3 className="font-semibold text-gray-800 mb-3">ประเภทแขนเสื้อ</h3>
             <ul className="space-y-2">
               {sleeveTypes.map((sleeve) => (
                 <li key={sleeve}>
@@ -331,7 +223,7 @@ export default function ProductsPage() {
 
           {/* สีเสื้อ */}
           <div className="mb-6 pb-5 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3">Color</h3>
+            <h3 className="font-semibold text-gray-800 mb-3">สี</h3>
             <div className="flex flex-wrap gap-2">
               {colors.map((color) => (
                 <button
@@ -352,7 +244,7 @@ export default function ProductsPage() {
 
           {/* ไซส์ */}
           <div className="mb-6 pb-5 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3">Size</h3>
+            <h3 className="font-semibold text-gray-800 mb-3">ไซส์</h3>
             <div className="flex flex-wrap gap-2">
               {sizes.map((size) => (
                 <button
@@ -404,16 +296,16 @@ export default function ProductsPage() {
           </div>
         </aside>
 
-        //* สินค้า + ช่องค้นหา
-        <main className="flex-1 mt-140">
+        {/* สินค้า + ช่องค้นหา */}
+        <main className="flex-1 mt-8">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">All Product</h1>
+            <h1 className="text-2xl font-bold text-gray-800">สินค้าทั้งหมด</h1>
             <div className="flex items-center gap-2">
               <div className="flex items-center border border-gray-300 rounded-xl px-3 py-2 gap-2 w-60 focus-within:border-gray-500">
                 <Search size={15} className="text-gray-400 flex-shrink-0" />
                 <input
                   type="text"
-                  placeholder="Search product..."
+                  placeholder="ค้นหาสินค้า..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="text-sm outline-none w-full text-gray-700 placeholder-gray-400"
@@ -429,42 +321,51 @@ export default function ProductsPage() {
             {mockProducts.map((product) => (
               <div
                 key={product.id}
-                className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer flex flex-col group"
               >
-                <div className="aspect-square bg-gray-100 overflow-hidden">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-                <div className="p-4">
-                  <p className="font-medium text-gray-800 text-sm mb-1">
-                    {product.name}
-                  </p>
-                  <div className="flex items-center gap-1 mb-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        size={12}
-                        className={
-                          i < product.rating
-                            ? "fill-yellow-400 text-yellow-400"
-                            : "text-gray-200 fill-gray-200"
-                        }
-                      />
-                    ))}
-                    <span className="text-xs text-gray-400 ml-1">
-                      {product.reviews}
+                <Link href={`/product/${product.id}`} className="block flex-1 flex flex-col">
+                  <div className="aspect-square bg-gray-100 overflow-hidden">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <div className="p-4 flex-1">
+                    <p className="font-medium text-gray-800 text-sm mb-1 group-hover:text-blue-600 transition-colors">
+                      {product.name}
+                    </p>
+                    <div className="flex items-center gap-1 mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          size={12}
+                          className={
+                            i < product.rating
+                              ? "fill-yellow-400 text-yellow-400"
+                              : "text-gray-200 fill-gray-200"
+                          }
+                        />
+                      ))}
+                      <span className="text-xs text-gray-400 ml-1">
+                      ({product.reviews})
                     </span>
                   </div>
-                  <p className="font-bold text-gray-800 mb-3">
+                  <p className="font-bold text-gray-900 mb-4 text-lg">
                     ฿{product.price}
                   </p>
-                  <button onClick={handleAddCustomPrint} className="w-full flex items-center justify-center gap-2 bg-black text-white py-2 rounded-xl text-sm hover:bg-gray-800 transition-colors">
-                    <ShoppingCart size={14} />
-                    Add to cart
-                  </button>
+                  </div>
+                </Link>
+                <div className="p-4 pt-0">
+                  <div className="flex gap-2">
+                    <Link href="/custom" className="flex-1 text-center border border-gray-300 text-gray-700 py-2 rounded-xl text-sm hover:bg-gray-50 transition-colors">
+                      ออกแบบเอง
+                    </Link>
+                    <button onClick={(e) => { e.preventDefault(); handleAddCustomPrint(); }} className="flex-1 flex items-center justify-center gap-2 bg-black text-white py-2 rounded-xl text-sm hover:bg-gray-800 transition-colors">
+                      <ShoppingCart size={14} />
+                      ใส่ตะกร้า
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

@@ -13,13 +13,28 @@ enum Role {
 
 model User {
   id        String   @id @default(cuid())
-  name      String
+  name      String?
   email     String   @unique
   password  String
   address   String?
   phone     String?
+
+
+  image     Media?   @relation(fields: [imageId], references: [id])
+  imageId   Int?
   role      Role     @default(customer)
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("users")
+}
+
+model Media {
+  id        Int      @id @default(autoincrement()) @map("id")
+  url       String   @map("url")
+  type      String   @map("type")
+  user     User[]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("media")
 }

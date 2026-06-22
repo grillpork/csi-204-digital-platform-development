@@ -4,11 +4,16 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, X, Trash2, CheckCircle2 } from "lucide-react";
 import { useProductStore } from "../../store/product";
 
-export default function CartDrawer() {
+export default function CartDrawer({ size = 24, className = "" }) {
+  const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("transfer");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -42,15 +47,24 @@ export default function CartDrawer() {
     setIsCheckoutOpen(false);
   };
 
+  if (!isMounted) {
+    return (
+      <button className={`relative flex items-center justify-center ${className}`}>
+        <ShoppingCart size={size} />
+      </button>
+    );
+  }
+
   return (
     <>
       {/* Trigger Button */}
       <button 
         onClick={() => setIsOpen(true)} 
+        className={`relative flex items-center justify-center ${className}`}
       >
-        <ShoppingCart />
+        <ShoppingCart size={size} />
         {cartItemCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+          <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full pointer-events-none">
             {cartItemCount}
           </span>
         )}
@@ -72,7 +86,7 @@ export default function CartDrawer() {
       >
         {/* Header */}
         <div className="p-4 flex items-center justify-between border-b">
-          <h2 className="text-xl font-semibold text-slate-800">Your Cart</h2>
+          <h2 className="text-xl font-semibold text-slate-800">ตะกร้าสินค้า</h2>
           <button 
             onClick={closeAll}
             className="p-1 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
@@ -86,7 +100,7 @@ export default function CartDrawer() {
           {cart.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full gap-4">
               <ShoppingCart size={48} className="text-slate-300" />
-              <p>Your cart is currently empty.</p>
+              <p>ตะกร้าสินค้าของคุณยังว่างเปล่า</p>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
@@ -95,8 +109,8 @@ export default function CartDrawer() {
                   <img src={item.image} alt={item.name} className="w-20 h-24 object-cover rounded" />
                   <div className="flex-1">
                     <h3 className="font-medium text-sm line-clamp-2 text-slate-800">{item.name}</h3>
-                    <p className="text-slate-500 text-sm mt-1">{item.price}.00 AUD x {item.quantity}</p>
-                    <p className="font-semibold mt-1 text-slate-800">{(item.price * item.quantity)}.00 AUD</p>
+                    <p className="text-slate-500 text-sm mt-1">{item.price} บาท x {item.quantity}</p>
+                    <p className="font-semibold mt-1 text-slate-800">{(item.price * item.quantity)} บาท</p>
                   </div>
                   <button 
                     onClick={() => removeFromCart(item.id)}
@@ -113,15 +127,15 @@ export default function CartDrawer() {
         {/* Footer */}
         <div className="p-4 border-t border-slate-100 bg-white">
           <div className="flex justify-between items-center mb-4 font-semibold text-lg text-slate-800">
-            <span>Total:</span>
-            <span>{cartTotal}.00 AUD</span>
+            <span>ยอดรวม:</span>
+            <span>{cartTotal} บาท</span>
           </div>
           <button 
             className="w-full bg-slate-900 text-white py-3 rounded-md font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={cart.length === 0}
             onClick={() => setIsCheckoutOpen(true)}
           >
-            Checkout
+            ชำระเงิน
           </button>
         </div>
 
@@ -132,7 +146,7 @@ export default function CartDrawer() {
           }`}
         >
           <div className="p-4 flex items-center justify-between border-b">
-            <h2 className="text-xl font-semibold text-slate-800">Checkout</h2>
+            <h2 className="text-xl font-semibold text-slate-800">ชำระเงิน</h2>
             <button 
               onClick={() => setIsCheckoutOpen(false)}
               className="p-1 rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
@@ -143,7 +157,7 @@ export default function CartDrawer() {
           <div className="p-4 flex-1 ">
             <form id="checkout-form" onSubmit={handleCheckoutSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">Payment Method</label>
+                <label className="block text-sm font-medium text-slate-700 mb-2">ช่องทางการชำระเงิน</label>
                 <div className="flex flex-col gap-2">
                   <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
                     <input
@@ -171,15 +185,15 @@ export default function CartDrawer() {
           </div>
           <div className="p-4 border-t border-slate-100 bg-white">
             <div className="flex justify-between items-center mb-4 font-semibold text-lg text-slate-800">
-              <span>{paymentMethod === "cod" ? "ยอดชำระปลายทาง:" : "Pay:"}</span>
-              <span>{cartTotal}.00 AUD</span>
+              <span>{paymentMethod === "cod" ? "ยอดชำระปลายทาง:" : "ยอดชำระ:"}</span>
+              <span>{cartTotal} บาท</span>
             </div>
             <button
               type="submit"
               form="checkout-form"
               className="w-full bg-slate-900 text-white py-3 rounded-md font-medium hover:bg-slate-800 transition-colors"
             >
-              {paymentMethod === "cod" ? "ยืนยันคำสั่งซื้อ" : "Confirm Payment"}
+              {paymentMethod === "cod" ? "ยืนยันคำสั่งซื้อ" : "ยืนยันการชำระเงิน"}
             </button>
           </div>
         </div>
@@ -190,13 +204,13 @@ export default function CartDrawer() {
         <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center text-center transform transition-all">
             <CheckCircle2 size={64} className="text-green-500 mb-4" />
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">Payment Successful!</h2>
-            <p className="text-slate-600 mb-8">Thank you for your purchase. We will email you the receipt shortly.</p>
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">ชำระเงินสำเร็จ!</h2>
+            <p className="text-slate-600 mb-8">ขอบคุณสำหรับการสั่งซื้อ เราจะส่งใบเสร็จให้คุณทางอีเมลเร็วๆ นี้</p>
             <button 
               onClick={() => setIsSuccessModalOpen(false)}
               className="w-full bg-slate-900 text-white py-3 rounded-md font-medium hover:bg-slate-800 transition-colors"
             >
-              Continue Shopping
+              เลือกซื้อสินค้าต่อ
             </button>
           </div>
         </div>
