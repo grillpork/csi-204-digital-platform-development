@@ -19,7 +19,7 @@ const BuyersGuide = () => {
     );
 
     const sections = document.querySelectorAll(
-      '#how-to-order, #image-prep, #size-guide, #shipping'
+      '#how-to-order, #image-prep, #size-guide, #fabric-quality, #shipping, #return-policy'
     );
     sections.forEach((section) => observer.observe(section));
 
@@ -29,10 +29,12 @@ const BuyersGuide = () => {
   }, []);
 
   const toc = [
-    { id: 'how-to-order', title: 'วิธีการสั่งซื้อ' },
-    { id: 'image-prep', title: 'การเตรียมไฟล์ภาพ' },
-    { id: 'size-guide', title: 'ตารางไซส์เสื้อ' },
-    { id: 'shipping', title: 'การจัดส่งและการชำระเงิน' },
+    { id: 'how-to-order', title: '1. วิธีการสั่งซื้ออย่างละเอียด' },
+    { id: 'image-prep', title: '2. การเตรียมไฟล์ภาพให้คมชัด' },
+    { id: 'size-guide', title: '3. ตารางไซส์เสื้อ (Size Guide)' },
+    { id: 'fabric-quality', title: '4. เนื้อผ้าและคุณภาพการสกรีน' },
+    { id: 'shipping', title: '5. การจัดส่งและการชำระเงิน' },
+    { id: 'return-policy', title: '6. นโยบายการคืน/เปลี่ยนสินค้า' },
   ];
 
   return (
@@ -42,47 +44,56 @@ const BuyersGuide = () => {
       <div className="flex-1 min-w-0 max-w-3xl pr-0 xl:pr-12">
         {/* Header Section */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-4xl font-bold tracking-tight text-[#ededed]">คู่มือสำหรับลูกค้า</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-[#ededed]">คู่มือสำหรับลูกค้า (Buyer's Guide)</h1>
           <button className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-[#a1a1aa] bg-[#1a1a1a] hover:bg-[#27272a] rounded-md border border-[#27272a] transition-colors">
             <Copy className="w-3.5 h-3.5" />
             คัดลอกหน้า
-            <span className="ml-1 opacity-50">▼</span>
           </button>
         </div>
         
         <p className="text-[15px] leading-7 text-[#a1a1aa] mb-10">
-          เรียนรู้วิธีการสั่งสกรีนเสื้อออนไลน์ การเลือกขนาดเสื้อ และคำแนะนำสำหรับการเตรียมไฟล์ภาพ เพื่อให้ได้เสื้อสกรีนที่สวยงามและตรงตามความต้องการของคุณ
+          ยินดีต้อนรับเข้าสู่ The Shirtsy แพลตฟอร์มที่คุณสามารถสั่งสกรีนเสื้อลายโปรดได้ตามใจชอบ ไม่ว่าจะเป็นการอัปโหลดไฟล์ภาพของคุณเอง หรือเลือกลายจากนักออกแบบของเราใน Marketplace คู่มือนี้จะแนะนำทุกขั้นตอนอย่างละเอียด เพื่อให้คุณได้รับเสื้อสกรีนที่สวยงาม คมชัด และตอบโจทย์มากที่สุด
         </p>
 
         {/* Section 1 */}
         <div className="mb-12 pt-4" id="how-to-order">
-          <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">1. วิธีการสั่งซื้อ</h2>
-          <ul className="space-y-3 text-[15px] leading-7 text-[#a1a1aa] list-decimal list-inside">
-            <li>เลือกรูปแบบเสื้อยืดที่คุณต้องการ เช่น เสื้อคอกลม เสื้อโอเวอร์ไซส์ หรือเสื้อทรงครอป</li>
-            <li>เลือกสีเสื้อที่เหมาะกับลายสกรีนของคุณ โดยพิจารณาถึงความกลมกลืนหรือความโดดเด่นของสีภาพ</li>
-            <li>อัปโหลดไฟล์ภาพของคุณ หรือเลือกจากลายเสื้อใน Marketplace ที่นักออกแบบของเราได้สร้างสรรค์ไว้</li>
-            <li>จัดวางตำแหน่งและปรับขนาดของลายสกรีนบนเสื้อตามต้องการ</li>
-            <li>ตรวจสอบไซส์และจำนวนที่ต้องการสั่งซื้อ จากนั้นกดปุ่มชำระเงิน</li>
+          <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">1. วิธีการสั่งซื้ออย่างละเอียด</h2>
+          <p className="text-[15px] leading-7 text-[#a1a1aa] mb-4">
+            การสั่งซื้อเสื้อผ่าน The Shirtsy สามารถทำได้ง่ายๆ เพียงไม่กี่ขั้นตอน ทั้งบนคอมพิวเตอร์และโทรศัพท์มือถือ:
+          </p>
+          <ul className="space-y-3 text-[15px] leading-7 text-[#a1a1aa] list-decimal list-inside mb-4">
+            <li><strong>เข้าสู่หน้าเลือกสินค้า:</strong> ค้นหาและเลือกรูปแบบเสื้อที่คุณต้องการ เช่น เสื้อยืดคอกลมคลาสสิก เสื้อยืดโอเวอร์ไซส์ทรงเกาหลี หรือเสื้อครอบ ฯลฯ</li>
+            <li><strong>เลือกสีเสื้อที่ถูกใจ:</strong> เรามีสีเสื้อให้เลือกหลากหลาย ทั้งสีพื้น (ขาว ดำ เทา กรมท่า) และสีแฟชั่นตามฤดูกาล</li>
+            <li><strong>อัปโหลดภาพหรือเลือกลาย:</strong> คุณสามารถกดปุ่ม "Custom" เพื่ออัปโหลดไฟล์ภาพของคุณเอง (รองรับ PNG, JPG) หรือคลิกหยิบลายที่ชอบจาก Marketplace ลงตะกร้า</li>
+            <li><strong>ปรับขนาดและตำแหน่ง (เฉพาะโหมด Custom):</strong> เมื่ออัปโหลดแล้ว คุณจะสามารถครอบตัด (Crop) ภาพ ย่อขยาย และหมุนภาพเพื่อให้พอดีกับกรอบสกรีน (Logo, A4, A3) บนตัวเสื้อจำลองได้</li>
+            <li><strong>เลือกไซส์เสื้อ:</strong> ดู <a href="#size-guide" className="text-blue-400 hover:underline">ตารางไซส์ (Size Guide)</a> เพื่อเลือกขนาดที่พอดีกับตัวคุณ</li>
+            <li><strong>เพิ่มลงตะกร้าและชำระเงิน:</strong> ตรวจสอบรายละเอียดสินค้า ระบุจำนวน และกดไปที่ตะกร้าเพื่อเข้าสู่ระบบการชำระเงิน</li>
           </ul>
+          <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg text-blue-200 text-sm">
+            💡 <strong>เคล็ดลับ:</strong> หากคุณต้องการสั่งซื้อจำนวนมาก (เกิน 20 ตัวขึ้นไป) สำหรับทำเสื้อรุ่น เสื้อทีม หรือเสื้อบริษัท สามารถติดต่อเราผ่านเมนู "ติดต่อเรา" เพื่อขอรับเรทราคาขายส่งได้ครับ!
+          </div>
         </div>
 
         {/* Section 2 */}
         <div className="mb-12 pt-4" id="image-prep">
-          <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">2. การเตรียมไฟล์ภาพ</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">2. การเตรียมไฟล์ภาพให้คมชัด</h2>
           <p className="text-[15px] leading-7 text-[#a1a1aa] mb-4">
-            เพื่อให้งานสกรีนออกมาคมชัดและมีคุณภาพสูงที่สุด กรุณาปฏิบัติตามคำแนะนำต่อไปนี้:
+            หัวใจสำคัญของเสื้อสกรีนที่สวยงามคือ "ความคมชัดของภาพต้นฉบับ" เพื่อให้ได้งานสกรีนที่คมกริบ ไม่เบลอ ไม่แตก รบกวนตรวจสอบไฟล์ภาพของคุณตามคำแนะนำเหล่านี้:
           </p>
           <ul className="space-y-3 text-[15px] leading-7 text-[#a1a1aa] list-disc list-inside">
-            <li><strong>ประเภทไฟล์:</strong> แนะนำให้ใช้ไฟล์ `.PNG` ที่มีการลบพื้นหลัง (Transparent Background) ออกแล้วเท่านั้น</li>
-            <li><strong>ความละเอียด (Resolution):</strong> ควรกำหนดที่อย่างน้อย <strong>300 DPI</strong> หรือมีขนาดพิกเซลขั้นต่ำ 2000x2000 px</li>
-            <li><strong>โหมดสี:</strong> ควรบันทึกไฟล์ด้วยโหมดสี <strong>CMYK</strong> หรือ <strong>sRGB</strong> เพื่อให้สีที่สกรีนออกมาใกล้เคียงกับหน้าจอมากที่สุด</li>
-            <li>หลีกเลี่ยงการใช้ภาพที่เบลอ แตก หรือภาพที่ดึงมาจากโซเชียลมีเดียที่ถูกลดทอนคุณภาพ</li>
+            <li><strong>ประเภทไฟล์:</strong> ทางเราแนะนำให้ใช้ไฟล์ <strong>.PNG ที่เจาะพื้นหลังใส (Transparent)</strong> เป็นหลัก เพื่อเวลาสกรีนลงเสื้อสีต่างๆ จะไม่มีกรอบสี่เหลี่ยมติดไปด้วย (ยกเว้นกรณีตั้งใจให้เป็นกรอบสี่เหลี่ยม สามารถใช้ JPG ได้)</li>
+            <li><strong>ความละเอียด (Resolution):</strong> ควรกำหนดความละเอียดที่ <strong>300 DPI</strong> ขึ้นไป หรืออย่างน้อยมีขนาด 2000x2000 พิกเซล หากภาพต้นฉบับเล็กแล้วนำมาขยายตอนพิมพ์ ภาพจะแตกเป็นเม็ดพิกเซล</li>
+            <li><strong>โหมดสี (Color Mode):</strong> ใช้โหมดสี <strong>CMYK</strong> หรือ <strong>sRGB</strong> หากเป็นภาพที่มีสีนีออนสว่างจัดจ้าน (เช่น สีชมพูช็อกกิ้งพิงก์ สีเขียวสะท้อนแสง) เวลาสกรีนจริงด้วยหมึก CMYK สีอาจจะดรอปลงเล็กน้อยจากที่เห็นบนหน้าจอมือถือหรือคอมพิวเตอร์</li>
+            <li><strong>เส้นขอบและตัวอักษร:</strong> ตัวอักษรควรมีความหนาไม่ต่ำกว่า 2pt เพื่อให้หมึกเกาะติดได้ดีและอ่านง่าย เส้นขอบที่บางเกินไปอาจทำให้การสกรีนเก็บรายละเอียดได้ไม่หมด</li>
           </ul>
         </div>
 
         {/* Section 3 */}
         <div className="mb-12 pt-4" id="size-guide">
           <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">3. ตารางไซส์เสื้อ (Size Guide)</h2>
+          <p className="text-[15px] leading-7 text-[#a1a1aa] mb-4">
+            เสื้อยืดทรงมาตรฐานของเราเป็นแบบ <strong>Unisex</strong> ใส่ได้ทั้งชายและหญิง การตัดเย็บใช้มาตรวัดแบบสากล โดยมีตารางรอบอกและความยาวดังนี้:
+          </p>
           <div className="overflow-x-auto rounded-lg border border-[#27272a] bg-[#1a1a1a] mb-4">
             <table className="w-full text-sm text-left text-[#a1a1aa]">
               <thead className="text-xs uppercase bg-[#27272a] text-[#ededed]">
@@ -90,32 +101,72 @@ const BuyersGuide = () => {
                   <th className="px-6 py-3">ไซส์ (Size)</th>
                   <th className="px-6 py-3">รอบอก (นิ้ว)</th>
                   <th className="px-6 py-3">ความยาว (นิ้ว)</th>
+                  <th className="px-6 py-3">ไหล่กว้าง (นิ้ว)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#27272a]">
-                <tr><td className="px-6 py-4">S</td><td className="px-6 py-4">34"</td><td className="px-6 py-4">25"</td></tr>
-                <tr><td className="px-6 py-4">M</td><td className="px-6 py-4">38"</td><td className="px-6 py-4">27"</td></tr>
-                <tr><td className="px-6 py-4">L</td><td className="px-6 py-4">42"</td><td className="px-6 py-4">29"</td></tr>
-                <tr><td className="px-6 py-4">XL</td><td className="px-6 py-4">46"</td><td className="px-6 py-4">30"</td></tr>
-                <tr><td className="px-6 py-4">2XL</td><td className="px-6 py-4">50"</td><td className="px-6 py-4">31"</td></tr>
+                <tr className="hover:bg-[#27272a]/50"><td className="px-6 py-4 font-semibold text-white">S</td><td className="px-6 py-4">34"</td><td className="px-6 py-4">25"</td><td className="px-6 py-4">15"</td></tr>
+                <tr className="hover:bg-[#27272a]/50"><td className="px-6 py-4 font-semibold text-white">M</td><td className="px-6 py-4">38"</td><td className="px-6 py-4">27"</td><td className="px-6 py-4">17"</td></tr>
+                <tr className="hover:bg-[#27272a]/50"><td className="px-6 py-4 font-semibold text-white">L</td><td className="px-6 py-4">42"</td><td className="px-6 py-4">29"</td><td className="px-6 py-4">19"</td></tr>
+                <tr className="hover:bg-[#27272a]/50"><td className="px-6 py-4 font-semibold text-white">XL</td><td className="px-6 py-4">46"</td><td className="px-6 py-4">30"</td><td className="px-6 py-4">20"</td></tr>
+                <tr className="hover:bg-[#27272a]/50"><td className="px-6 py-4 font-semibold text-white">2XL</td><td className="px-6 py-4">50"</td><td className="px-6 py-4">31"</td><td className="px-6 py-4">21"</td></tr>
+                <tr className="hover:bg-[#27272a]/50"><td className="px-6 py-4 font-semibold text-white">3XL</td><td className="px-6 py-4">54"</td><td className="px-6 py-4">32"</td><td className="px-6 py-4">22"</td></tr>
               </tbody>
             </table>
           </div>
+          <p className="text-[14px] leading-6 text-gray-500 italic mt-2">
+            * หมายเหตุ: ขนาดเสื้ออาจมีความคลาดเคลื่อนประมาณ ±0.5 นิ้ว ถึง 1 นิ้ว ซึ่งเกิดจากกระบวนการตัดเย็บและการหดตัวของเส้นด้ายคอตตอน
+          </p>
         </div>
 
         {/* Section 4 */}
-        <div className="mb-12 pt-4" id="shipping">
-          <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">4. การจัดส่งและการชำระเงิน</h2>
+        <div className="mb-12 pt-4" id="fabric-quality">
+          <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">4. เนื้อผ้าและคุณภาพการสกรีน</h2>
           <p className="text-[15px] leading-7 text-[#a1a1aa] mb-4">
-            <strong>ช่องทางการชำระเงิน:</strong> เรารองรับการชำระเงินผ่านบัตรเครดิต/เดบิต, พร้อมเพย์ (PromptPay), และการโอนเงินผ่านธนาคาร
-          </p>
-          <p className="text-[15px] leading-7 text-[#a1a1aa] mb-4">
-            <strong>ระยะเวลาการผลิตและจัดส่ง:</strong>
+            The Shirtsy ให้ความสำคัญกับคุณภาพสินค้าเป็นอันดับแรก เราคัดสรรเส้นด้ายและเทคโนโลยีการสกรีนที่ดีที่สุดในตลาดปัจจุบัน:
           </p>
           <ul className="space-y-3 text-[15px] leading-7 text-[#a1a1aa] list-disc list-inside">
-            <li>กระบวนการผลิตและสกรีนเสื้อจะใช้เวลาประมาณ 2-4 วันทำการ (ขึ้นอยู่กับคิวงาน)</li>
-            <li>ระยะเวลาจัดส่งโดยบริษัทขนส่งเอกชน (Kerry / J&T / Flash) ใช้เวลา 1-3 วันทำการ ทั่วประเทศ</li>
-            <li>หลังจากสินค้าถูกจัดส่ง คุณจะได้รับอีเมลหรือข้อความ SMS แจ้งหมายเลข Tracking เพื่อติดตามสถานะสินค้า</li>
+            <li><strong>เนื้อผ้า Cotton 100% (Comb No.32):</strong> เนื้อผ้าเนียนนุ่ม สวมใส่สบาย ระบายอากาศได้ดีเยี่ยม ไม่ระคายเคืองผิว ผ่านกระบวนการฟอกนุ่ม (Enzyme Wash) เพื่อสัมผัสที่พรีเมียมขึ้น ทรงสวย ไม่ย้วยง่าย</li>
+            <li><strong>เทคโนโลยีการสกรีน DTG (Direct to Garment):</strong> พิมพ์ลวดลายลงบนเส้นใยผ้าโดยตรง ให้สัมผัสที่นุ่มนวล เป็นเนื้อเดียวกับเสื้อ สีสันคมชัด ไล่เฉดสีได้ไม่จำกัด เหมาะกับภาพถ่ายหรือกราฟิกที่มีรายละเอียดสูง</li>
+            <li><strong>เทคโนโลยีการสกรีน DTF (Direct to Film):</strong> สำหรับลวดลายที่มีขอบคมชัด โลโก้ที่มีสีทึบ สีสันสดใสโดดเด่น ยืดหยุ่นได้ดี ซักแล้วไม่หลุดร่อน ทนทานต่อการซักรีด</li>
+            <li><strong>วิธีการดูแลรักษา:</strong> เพื่อยืดอายุการใช้งานของเสื้อสกรีน ควรกลับด้านเสื้อก่อนซักและก่อนรีด หลีกเลี่ยงการใช้น้ำยาฟอกขาว และไม่ควรอบผ้าด้วยความร้อนสูง</li>
+          </ul>
+        </div>
+
+        {/* Section 5 */}
+        <div className="mb-12 pt-4" id="shipping">
+          <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">5. การจัดส่งและการชำระเงิน</h2>
+          <div className="bg-[#1a1a1a] rounded-xl p-6 border border-[#27272a] mb-6">
+            <h3 className="font-medium text-white mb-3 flex items-center gap-2">💳 ช่องทางการชำระเงิน</h3>
+            <p className="text-[15px] leading-7 text-[#a1a1aa]">
+              เรารองรับการชำระเงินผ่านหลายช่องทาง ไม่ว่าจะเป็น บัตรเครดิต/เดบิต (Visa, Mastercard), โอนเงินผ่านบัญชีธนาคาร, สแกน QR Code พร้อมเพย์ (PromptPay) และบริการเก็บเงินปลายทาง (COD) สำหรับยอดสั่งซื้อไม่เกิน 3,000 บาท
+            </p>
+          </div>
+          
+          <div className="bg-[#1a1a1a] rounded-xl p-6 border border-[#27272a]">
+            <h3 className="font-medium text-white mb-3 flex items-center gap-2">🚚 รอบการผลิตและจัดส่ง</h3>
+            <p className="text-[15px] leading-7 text-[#a1a1aa] mb-2">
+              สินค้าทั้งหมดของเราเป็นสินค้า <strong>Make to Order</strong> (ผลิตตามคำสั่งซื้อชิ้นต่อชิ้น) จึงต้องใช้เวลาในการเตรียมการผลิตดังนี้:
+            </p>
+            <ul className="space-y-2 text-[15px] leading-7 text-[#a1a1aa] list-disc list-inside">
+              <li><strong>ระยะเวลาการผลิต:</strong> ประมาณ 2-4 วันทำการ นับจากวันที่ยืนยันการชำระเงิน (ตัดรอบ 12:00 น. ของทุกวัน)</li>
+              <li><strong>ระยะเวลาจัดส่ง:</strong> ใช้บริการขนส่งเอกชนชั้นนำ (Kerry Express / Flash Express / J&T) ใช้เวลา 1-3 วันทำการ ทั่วประเทศ</li>
+              <li>ระบบจะทำการส่งอีเมลหรือข้อความ SMS แจ้งหมายเลขพัสดุ (Tracking Number) ทันทีที่สินค้าถูกแพ็กและส่งมอบให้บริษัทขนส่ง</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Section 6 */}
+        <div className="mb-12 pt-4" id="return-policy">
+          <h2 className="text-2xl font-semibold tracking-tight text-[#ededed] mb-4">6. นโยบายการคืน/เปลี่ยนสินค้า</h2>
+          <p className="text-[15px] leading-7 text-[#a1a1aa] mb-4">
+            เพื่อความสบายใจของลูกค้า เรามีนโยบายรับประกันสินค้า หากพบว่าสินค้ามีปัญหาที่เกิดจากความผิดพลาดของทางร้าน:
+          </p>
+          <ul className="space-y-3 text-[15px] leading-7 text-[#a1a1aa] list-disc list-inside">
+            <li><strong>รับเคลม 100%:</strong> หากเกิดกรณี เสื้อมีตำหนิ ขาด เป็นรู, ลายสกรีนผิด, ไซส์เสื้อผิดไปจากที่สั่ง, หรือลอกร่อนตั้งแต่ครั้งแรกที่ซัก</li>
+            <li><strong>เงื่อนไขการเคลม:</strong> ต้องแจ้งเคลมภายใน <strong>7 วัน</strong> หลังจากได้รับสินค้า โดยเสื้อต้องยังไม่ผ่านการซัก (ยกเว้นกรณีเคลมเรื่องซักแล้วลอก) ป้ายห้อย (หากมี) ยังอยู่ครบ</li>
+            <li><strong>สิ่งที่ไม่รับเคลม:</strong> กรณีสั่งไซส์ผิด สั่งสีผิด ใส่ไม่ได้ หรือเปลี่ยนใจกะทันหัน เนื่องจากเป็นสินค้าสั่งผลิตเฉพาะบุคคล (Custom Made)</li>
+            <li><strong>วิธีการแจ้งเคลม:</strong> ติดต่อฝ่ายบริการลูกค้า (Customer Service) ทางเมนู "ติดต่อเรา" พร้อมแนบรูปถ่ายจุดที่มีปัญหาและหมายเลขคำสั่งซื้อ แอดมินจะดำเนินการจัดส่งตัวใหม่ให้ภายใน 3-5 วันทำการ โดยไม่มีค่าใช้จ่ายเพิ่มเติม</li>
           </ul>
         </div>
 
@@ -135,7 +186,7 @@ const BuyersGuide = () => {
                 <a
                   href={`#${item.id}`}
                   className={`pl-4 relative flex items-center transition-colors ${
-                    isActive ? 'text-[#ededed]' : 'text-[#a1a1aa] hover:text-[#ededed]'
+                    isActive ? 'text-[#ededed] font-medium' : 'text-[#a1a1aa] hover:text-[#ededed]'
                   }`}
                 >
                   {isActive && (
