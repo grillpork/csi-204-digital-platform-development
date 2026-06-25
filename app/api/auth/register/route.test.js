@@ -1,11 +1,14 @@
-import { describe, it, expect, afterEach } from "vitest";
 import { POST } from "@/app/api/auth/register/route";
 import { prisma } from "@/lib/prisma";
 
-const TEST_EMAIL = "test-register@example.com";
+const TEST_EMAIL = `test-register-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
 
 afterEach(async () => {
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
 });
 
 describe("POST /api/auth/register", () => {

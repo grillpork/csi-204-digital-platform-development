@@ -5,7 +5,10 @@ import { createSessionResponse } from "@/lib/auth/session";
 export async function POST(request) {
   const { email, password } = await request.json();
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: { role: true },
+  });
 
   if (!user) {
   return Response.json({ error: "Invalid email or password" }, { status: 401 });

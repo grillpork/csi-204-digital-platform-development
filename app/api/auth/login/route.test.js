@@ -1,9 +1,8 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { POST } from "@/app/api/auth/login/route";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/auth/password";
 
-const TEST_EMAIL = "test-login@example.com";
+const TEST_EMAIL = `test-login-${Date.now()}-${Math.random().toString(36).slice(2)}@example.com`;
 const TEST_PASSWORD = "mySecret123";
 
 beforeEach(async () => {
@@ -18,6 +17,10 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
 });
 
 describe("POST /api/auth/login", () => {

@@ -118,26 +118,36 @@ csi-204-digital-platform-development/
 
 ## วิธีเริ่มใช้งาน (Getting Started)
 
-ติดตั้ง dependencies:
+### ตั้งค่าครั้งแรก / หลัง `git pull` (สำคัญ — ทำตามลำดับ)
+
+> ทีมใช้ **ฐานข้อมูล cloud ตัวเดียวกันทั้งทีม** — schema และข้อมูลเริ่มต้น (roles) ถูกตั้งไว้บน DB กลางแล้ว
+> ดังนั้น **ไม่ต้องรัน `prisma migrate` และ `prisma seed`** แค่ทำ 4 ขั้นนี้:
 
 ```bash
+# 1. ดึงโค้ดล่าสุด
+git pull
+
+# 2. วางไฟล์ .env ที่ได้รับจากแชทส่วนตัวของทีม ไว้ที่ root ของโปรเจกต์
+#    (ไฟล์นี้มี DATABASE_URL และ JWT_SECRET — ห้าม commit ขึ้น git เด็ดขาด)
+
+# 3. ติดตั้ง dependencies (postinstall จะรัน `prisma generate` ให้อัตโนมัติ)
 npm install
+
+# 4. รัน
+npm run dev      # เปิดเว็บที่ http://localhost:3000
 ```
 
-รัน development server:
+**ข้อกำหนด:** ต้องใช้ **Node.js เวอร์ชัน 18 ขึ้นไป** (แนะนำ 20 หรือ 22) — เช็คด้วย `node --version`
 
-```bash
-npm run dev
-```
+> ⚠️ ถ้าแก้ `prisma/schema.prisma` แล้วโค้ดฟ้องว่าหา field/model ไม่เจอ ให้รัน `npx prisma generate` ใหม่อีกครั้ง
 
-เปิดเบราว์เซอร์ที่ [http://localhost:3000](http://localhost:3000)
-
-คำสั่งอื่น ๆ:
+### คำสั่งอื่น ๆ
 
 ```bash
 npm run build   # build สำหรับ production
 npm run start   # รัน production server
 npm run lint    # ตรวจสอบโค้ดด้วย ESLint
+npm test        # รัน unit/integration test (jest)
 ```
 
 ## ผู้พัฒนา

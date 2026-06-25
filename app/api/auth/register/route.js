@@ -19,6 +19,7 @@ export async function POST(request) {
   try {
     user = await prisma.user.create({
       data: { name, email, password: hashedPassword },
+      include: { role: true },
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {

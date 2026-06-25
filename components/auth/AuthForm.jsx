@@ -31,6 +31,18 @@ export default function AuthForm({ mode }) {
       return;
     }
 
+    const { user } = await response.json();
+    localStorage.setItem(
+      "authUser",
+      JSON.stringify({ id: user.id, email: user.email, role: user.role }),
+    );
+    if (!localStorage.getItem("pagesViewed")) {
+      localStorage.setItem("pagesViewed", "[]");
+    }
+    if (!localStorage.getItem("productsViewed")) {
+      localStorage.setItem("productsViewed", "[]");
+    }
+
     router.push("/");
   };
 
