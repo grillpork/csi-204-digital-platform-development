@@ -19,92 +19,7 @@ import {
 import NavbarA from "../components/ui/NavbarA";
 import HeroBanner from "../components/ui/HeroBanner";
 import Pagination from "../components/ui/Pagination";
-
-
-// รายการสินค้าจำลอง — ทำแค่ UI ยังไม่ได้เชื่อม backend
-const mockProducts = [
-  {
-    id: 1,
-    name: "Product",
-    price: 370,
-    rating: 4,
-    reviews: 120,
-    image:
-      "https://josephineco.com/cdn/shop/files/6217024316_010_1.jpg?v=1773234174&width=2048",
-  },
-  {
-    id: 2,
-    name: "Product",
-    price: 370,
-    rating: 4,
-    reviews: 98,
-    image:
-      "https://cdn-images.farfetch-contents.com/24/09/63/05/24096305_54170622_600.jpg",
-  },
-  {
-    id: 3,
-    name: "Product",
-    price: 370,
-    rating: 5,
-    reviews: 210,
-    image:
-      "https://editorialist.com/thumbnails/600/2024/11/032/965/456/32965456~black_2.webp",
-  },
-  {
-    id: 4,
-    name: "Product",
-    price: 370,
-    rating: 3,
-    reviews: 55,
-    image:
-      "https://vspconsignment.com/cdn/shop/files/Gucci-back-monogram-embrd-top4_2400x.jpg?v=1759273918",
-  },
-  {
-    id: 5,
-    name: "Product",
-    price: 370,
-    rating: 4,
-    reviews: 88,
-    image:
-      "https://josephineco.com/cdn/shop/files/6217024316_010_1.jpg?v=1773234174&width=2048",
-  },
-  {
-    id: 6,
-    name: "Product",
-    price: 370,
-    rating: 5,
-    reviews: 175,
-    image:
-      "https://cdn-images.farfetch-contents.com/24/09/63/05/24096305_54170622_600.jpg",
-  },
-  {
-    id: 7,
-    name: "Product",
-    price: 370,
-    rating: 4,
-    reviews: 63,
-    image:
-      "https://editorialist.com/thumbnails/600/2024/11/032/965/456/32965456~black_2.webp",
-  },
-  {
-    id: 8,
-    name: "Product",
-    price: 370,
-    rating: 3,
-    reviews: 40,
-    image:
-      "https://vspconsignment.com/cdn/shop/files/Gucci-back-monogram-embrd-top4_2400x.jpg?v=1759273918",
-  },
-  {
-    id: 9,
-    name: "Product",
-    price: 370,
-    rating: 4,
-    reviews: 132,
-    image:
-      "https://josephineco.com/cdn/shop/files/6217024316_010_1.jpg?v=1773234174&width=2048",
-  },
-];
+import { mockProducts } from "./data/products";
 
 const categories = ["เสื้อยืด", "เสื้อโปโล", "ฮู้ดดี้", "แขนยาว", "เสื้อกล้าม"];
 const colors = [
@@ -358,7 +273,7 @@ export default function ProductsPage() {
                 </Link>
                 <div className="p-4 pt-0">
                   <div className="flex gap-2">
-                    <Link href="/custom" className="flex-1 text-center border border-gray-300 text-gray-700 py-2 rounded-xl text-sm hover:bg-gray-50 transition-colors">
+                    <Link href={`/custom?id=${product.id}`} className="flex-1 text-center border border-gray-300 text-gray-700 py-2 rounded-xl text-sm hover:bg-gray-50 transition-colors">
                       ออกแบบเอง
                     </Link>
                     <button onClick={(e) => { e.preventDefault(); handleAddCustomPrint(); }} className="flex-1 flex items-center justify-center gap-2 bg-black text-white py-2 rounded-xl text-sm hover:bg-gray-800 transition-colors">
