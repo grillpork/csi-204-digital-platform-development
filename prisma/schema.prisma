@@ -25,24 +25,11 @@ model User {
   role      Role     @relation(fields: [roleId], references: [id])
   isSeller  Boolean  @default(false) @map("is_seller")
   shopName  String?  @map("shop_name")
-  image     Media?   @relation(fields: [imageId], references: [id])
-  imageId   Int?
   products  Product[]
   cart      Cart?
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("users")
-}
-
-model Media {
-  id        Int      @id @default(autoincrement()) @map("id")
-  url       String   @map("url")
-  type      String   @map("type")
-  user      User[]
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
-
-  @@map("media")
 }
 
 model Cart {
