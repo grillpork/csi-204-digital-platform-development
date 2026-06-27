@@ -41,3 +41,13 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# internal handoff/working docs — ไม่ push ขึ้น repo รวม
+TODO.md
+CONTEXT.md
+
+# local AI/agent config
+.claude/
+
+# Local Claude context (not shared)
+CLAUDE.md

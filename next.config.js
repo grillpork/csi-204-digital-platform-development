@@ -1,12 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
+  // jose เป็น ESM-only — ให้ next/jest (และ Next) transpile เพื่อให้ jest รันผ่าน
+  transpilePackages: ["jose"],
 };
 
 module.exports = nextConfig;
