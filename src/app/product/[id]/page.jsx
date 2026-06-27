@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Star, ShoppingCart, ArrowLeft, Heart, Share2, Truck, ShieldCheck, RefreshCcw } from "lucide-react";
-import NavbarA from "../../../components/ui/NavbarA";
-import { useProductStore } from "../../../store/product";
-import { mockProducts } from "../../data/products";
+import NavbarA from "@/components/ui/NavbarA";
+import { useProductStore } from "@/store/product";
+import { mockProducts } from "@/app/data/products";
 
 const colors = [
   { name: "Black", hex: "#000000" },

@@ -4,9 +4,9 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, ShoppingCart, CheckCircle2, Image as ImageIcon, ArrowLeft, Move, ZoomIn, ZoomOut, RotateCcw, Trash2, FlipHorizontal2 } from 'lucide-react';
-import NavbarA from '../../components/ui/NavbarA';
-import { mockProducts } from '../data/products';
-import { useProductStore } from '../../store/product';
+import NavbarA from '@/components/ui/NavbarA';
+import { mockProducts } from '@/app/data/products';
+import { useProductStore } from '@/store/product';
 
 const DEFAULT_PRINT_ZONE = { x: 0.27, y: 0.20, w: 0.46, h: 0.70 };
 
