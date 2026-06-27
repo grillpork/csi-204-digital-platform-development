@@ -4,11 +4,17 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, X, Trash2, CheckCircle2 } from "lucide-react";
 import { useProductStore } from "../../store/product";
 
-export default function CartDrawer() {
+export default function CartDrawer({ size = 24, className = "" }) {
+  const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("transfer");
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional hydration-guard pattern
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -22,8 +28,15 @@ export default function CartDrawer() {
   }, [isOpen]);
 
   const cart = useProductStore((state) => state.cart);
+  const fetchCart = useProductStore((state) => state.fetchCart);
   const removeFromCart = useProductStore((state) => state.removeFromCart);
   const clearCart = useProductStore((state) => state.clearCart);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchCart();
+    }
+  }, [isOpen, fetchCart]);
 
   const cartTotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
   const cartItemCount = cart.reduce((total, item) => total + item.quantity, 0);
@@ -42,13 +55,22 @@ export default function CartDrawer() {
     setIsCheckoutOpen(false);
   };
 
+  if (!isMounted) {
+    return (
+      <button className={`relative inline-flex ${className}`}>
+        <ShoppingCart size={size} />
+      </button>
+    );
+  }
+
   return (
     <>
       {/* Trigger Button */}
-      <button 
-        onClick={() => setIsOpen(true)} 
+      <button
+        onClick={() => setIsOpen(true)}
+        className={`relative inline-flex ${className}`}
       >
-        <ShoppingCart />
+        <ShoppingCart size={size} />
         {cartItemCount > 0 && (
           <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
             {cartItemCount}

@@ -23,6 +23,10 @@ model User {
   phone     String?
   roleId    Int      @default(1)
   role      Role     @relation(fields: [roleId], references: [id])
+    isSeller  Boolean   @default(false) @map("is_seller")
+  shopName  String?   @map("shop_name")
+  products  Product[]                                // back-relation ของ seller
+
   cart      Cart?
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -50,4 +54,42 @@ model CartItem {
 
   @@map("cart_items")
 }
+
+
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+enum Category {
+  TSHIRT
+  POLO
+  HOODIE
+  LONG_SLEEVE
+  TANK_TOP
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Int                                    // สตางค์
+  category    Category
+  images      String[]                               // 1–5 รูป (base64 ตอนนี้)
+  colors      String[]
+  sizes       Size[]
+  stock       Int      @default(0)
+  sellerId    String
+  seller      User     @relation(fields: [sellerId], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([id, sellerId])                           // ← สำหรับ E (update compound key)
+  @@map("products")
+}
+
 

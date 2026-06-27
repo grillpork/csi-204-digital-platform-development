@@ -1,9 +1,12 @@
-import React from 'react'
+import React from 'react';
+import Policy from '@/components/Policy';
 
 const page = () => {
   return (
-    <div>Policy Page</div>
-  )
-}
+    <div>
+      <Policy />
+    </div>
+  );
+};
 
-export default page
+export default page;

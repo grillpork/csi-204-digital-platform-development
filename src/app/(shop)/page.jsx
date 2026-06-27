@@ -1,8 +1,9 @@
 "use client";
 import CartDrawer from "@/components/ui/CartDrawer";
 import { useProductStore } from "@/store/product";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   Search,
@@ -250,6 +251,7 @@ const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 const sleeveTypes = ["Long Sleeve", "Short Sleeve", "No Sleeve"];
 
 export default function ProductsPage() {
+  const router = useRouter();
   const [lang, setLang] = useState("EN");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedColors, setSelectedColors] = useState([]);
@@ -258,6 +260,18 @@ export default function ProductsPage() {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((j) => setProducts(j.data || []))
+      .catch(() => {});
+  }, []);
+
+  // สลับกลับไปใช้ mock ได้ด้วยการเปลี่ยนเป็น true บรรทัดเดียว
+  const USE_MOCK = false;
+  const displayProducts = USE_MOCK ? mockProducts : products;
 
   const addToCart = useProductStore((state) => state.addToCart);
 
@@ -267,9 +281,9 @@ export default function ProductsPage() {
       list.includes(item) ? list.filter((i) => i !== item) : [...list, item],
     );
 
-  // กดแล้วเพิ่ม สินค้า เข้าตะกร้า 
-  const handleAddCustomPrint = () => {
-    addToCart({
+  // กดแล้วเพิ่ม สินค้า เข้าตะกร้า
+  const handleAddCustomPrint = async () => {
+    const result = await addToCart({
       id: "custom-print",
       name: "เสื้อสกรีนลายตามสั่ง",
       price: 390,
@@ -277,6 +291,22 @@ export default function ProductsPage() {
         ? URL.createObjectURL(uploadedFile)
         : "https://josephineco.com/cdn/shop/files/6217024316_010_1.jpg?v=1773234174&width=2048",
     });
+    if (result?.needLogin) {
+      router.push("/login");
+    }
+  };
+
+  // กดแล้วเพิ่มสินค้าจริงจาก grid เข้าตะกร้า
+  const handleAddToCart = async (product) => {
+    const result = await addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image || product.images?.[0],
+    });
+    if (result?.needLogin) {
+      router.push("/login");
+    }
   };
 
   return (
@@ -423,7 +453,6 @@ export default function ProductsPage() {
           </div>
         </aside>
 
-        //* สินค้า + ช่องค้นหา
         <main className="flex-1 mt-140">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">All Product</h1>
@@ -445,14 +474,14 @@ export default function ProductsPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-4">
-            {mockProducts.map((product) => (
+            {displayProducts.map((product) => (
               <div
                 key={product.id}
                 className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
               >
                 <div className="aspect-square bg-gray-100 overflow-hidden">
                   <img
-                    src={product.image}
+                    src={product.image || product.images?.[0] || "https://josephineco.com/cdn/shop/files/6217024316_010_1.jpg?v=1773234174&width=2048"}
                     alt={product.name}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
@@ -467,20 +496,20 @@ export default function ProductsPage() {
                         key={i}
                         size={12}
                         className={
-                          i < product.rating
+                          i < (product.rating ?? 0)
                             ? "fill-yellow-400 text-yellow-400"
                             : "text-gray-200 fill-gray-200"
                         }
                       />
                     ))}
                     <span className="text-xs text-gray-400 ml-1">
-                      {product.reviews}
+                      {product.reviews ?? 0}
                     </span>
                   </div>
                   <p className="font-bold text-gray-800 mb-3">
                     ฿{product.price}
                   </p>
-                  <button onClick={handleAddCustomPrint} className="w-full flex items-center justify-center gap-2 bg-black text-white py-2 rounded-xl text-sm hover:bg-gray-800 transition-colors">
+                  <button onClick={() => handleAddToCart(product)} className="w-full flex items-center justify-center gap-2 bg-black text-white py-2 rounded-xl text-sm hover:bg-gray-800 transition-colors">
                     <ShoppingCart size={14} />
                     Add to cart
                   </button>
