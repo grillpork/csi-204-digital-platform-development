@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { Mail, Lock, User, Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function AuthForm({ mode }) {
   const router = useRouter();
@@ -51,32 +52,55 @@ export default function AuthForm({ mode }) {
       className="relative min-h-screen flex items-center justify-center bg-cover bg-center px-4 overflow-hidden font-sans"
       style={{ backgroundImage: "url('/images/auth-bg.png')" }}
     >
-  
-
-      <div className="relative w-full max-w-md bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl p-8 md:p-10 shadow-2xl shadow-sky-900/10 transition-all">
+      <motion.div 
+        initial={{ opacity: 0, y: 30, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-full max-w-md bg-white/70 backdrop-blur-xl border border-white/60 rounded-3xl p-8 md:p-10 shadow-2xl shadow-sky-900/10 transition-all"
+      >
         {/* Top central icon box */}
-        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-md mb-6 mx-auto">
+        <motion.div 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-slate-100 shadow-md mb-6 mx-auto"
+        >
           {isRegister ? (
             <UserPlus className="w-5 h-5 text-slate-700" />
           ) : (
             <LogIn className="w-5 h-5 text-slate-700" />
           )}
-        </div>
+        </motion.div>
 
-        <h1 className="text-2xl font-bold text-slate-800 mb-2 text-center tracking-tight">
+        <motion.h1 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.4 }}
+          className="text-2xl font-bold text-slate-800 mb-2 text-center tracking-tight"
+        >
           {isRegister ? "Create an account" : "Sign in with email"}
-        </h1>
+        </motion.h1>
         
-        <p className="text-xs text-slate-500 mb-8 text-center max-w-[280px] mx-auto leading-relaxed">
+        <motion.p 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.4 }}
+          className="text-xs text-slate-500 mb-8 text-center max-w-[280px] mx-auto leading-relaxed"
+        >
           {isRegister 
             ? "Sign up today to manage your data, workspace and projects in one place."
             : "Make a new doc to bring your words, data, and teams together. For free."
           }
-        </p>
+        </motion.p>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {isRegister && (
-            <div className="relative">
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.25, duration: 0.3 }}
+              className="relative"
+            >
               <span className="absolute inset-y-0 left-3.5 flex items-center text-slate-400">
                 <User className="w-4 h-4" />
               </span>
@@ -88,10 +112,15 @@ export default function AuthForm({ mode }) {
                 required
                 className="w-full bg-slate-50/50 border border-slate-200/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-slate-400 focus:bg-white transition-all"
               />
-            </div>
+            </motion.div>
           )}
 
-          <div className="relative">
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
+            className="relative"
+          >
             <span className="absolute inset-y-0 left-3.5 flex items-center text-slate-400">
               <Mail className="w-4 h-4" />
             </span>
@@ -103,9 +132,14 @@ export default function AuthForm({ mode }) {
               required
               className="w-full bg-slate-50/50 border border-slate-200/80 rounded-xl pl-10 pr-4 py-2.5 text-sm text-slate-700 placeholder-slate-400 outline-none focus:border-slate-400 focus:bg-white transition-all"
             />
-          </div>
+          </motion.div>
 
-          <div className="relative">
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.35, duration: 0.3 }}
+            className="relative"
+          >
             <span className="absolute inset-y-0 left-3.5 flex items-center text-slate-400">
               <Lock className="w-4 h-4" />
             </span>
@@ -124,32 +158,48 @@ export default function AuthForm({ mode }) {
             >
               {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
-          </div>
+          </motion.div>
 
           {!isRegister && (
-            <div className="flex justify-end -mt-1">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.3 }}
+              className="flex justify-end -mt-1"
+            >
               <Link href="#" className="text-xs text-slate-500 hover:text-slate-800 transition-colors font-medium">
                 Forgot password?
               </Link>
-            </div>
+            </motion.div>
           )}
 
           {error && (
-            <p className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+            <motion.p 
+              initial={{ opacity: 0, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-xs text-red-500 bg-red-50 border border-red-100 rounded-lg px-3 py-2"
+            >
               {error}
-            </p>
+            </motion.p>
           )}
 
-          <button
+          <motion.button
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
             type="submit"
             className="w-full bg-slate-900 text-white rounded-xl py-3 text-sm font-semibold hover:bg-slate-800 active:scale-[0.98] transition-all mt-2 cursor-pointer shadow-lg shadow-slate-900/10"
           >
             {isRegister ? "Get Started" : "Get Started"}
-          </button>
+          </motion.button>
         </form>
 
         {/* Mode switcher link */}
-        <p className="text-xs text-slate-500 text-center mt-8">
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.45, duration: 0.3 }}
+          className="text-xs text-slate-500 text-center mt-8"
+        >
           {isRegister ? (
             <>
               Already have an account?{" "}
@@ -165,8 +215,8 @@ export default function AuthForm({ mode }) {
               </Link>
             </>
           )}
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
     </div>
   );
 }
