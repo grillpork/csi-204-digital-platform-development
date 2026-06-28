@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Star, ShoppingCart, ArrowLeft, Heart, Share2, Truck, ShieldCheck, RefreshCcw } from "lucide-react";
-import NavbarA from "@/components/ui/NavbarA";
 import { useProductStore } from "@/store/product";
 import { mockProducts } from "@/app/data/products";
 
@@ -19,8 +18,6 @@ const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function ProductDetailPage() {
   const { id } = useParams();
-  const [lang, setLang] = useState("TH");
-  
   const [selectedColor, setSelectedColor] = useState(colors[0].name);
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
@@ -42,7 +39,6 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans pb-20">
-      <NavbarA lang={lang} onLangToggle={() => setLang(l => l === "EN" ? "TH" : "EN")} />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
         
