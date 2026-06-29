@@ -18,86 +18,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-// แถบ navbar ของหน้าสินค้า: เป็น nav สีดำแบบ fixed (โลโก้, เมนู, ไอคอนตะกร้า/หัวใจ/โปรไฟล์, ปุ่มเปลี่ยนภาษา)
-// ลอยอยู่เหนือรูปแบนเนอร์ จุดที่แก้ width: ต้องใส่ inset-x-0 ที่ nav เองเลย เพราะ "fixed" จะไม่ยืดตาม parent ให้
-function NavbarA({ lang, onLangToggle }) {
-  const { user, logout } = useAuth();
-  return (
-    <header className="w-full bg-yellow-50/10 border-b border-gray-200  flex items-center ">
-      
-      <div className="max-w-[1440px] bg-red-500 mx-auto">
-        
-        <nav className=" py-8  bg-white rounded-b-2xl text-black justify-around z-999 fixed inset-x-0 max-w-7xl mx-auto flex items-center gap-8">
-          <div className="text-xl font-bold tracking-tight">
-        The Shirtsy
-      </div> 
-      <div className="flex gap-12">
-        {["Home", "Shop", "Blog", "About"].map((item) => (
-            <div
-              key={item}
-              className="text-sm hover:text-black cursor-pointer transition-colors"
-            >
-              {item}
-            </div>
-          ))}
-      </div>
-          
-          <div className="flex items-center gap-4">
-        <CartDrawer
-          size={20}
-          className=" hover:text-black cursor-pointer transition-colors"
-        />
-        <Heart
-          size={20}
-          className=" hover:text-black cursor-pointer transition-colors"
-        />
-        {user ? (
-          <>
-            <Link href="/account">
-              <User
-                size={20}
-                className=" hover:text-black cursor-pointer transition-colors"
-              />
-            </Link>
-            <button
-              onClick={logout}
-              className="text-xs border border-gray-300 rounded px-2 py-1 hover:border-black hover:text-black transition-colors"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <Link href="/login">
-            <User
-              size={20}
-              className=" hover:text-black cursor-pointer transition-colors"
-            />
-          </Link>
-        )}
-        <button
-          onClick={onLangToggle}
-          className="text-xs border border-gray-300 rounded px-2 py-1 hover:border-black hover:text-black transition-colors"
-        >
-          {lang === "EN" ? "EN" : "TH"}
-        </button>
-      </div>
-        </nav>
-      </div>
-
-      
-      {
-        <div className=" absolute top-0 w-full h-[550px] overflow-clip">
-          <img
-            className="w-full"
-            src="https://i.pinimg.com/736x/d8/ee/0a/d8ee0a2e063132ba0867b4242add1391.jpg"
-            alt=""
-          />
-        </div>
-      }
-    </header>
-  );
-}
-
 // Pagination ตามดีไซน์ที่อ้างอิง (@SCR-20260618-msaz.png):
 // ปุ่ม Previous/Next แบบ pill อยู่หัว-ท้าย เลขหน้าอยู่กลาง หน้าที่เลือกอยู่จะถูก highlight
 function getPageNumbers(totalPages) {
@@ -252,7 +172,6 @@ const sleeveTypes = ["Long Sleeve", "Short Sleeve", "No Sleeve"];
 
 export default function ProductsPage() {
   const router = useRouter();
-  const [lang, setLang] = useState("EN");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
@@ -311,7 +230,16 @@ export default function ProductsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <NavbarA lang={lang} onLangToggle={toggleLang} />
+
+
+      {/* Banner image */}
+      <div className="absolute top-0 w-full h-[550px] overflow-hidden pointer-events-none z-0">
+        <img
+          className="w-full object-cover"
+          src="https://i.pinimg.com/736x/d8/ee/0a/d8ee0a2e063132ba0867b4242add1391.jpg"
+          alt="Banner"
+        />
+      </div>
 
       {/* max-w-7xl mx-auto: จัดให้ส่วน "All Product" ทั้งหมด (sidebar + grid) อยู่กลางจอ ขอบซ้าย-ขวาเท่ากัน */}
       <div className="max-w-7xl mx-auto px-6 py-8 flex gap-8">

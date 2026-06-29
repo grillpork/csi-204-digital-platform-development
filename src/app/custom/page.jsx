@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, ShoppingCart, CheckCircle2, Image as ImageIcon, ArrowLeft, Move, ZoomIn, ZoomOut, RotateCcw, Trash2, FlipHorizontal2 } from 'lucide-react';
-import NavbarA from '@/components/ui/NavbarA';
 import { mockProducts } from '@/app/data/products';
 import { useProductStore } from '@/store/product';
 
@@ -15,11 +14,8 @@ export default function CustomShirtPage() {
   const productId = parseInt(searchParams.get('id')) || 1;
   const product = mockProducts.find((p) => p.id === productId) || mockProducts[0];
 
-  const [lang, setLang] = useState('TH');
-  
   const addToCart = useProductStore((state) => state.addToCart);
 
-  // Front / Back toggle
   const [viewSide, setViewSide] = useState('front');
 
   // Uploaded overlay image — separate state per side
@@ -344,7 +340,6 @@ export default function CustomShirtPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-[#ededed]">
-      <NavbarA lang={lang} onLangToggle={() => setLang((l) => (l === 'EN' ? 'TH' : 'EN'))} />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Breadcrumbs */}

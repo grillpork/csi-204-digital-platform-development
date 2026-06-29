@@ -1,6 +1,7 @@
 import { Anuphan } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import NavbarA from "@/components/ui/NavbarA";
 
 const anuphan = Anuphan({
   variable: "--font-anuphan",
@@ -20,7 +21,10 @@ export default function RootLayout({ children }) {
       className={`${anuphan.variable} h-full antialiased`}
     >
       <body suppressHydrationWarning className="min-h-full flex min-h-screen flex-col">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <NavbarA />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

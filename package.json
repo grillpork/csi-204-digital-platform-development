@@ -17,6 +17,7 @@
     "@splidejs/react-splide": "^0.7.12",
     "@splidejs/splide": "^4.1.4",
     "bcryptjs": "^3.0.3",
+    "framer-motion": "^12.42.0",
     "jose": "^6.2.3",
     "lucide-react": "^1.20.0",
     "multer": "^2.2.0",
