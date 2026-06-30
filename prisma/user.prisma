@@ -13,6 +13,8 @@ model User {
   cart      Cart?
   favorites Favorite[]
   orders    Order[]
+  bio       String?
+  avatar    String?
   createdAt DateTime   @default(now()) @map("created_at")
 
   @@map("users")
