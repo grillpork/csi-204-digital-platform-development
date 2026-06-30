@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, User, LogOut, Edit3, Package, ShoppingBag, Truck, ChevronDown, Home, Palette, FileText } from "lucide-react";
+import { Heart, User, LogOut, Edit3, Package, ShoppingBag, Truck, ChevronDown, Home, Palette, FileText, DollarSign, ShoppingCart } from "lucide-react";
 import CartDrawer from "./CartDrawer";
 import { useAuth } from "@/context/AuthContext";
 
@@ -16,6 +16,7 @@ export default function NavbarA() {
     { label: "โปรไฟล์ของฉัน", href: "/profile", icon: User },
     { label: "แก้ไขโปรไฟล์", href: "/profile/edit", icon: Edit3 },
     { label: "สินค้าของฉัน", href: "/profile/products", icon: Package },
+    { label: "รายได้ของฉัน", href: "/profile/earnings", icon: DollarSign },
     { label: "สินค้าที่ถูกใจ", href: "/profile/favorites", icon: Heart },
     { label: "ประวัติการสั่งซื้อ", href: "/profile/orders", icon: ShoppingBag },
     { label: "ติดตามพัสดุ", href: "/tracking", icon: Truck },
@@ -58,10 +59,16 @@ export default function NavbarA() {
           </div>
           
           <div className="flex items-center gap-4">
-            <CartDrawer
-              size={20}
-              className="hover:text-black cursor-pointer transition-colors"
-            />
+            <Suspense fallback={
+              <button className="relative inline-flex hover:text-black cursor-pointer transition-colors">
+                <ShoppingCart size={20} />
+              </button>
+            }>
+              <CartDrawer
+                size={20}
+                className="hover:text-black cursor-pointer transition-colors"
+              />
+            </Suspense>
             {user ? (
               <div className="relative">
                 <button

@@ -24,7 +24,7 @@ export async function getCurrentUser() {
   });
   if (!user) return null;
 
-  return { id: user.id, name: user.name, email: user.email, role: user.role?.name };
+  return { id: user.id, name: user.name, email: user.email, role: user.role?.name, isSeller: user.isSeller };
 }
 // ไว้ตรวจว่าเป็นคนขายไหม ตรวจผ่าน token จำใน cache
 export const getSessionUser = cache(async () => {

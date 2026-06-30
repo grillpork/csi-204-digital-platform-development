@@ -12,6 +12,7 @@ model User {
   products  Product[]
   cart      Cart?
   favorites Favorite[]
+  orders    Order[]
   createdAt DateTime   @default(now()) @map("created_at")
 
   @@map("users")
