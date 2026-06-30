@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Edit3 } from 'lucide-react';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -79,8 +80,8 @@ export default function ProfilePage() {
 
         </div>
 
-        <button onClick={() => router.push('/profile/edit')} style={buttonStyle}>
-          ✏️ แก้ไขข้อมูลโปรไฟล์
+        <button onClick={() => router.push('/profile/edit')} style={{ ...buttonStyle, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <Edit3 size={16} /> แก้ไขข้อมูลโปรไฟล์
         </button>
 
       </div>
