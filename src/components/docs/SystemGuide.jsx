@@ -19,7 +19,7 @@ const SystemGuide = () => {
     );
 
     const sections = document.querySelectorAll(
-      '#architecture, #database, #roles, #transactions, #security, #sequence'
+      '#architecture, #database, #roles, #transactions, #security, #sequence, #marketplace-concept'
     );
     sections.forEach((section) => observer.observe(section));
 
@@ -42,6 +42,7 @@ const SystemGuide = () => {
     { id: 'transactions', title: '4. ระบบการเงินและคำสั่งซื้อ (Transactions)' },
     { id: 'security', title: '5. มาตรฐานความปลอดภัย (Security)' },
     { id: 'sequence', title: '6. ลำดับการทำงาน (Sequence Diagram)' },
+    { id: 'marketplace-concept', title: '7. แนวคิดระบบ Marketplace (Overview)' },
   ];
 
   return (
@@ -331,6 +332,67 @@ const SystemGuide = () => {
         DB-->>Withdraw: สำเร็จ
         Withdraw-->>Website: ถอนเงินสำเร็จ
         Website-->>Designer: แจ้งผลการถอนเงิน`}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 7: Marketplace Concept */}
+        <div className="mb-12 pt-4" id="marketplace-concept">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-6 flex items-center gap-2">
+            <GitCommit className="w-6 h-6 text-purple-600" />
+            7. แนวคิดการทำงานของระบบ Marketplace
+          </h2>
+          <p className="text-[15px] leading-7 text-slate-600 mb-6">
+            ระบบ Marketplace สำหรับขายลายเสื้อแบบ Print-on-Demand (POD) ของ The Shirtsy ได้รับการออกแบบขึ้นมาเพื่อแก้ปัญหาระบบ E-Commerce แบบดั้งเดิม โดยการเปิดโอกาสให้นักออกแบบสร้างรายได้จากความคิดสร้างสรรค์อย่างไร้ความเสี่ยงทางการเงิน
+          </p>
+
+          <div className="space-y-6">
+            {/* 7.1 ภาพรวมและแนวคิดหลัก */}
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-3">7.1 ภาพรวมของระบบ (System Overview)</h3>
+              <p className="text-[15px] leading-7 text-slate-600">
+                แนวคิดหลักคือการสร้างระบบนิเวศ (Ecosystem) ที่เชื่อมโยง **นักออกแบบ (Creators) ผู้ซื้อ (Buyers) และผู้ผลิต (Production)** เข้าด้วยกัน โดยที่แพลตฟอร์มทำหน้าที่เป็นตัวกลางในการควบคุมกระบวนการทั้งหมดแบบครบวงจร:
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-600 list-disc pl-5">
+                <li><strong>สกรีนตามคำสั่งซื้อ (Print-on-Demand):</strong> จะเริ่มผลิตเสื้อจริงก็ต่อเมื่อลูกค้ากดสั่งซื้อและชำระเงินสมบูรณ์แล้วเท่านั้น ลดปัญหาการผลิตล่วงหน้า การจัดเก็บ และความเสี่ยงเรื่องสต๊อกสินค้าค้างคลัง</li>
+                <li><strong>นักออกแบบโฟกัสที่การดีไซน์:</strong> Creators อัปโหลดลายและรับส่วนแบ่งกำไร แพลตฟอร์มจะจัดการการผลิต แพ็กของ จัดส่ง และบริการลูกค้าเองทั้งหมด</li>
+              </ul>
+            </div>
+
+            {/* 7.2 ด้านราคาและการเงิน */}
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-3">7.2 แนวคิดด้านการกำหนดราคาและการเงิน</h3>
+              <p className="text-[15px] leading-7 text-slate-600">
+                เพื่อป้องกันปัญหาการตั้งราคาสูงหรือต่ำเกินควรจนทำลายความน่าเชื่อถือและการแข่งขันในตลาด แพลตฟอร์มนำ **โมดูลประเมินราคาสินค้าอัตโนมัติ (Pricing Service)** มาวิเคราะห์ปัจจัยต่าง ๆ ในการระบุราคาขายที่เหมาะสม:
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-600 list-disc pl-5">
+                <li><strong>ปัจจัยวิเคราะห์ราคา:</strong> คำนวณจากต้นทุนเสื้อเปล่า, เทคนิคสกรีน (DFT/DTG), ขนาด/ตำแหน่งของลายสกรีน, ความละเอียดของไฟล์ภาพ, และค่าดำเนินงานแพลตฟอร์ม</li>
+                <li><strong>ส่วนแบ่งรายได้โปร่งใส:</strong> ทุกยอดซื้อสินค้า Marketplace ระบบแยกบันทึก "ต้นทุนรวม + ค่าจัดการเว็บ" และ "ส่วนแบ่ง Markup ของ Creator" ซึ่งกำไรจะโอนเข้า Wallet อัตโนมัติเมื่อส่งของเรียบร้อยแล้ว</li>
+              </ul>
+            </div>
+
+            {/* 7.3 กระบวนการทำงาน (Workflows) */}
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-3">7.3 ขั้นตอนการเผยแพร่และการจัดส่งสินค้า</h3>
+              <p className="text-[15px] leading-7 text-slate-600">
+                ขั้นตอนการไหลเวียนของข้อมูลจากผู้ขายสู่กระบวนการจัดส่งพัสดุ:
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-600 list-disc pl-5">
+                <li><strong>อัปโหลดและตรวจสอบ:</strong> ระบบตรวจเช็กความเข้ากันได้ของอาร์ตเวิร์ค เช่น ชนิดไฟล์ สเกลภาพ และความละเอียด ให้สอดคล้องกับขนาดงานพิมพ์</li>
+                <li><strong>ขั้นตอนการซื้อ:</strong> ลูกค้าค้นหา เพิ่มลงตะกร้า Checkout ชำระเงิน และระบบส่งต่อข้อมูลพิมพ์ลายไปยังหน่วยผลิตทันที</li>
+                <li><strong>จัดส่งและติดตามสถานะ:</strong> หลังจากผ่านการควบคุมคุณภาพ (QC) สินค้าจะถูกแพ็กส่งมอบให้ขนส่งเอกชน พร้อมสร้างรหัสและส่งแจ้งหมายเลข Tracking ให้ลูกค้าอัปเดตแบบเรียลไทม์</li>
+              </ul>
+            </div>
+
+            {/* 7.4 การถอนรายได้และ KYC */}
+            <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
+              <h3 className="text-lg font-semibold text-slate-800 mb-3">7.4 ระบบยืนยันตัวตน (KYC) และการถอนเงิน</h3>
+              <p className="text-[15px] leading-7 text-slate-600">
+                เราต้องการลดอุปสรรคของการเริ่มต้นลงทะเบียน ดังนั้น **นักออกแบบสามารถสมัครสมาชิก อัปโหลดผลงาน และเริ่มวางขายได้ทันทีโดยยังไม่ต้องผ่านขั้นตอนยืนยันตัวตน** ในช่วงแรก
+              </p>
+              <div className="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-sm">
+                📌 <strong>เงื่อนไขการยืนยันตัวตน:</strong> ระบบจะบังคับให้ทำรายการยืนยันตัวตน (Know Your Customer: KYC) ด้วย **บัตรประชาชนและข้อมูลบัญชีธนาคาร** เฉพาะในขั้นตอนที่กดส่งคำขอถอนเงินจริง (Withdrawal) จากกระเป๋าเท่านั้น เพื่อความถูกต้องทางบัญชีและความปลอดภัยสูงสุดด้านกฎหมายการเงิน
               </div>
             </div>
           </div>
