@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireUserPage } from "@/lib/auth/dal";
 import { prisma } from "@/lib/db/prisma";
-import ProductForm from "../../_components/ProductForm";
+import EditProductWithLivePanel from "../../_components/EditProductWithLivePanel";
 
 export default async function EditProductPage({ params }) {
   const user = await requireUserPage();
@@ -12,10 +12,14 @@ export default async function EditProductPage({ params }) {
   });
   if (!product) notFound();
 
+  const products = await prisma.product.findMany({
+    where: { sellerId: user.id },
+    orderBy: { createdAt: "desc" },
+  });
+
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">แก้ไขสินค้า</h1>
-      <ProductForm mode="edit" productId={id} initial={product} />
+    <div className="max-w-[1600px] mx-auto px-6 py-10">
+      <EditProductWithLivePanel productId={id} initial={product} initialProducts={products} />
     </div>
   );
 }

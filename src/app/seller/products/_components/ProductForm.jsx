@@ -13,7 +13,7 @@ const CATEGORIES = [
 ];
 const SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
 
-export default function ProductForm({ mode, productId, initial }) {
+export default function ProductForm({ mode, productId, initial, onCreated, onUpdated }) {
   const router = useRouter();
   const isEdit = mode === "edit";
 
@@ -91,6 +91,26 @@ export default function ProductForm({ mode, productId, initial }) {
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setFormError(data.error ?? "Something went wrong");
+        return;
+      }
+
+      if (!isEdit && onCreated) {
+        const { data } = await res.json();
+        onCreated(data);
+        setName("");
+        setDescription("");
+        setPrice("");
+        setStock("0");
+        setCategory(CATEGORIES[0].value);
+        setSizes([]);
+        setColors([]);
+        setFiles([]);
+        return;
+      }
+
+      if (isEdit && onUpdated) {
+        const { data } = await res.json();
+        onUpdated(data);
         return;
       }
 
