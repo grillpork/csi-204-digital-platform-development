@@ -1,0 +1,51 @@
+graph TB
+    %% Actors
+    subgraph Users [Actors]
+        Designer((นักออกแบบ))
+        Customer((ลูกค้า))
+        SystemActor((ระบบผลิต & ขนส่ง))
+    end
+
+    %% Use Cases Boundary
+    subgraph PODSystem [ระบบ Marketplace Print-on-Demand]
+        %% Common
+        UC_Login(เข้าสู่ระบบ)
+        
+        %% Designer Use Cases
+        UC_Upload(อัปโหลดลายเสื้อ)
+        UC_SelectPackage(เลือกแพ็กเกจการสกรีน)
+        UC_Pricing(ประเมินราคาราคาสินค้า)
+        UC_Publish(เผยแพร่สินค้าพร้อมจำหน่าย)
+        UC_KYC(ยืนยันตัวตน KYC)
+        UC_Withdraw(ถอนเงินรายได้)
+        
+        %% Customer Use Cases
+        UC_Search(ค้นหาและดูสินค้า)
+        UC_Cart(จัดการตะกร้าสินค้า)
+        UC_Checkout(สั่งซื้อและชำระเงิน)
+        
+        %% Production & Shipping
+        UC_Produce(จัดการการผลิตสินค้า)
+        UC_Ship(จัดส่งและแจ้งเลขพัสดุ)
+    end
+
+    %% Relationships
+    Designer --> UC_Login
+    Designer --> UC_Upload
+    Designer --> UC_SelectPackage
+    Designer --> UC_Pricing
+    Designer --> UC_Publish
+    Designer --> UC_Withdraw
+    
+    Customer --> UC_Search
+    Customer --> UC_Cart
+    Customer --> UC_Checkout
+    
+    SystemActor --> UC_Produce
+    SystemActor --> UC_Ship
+
+    %% Includes & Extends
+    UC_Withdraw -.->|include| UC_KYC
+    UC_Pricing -.->|include| UC_SelectPackage
+    UC_Publish -.->|include| UC_Pricing
+    UC_Checkout -.->|include| UC_Login
