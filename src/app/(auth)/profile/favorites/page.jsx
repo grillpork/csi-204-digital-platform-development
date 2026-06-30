@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { Heart } from 'lucide-react';
 
 export default function FavoritesPage() {
   // จำลองข้อมูลสินค้าที่ถูกใจให้เข้ากับหน้าหลักของร้าน
@@ -37,8 +38,9 @@ export default function FavoritesPage() {
       </h1>
 
       {favorites.length === 0 ? (
-        <div style={{ padding: '60px 0', textAlign: 'center', color: '#888', border: '1px dashed #ddd', borderRadius: '8px' }}>
-          ❤️ ยังไม่มีสินค้าที่ถูกใจในรายการของคุณ
+        <div style={{ padding: '60px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#888', border: '1px dashed #ddd', borderRadius: '8px' }}>
+          <Heart size={32} className="text-slate-300 mb-2" />
+          <span>ยังไม่มีสินค้าที่ถูกใจในรายการของคุณ</span>
         </div>
       ) : (
         // 🛍️ แสดงผลเป็น Grid 4 คอลัมน์แบบมินิมอล
@@ -76,7 +78,7 @@ export default function FavoritesPage() {
                 }}
                 title="ลบออกจากรายการโปรด"
               >
-                ❤️
+                <Heart size={16} className="fill-red-500 text-red-500" />
               </button>
 
               {/* ชื่อสินค้าและราคา */}

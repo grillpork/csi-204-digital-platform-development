@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, ShoppingCart, CheckCircle2, Image as ImageIcon, ArrowLeft, Move, ZoomIn, ZoomOut, RotateCcw, Trash2, FlipHorizontal2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { useProductStore } from '@/store/product';
 
 const DEFAULT_PRINT_ZONE = { x: 0.27, y: 0.20, w: 0.46, h: 0.70 };
 
-export default function CustomShirtPage() {
+function CustomShirtPageContent() {
   const searchParams = useSearchParams();
   const productId = parseInt(searchParams.get('id')) || 1;
   const product = mockProducts.find((p) => p.id === productId) || mockProducts[0];
@@ -50,6 +50,7 @@ export default function CustomShirtPage() {
   const [shirtSize, setShirtSize] = useState('M');
   const [screenSize, setScreenSize] = useState('A4');
   const [shirtColor, setShirtColor] = useState('White');
+  const [printTechnique, setPrintTechnique] = useState('DFT');
 
   // Submission
   const [isUploading, setIsUploading] = useState(false);
@@ -324,6 +325,7 @@ export default function CustomShirtPage() {
         details: {
           shirtSize,
           screenSize,
+          printTechnique,
           color: shirtColor,
           side: viewSide
         }
@@ -339,59 +341,57 @@ export default function CustomShirtPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-[#ededed]">
+    <div className="min-h-screen bg-slate-50 text-slate-900">
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {/* Breadcrumbs */}
-        <nav className="flex text-sm text-[#a1a1aa] mb-8 items-center gap-2">
-          <Link href="/" className="hover:text-white transition-colors flex items-center gap-1">
+        <nav className="flex text-sm text-slate-500 mb-8 items-center gap-2">
+          <Link href="/" className="hover:text-slate-950 transition-colors flex items-center gap-1">
             <ArrowLeft size={16} /> กลับสู่หน้าหลัก
           </Link>
           <span>/</span>
-          <Link href={`/product/${product.id}`} className="hover:text-white transition-colors">
+          <Link href={`/product/${product.id}`} className="hover:text-slate-950 transition-colors">
             {product.name}
           </Link>
           <span>/</span>
-          <span className="text-white font-medium">ออกแบบเอง</span>
+          <span className="text-slate-950 font-medium">ออกแบบเอง</span>
         </nav>
 
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
             ออกแบบเสื้อ — {product.name}
           </h1>
-          <p className="text-[#a1a1aa] text-lg">
+          <p className="text-slate-500 text-lg">
             อัปโหลดลายของคุณแล้วลากวางตำแหน่งที่ต้องการบนเสื้อ
           </p>
         </div>
 
-        <div className="bg-[#1a1a1a] rounded-2xl border border-[#27272a] overflow-hidden flex flex-col lg:flex-row shadow-2xl">
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden flex flex-col lg:flex-row shadow-sm">
           {/* Left: Template Canvas */}
-          <div className="flex-1 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-[#27272a]">
+          <div className="flex-1 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-slate-200">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-blue-400" />
+                <ImageIcon className="w-5 h-5 text-blue-500" />
                 1. วางลายบนเสื้อ
               </h2>
 
               {/* Front / Back toggle */}
-              <div className="flex items-center bg-[#111] rounded-lg border border-[#27272a] p-0.5">
+              <div className="flex items-center bg-slate-100 rounded-lg border border-slate-200 p-0.5">
                 <button
                   onClick={() => setViewSide('front')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    viewSide === 'front'
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewSide === 'front'
                       ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-[#a1a1aa] hover:text-white'
-                  }`}
+                      : 'text-slate-500 hover:text-slate-800'
+                    }`}
                 >
                   ด้านหน้า
                 </button>
                 <button
                   onClick={() => setViewSide('back')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${
-                    viewSide === 'back'
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-all ${viewSide === 'back'
                       ? 'bg-blue-600 text-white shadow-sm'
-                      : 'text-[#a1a1aa] hover:text-white'
-                  }`}
+                      : 'text-slate-500 hover:text-slate-800'
+                    }`}
                 >
                   ด้านหลัง
                 </button>
@@ -402,8 +402,8 @@ export default function CustomShirtPage() {
             {overlayImage && (
               <div className="pb-3 flex flex-wrap justify-center items-center gap-3">
                 {/* Size controls */}
-                <div className="flex items-center gap-2 bg-[#111] rounded-lg px-3 py-2 border border-[#27272a]">
-                  <ZoomOut size={16} className="text-[#a1a1aa]" />
+                <div className="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2 border border-slate-200">
+                  <ZoomOut size={16} className="text-slate-500" />
                   <input
                     type="range"
                     min={40}
@@ -412,14 +412,14 @@ export default function CustomShirtPage() {
                     onChange={(e) => setOverlaySize(parseInt(e.target.value))}
                     className="w-32 accent-blue-500"
                   />
-                  <ZoomIn size={16} className="text-[#a1a1aa]" />
-                  <span className="text-xs text-[#a1a1aa] ml-1 w-10">{overlaySize}px</span>
+                  <ZoomIn size={16} className="text-slate-500" />
+                  <span className="text-xs text-slate-500 ml-1 w-10">{overlaySize}px</span>
                 </div>
 
                 {/* Reset position */}
                 <button
                   onClick={() => { setOverlayPos({ x: 150, y: 200 }); setOverlaySize(120); }}
-                  className="flex items-center gap-1.5 text-sm text-[#a1a1aa] hover:text-white bg-[#111] border border-[#27272a] px-3 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-800 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg transition-colors"
                 >
                   <RotateCcw size={14} />
                   รีเซ็ต
@@ -431,7 +431,7 @@ export default function CustomShirtPage() {
                     setOverlayImage(null);
                     setOverlayFile(null);
                   }}
-                  className="flex items-center gap-1.5 text-sm text-red-400 hover:text-red-300 bg-[#111] border border-red-500/30 px-3 py-2 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-600 bg-red-50/50 border border-red-200 px-3 py-2 rounded-lg transition-colors"
                 >
                   <Trash2 size={14} />
                   ลบลาย
@@ -442,7 +442,7 @@ export default function CustomShirtPage() {
             {/* Template + Overlay Canvas */}
             <div
               ref={canvasRef}
-              className="relative w-full bg-[#111] rounded-xl overflow-hidden select-none"
+              className="relative w-full bg-slate-100/50 border border-slate-200/60 rounded-xl overflow-hidden select-none"
               style={{ aspectRatio: '4/3.5', cursor: isDragging ? 'grabbing' : 'default' }}
               onMouseDown={overlayImage ? handlePointerDown : undefined}
               onTouchStart={overlayImage ? handlePointerDown : undefined}
@@ -476,13 +476,7 @@ export default function CustomShirtPage() {
                     width: `${printZone.w}px`,
                     height: `${printZone.h}px`,
                   }}
-                >
-                  {/* {!overlayImage && (
-                    <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-blue-400/60 whitespace-nowrap font-medium">
-                      พื้นที่สกรีน
-                    </span>
-                  )} */}
-                </div>
+                />
               )}
 
               {/* Overlay Image */}
@@ -508,30 +502,30 @@ export default function CustomShirtPage() {
               {!overlayImage && (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="text-center p-6">
-                    <Upload className="mx-auto h-10 w-10 text-[#a1a1aa] mb-3" />
-                    <p className="text-[#a1a1aa] text-sm">กรุณาอัปโหลดรูปลายสกรีนเพื่อเริ่มออกแบบ</p>
+                    <Upload className="mx-auto h-10 w-10 text-slate-400 mb-3" />
+                    <p className="text-slate-400 text-sm font-medium">กรุณาอัปโหลดรูปลายสกรีนเพื่อเริ่มออกแบบ</p>
                   </div>
                 </div>
               )}
             </div>
 
-            
+
           </div>
 
           {/* Right: Options & Upload */}
-          <div className="w-full lg:w-80 p-6 md:p-8 bg-[#121212] flex flex-col justify-between">
+          <div className="w-full lg:w-80 p-6 md:p-8 bg-slate-50/50 flex flex-col justify-between">
             <div>
               <h2 className="text-xl font-semibold mb-6">2. รายละเอียดเสื้อ</h2>
 
               {/* Upload */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-[#a1a1aa] mb-2">อัปโหลดลายสกรีน</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">อัปโหลดลายสกรีน</label>
                 <label
                   htmlFor="file-upload-custom"
-                  className="flex items-center justify-center gap-2 w-full rounded-xl border border-dashed border-[#3f3f46] px-4 py-4 hover:bg-[#27272a] transition-colors cursor-pointer"
+                  className="flex items-center justify-center gap-2 w-full rounded-xl border border-dashed border-slate-300 px-4 py-4 hover:bg-slate-100/50 transition-colors cursor-pointer"
                 >
-                  <Upload className="w-5 h-5 text-blue-400" />
-                  <span className="text-sm font-medium text-blue-400">
+                  <Upload className="w-5 h-5 text-blue-500" />
+                  <span className="text-sm font-medium text-blue-500">
                     {overlayImage ? 'เปลี่ยนรูปภาพ' : 'เลือกรูปภาพ'}
                   </span>
                   <input
@@ -542,25 +536,25 @@ export default function CustomShirtPage() {
                     onChange={onFileChange}
                   />
                 </label>
-                <p className="text-xs text-[#a1a1aa] mt-2 text-center">รองรับ PNG, JPG, GIF สูงสุด 10MB</p>
+                <p className="text-xs text-slate-400 mt-2 text-center">รองรับ PNG, JPG, GIF สูงสุด 10MB</p>
               </div>
 
               {/* Color */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-[#a1a1aa] mb-2">สีเสื้อ</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">สีเสื้อ</label>
                 <div className="flex gap-3">
                   <button onClick={() => setShirtColor('White')} className={`w-8 h-8 rounded-full bg-white border-2 ${shirtColor === 'White' ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-gray-200'}`}></button>
-                  <button onClick={() => setShirtColor('Black')} className={`w-8 h-8 rounded-full bg-black border-2 ${shirtColor === 'Black' ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-[#27272a]'}`}></button>
+                  <button onClick={() => setShirtColor('Black')} className={`w-8 h-8 rounded-full bg-black border-2 ${shirtColor === 'Black' ? 'border-blue-500 ring-2 ring-blue-500/50' : 'border-slate-800'}`}></button>
                 </div>
               </div>
 
               {/* Shirt Size */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-[#a1a1aa] mb-2">ไซส์เสื้อ</label>
+                <label className="block text-sm font-medium text-slate-600 mb-2">ไซส์เสื้อ</label>
                 <select
                   value={shirtSize}
                   onChange={(e) => setShirtSize(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-[#ededed] bg-[#1a1a1a] ring-1 ring-inset ring-[#27272a] focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 bg-white ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-blue-500 sm:text-sm"
                 >
                   <option value="S">S (อก 34&quot;)</option>
                   <option value="M">M (อก 38&quot;)</option>
@@ -571,16 +565,29 @@ export default function CustomShirtPage() {
               </div>
 
               {/* Screen Size */}
-              <div className="mb-8">
-                <label className="block text-sm font-medium text-[#a1a1aa] mb-2">ขนาดสกรีน</label>
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-600 mb-2">ขนาดสกรีน</label>
                 <select
                   value={screenSize}
                   onChange={(e) => setScreenSize(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-[#ededed] bg-[#1a1a1a] ring-1 ring-inset ring-[#27272a] focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                  className="mt-1 block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 bg-white ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-blue-500 sm:text-sm"
                 >
                   <option value="Logo">Logo (ไม่เกิน 10x10 cm)</option>
                   <option value="A4">A4 (มาตรฐาน)</option>
                   <option value="A3">A3 (เต็มหน้าอก/หลัง)</option>
+                </select>
+              </div>
+
+              {/* Screen Technique */}
+              <div className="mb-8">
+                <label className="block text-sm font-medium text-slate-600 mb-2">เทคนิคการสกรีน</label>
+                <select
+                  value={printTechnique}
+                  onChange={(e) => setPrintTechnique(e.target.value)}
+                  className="mt-1 block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 bg-white ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-blue-500 sm:text-sm"
+                >
+                  <option value="DFT">DFT (พิมพ์ฟิล์มรีดร้อน - สีสด ละเอียด)</option>
+                  <option value="DTG">DTG (พิมพ์ตรงลงเสื้อ - นุ่ม ซึมเข้าเนื้อผ้า)</option>
                 </select>
               </div>
             </div>
@@ -589,9 +596,9 @@ export default function CustomShirtPage() {
             <div>
               {uploadSuccess ? (
                 <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-center">
-                  <CheckCircle2 className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                  <p className="text-green-400 font-semibold mb-1">สั่งซื้อสำเร็จ!</p>
-                  <p className="text-xs text-green-300/80 mb-3">รายการของคุณถูกบันทึกแล้ว</p>
+                  <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
+                  <p className="text-green-600 font-semibold mb-1">สั่งซื้อสำเร็จ!</p>
+                  <p className="text-xs text-green-600/80 mb-3">รายการของคุณถูกบันทึกแล้ว</p>
                   <button
                     onClick={() => {
                       setOverlayImageFront(null);
@@ -600,7 +607,7 @@ export default function CustomShirtPage() {
                       setOverlayFileBack(null);
                       setUploadSuccess(false);
                     }}
-                    className="text-xs px-3 py-1.5 bg-green-500/20 hover:bg-green-500/30 text-green-300 rounded-md transition-colors"
+                    className="text-xs px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-md transition-colors"
                   >
                     สั่งเพิ่มอีกตัว
                   </button>
@@ -610,26 +617,26 @@ export default function CustomShirtPage() {
                   <button
                     onClick={handlePreorder}
                     disabled={!overlayImage || isUploading}
-                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-[#27272a] disabled:text-[#a1a1aa] disabled:cursor-not-allowed transition-all"
+                    className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all"
                   >
                     {isUploading ? (
                       <span className="animate-pulse">กำลังประมวลผล...</span>
                     ) : (
                       <>
                         <ShoppingCart className="w-4 h-4" />
-                        ยืนยันการพรีออเดอร์
+                        พรีออเดอร์
                       </>
                     )}
                   </button>
                   <button
                     disabled={!overlayImage || isUploading}
-                    className="max-w-30 flex items-center justify-center gap-1.5 rounded-xl border border-[#3f3f46] bg-[#1a1a1a] px-1 py-1 text-sm font-semibold text-[#ededed] hover:bg-[#27272a] hover:border-[#52525b] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-3.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     title="บันทึกลงคอลเลกชั่น"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
-                    บันทึกลงคอลเลกชั่น
+                    บันทึก
                   </button>
                 </div>
               )}
@@ -638,5 +645,17 @@ export default function CustomShirtPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CustomShirtPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500">
+        <span className="animate-pulse font-medium">กำลังโหลดหน้าระบบออกแบบ...</span>
+      </div>
+    }>
+      <CustomShirtPageContent />
+    </Suspense>
   );
 }

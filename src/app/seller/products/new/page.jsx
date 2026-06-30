@@ -1,13 +1,17 @@
 import { requireUserPage } from "@/lib/auth/dal";
-import ProductForm from "../_components/ProductForm";
+import { prisma } from "@/lib/db/prisma";
+import CreateProductWithLivePanel from "../_components/CreateProductWithLivePanel";
 
 export default async function NewProductPage() {
-  await requireUserPage();
+  const user = await requireUserPage();
+  const products = await prisma.product.findMany({
+    where: { sellerId: user.id },
+    orderBy: { createdAt: "desc" },
+  });
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">เพิ่มสินค้า</h1>
-      <ProductForm mode="create" />
+    <div className="max-w-[1600px] mx-auto px-6 py-10">
+      <CreateProductWithLivePanel initialProducts={products} />
     </div>
   );
 }

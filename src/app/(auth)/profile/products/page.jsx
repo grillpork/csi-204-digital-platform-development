@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { DollarSign, Package, Clock, Edit3, Trash2, Plus } from 'lucide-react';
 
 export default function MyProductsPage() {
   // จำลองข้อมูลสินค้าเริ่มต้นของกลุ่มร้านเสื้อผ้า
@@ -40,17 +41,23 @@ export default function MyProductsPage() {
       }}>
         {/* กล่องที่ 1 */}
         <div style={statCardStyle}>
-          <span style={statLabelStyle}>💰 ยอดขายทั้งหมด (เดือนนี้)</span>
+          <span style={{ ...statLabelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <DollarSign size={16} className="text-emerald-500" /> ยอดขายทั้งหมด (เดือนนี้)
+          </span>
           <span style={statValueStyle}>฿12,450</span>
         </div>
         {/* กล่องที่ 2 (ดึงตามจำนวนสินค้าในตารางจริง) */}
         <div style={statCardStyle}>
-          <span style={statLabelStyle}>📦 เสื้อผ้าทั้งหมดในระบบ</span>
+          <span style={{ ...statLabelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Package size={16} className="text-blue-500" /> เสื้อผ้าทั้งหมดในระบบ
+          </span>
           <span style={statValueStyle}>{products.length} รายการ</span>
         </div>
         {/* กล่องที่ 3 */}
         <div style={statCardStyle}>
-          <span style={statLabelStyle}>⏳ ออเดอร์ที่ต้องจัดส่ง</span>
+          <span style={{ ...statLabelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Clock size={16} className="text-amber-500" /> ออเดอร์ที่ต้องจัดส่ง
+          </span>
           <span style={statValueStyle}>3 คำสั่งซื้อ</span>
         </div>
       </div>
@@ -62,9 +69,9 @@ export default function MyProductsPage() {
         </h2>
         <button 
           onClick={() => alert('ฟีเจอร์เพิ่มสินค้ากำลังพัฒนาต่อในกลุ่มครับ')}
-          style={addButtonStyle}
+          style={{ ...addButtonStyle, display: 'flex', alignItems: 'center', gap: '6px' }}
         >
-          ＋ เพิ่มสินค้าใหม่
+          <Plus size={16} /> เพิ่มสินค้าใหม่
         </button>
       </div>
 
@@ -103,8 +110,12 @@ export default function MyProductsPage() {
                   <td style={{ ...tdStyle, fontWeight: '600', color: '#111' }}>฿{product.price}</td>
                   <td style={{ ...tdStyle, textAlign: 'right' }}>
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                      <button onClick={() => alert('แก้ไขสินค้าชิ้นนี้')} style={actionButtonStyle}>✏️ แก้ไข</button>
-                      <button onClick={() => handleDelete(product.id)} style={{ ...actionButtonStyle, color: '#ef4444' }}>🗑️ ลบ</button>
+                      <button onClick={() => alert('แก้ไขสินค้าชิ้นนี้')} style={{ ...actionButtonStyle, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <Edit3 size={14} /> แก้ไข
+                      </button>
+                      <button onClick={() => handleDelete(product.id)} style={{ ...actionButtonStyle, color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                        <Trash2 size={14} /> ลบ
+                      </button>
                     </div>
                   </td>
                 </tr>

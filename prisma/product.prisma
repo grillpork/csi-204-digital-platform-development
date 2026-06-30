@@ -1,0 +1,36 @@
+enum Size {
+  XS
+  S
+  M
+  L
+  XL
+  XXL
+}
+
+enum Category {
+  TSHIRT
+  POLO
+  HOODIE
+  LONG_SLEEVE
+  TANK_TOP
+}
+
+model Product {
+  id          Int        @id @default(autoincrement())
+  name        String
+  description String
+  price       Int
+  category    Category
+  images      String[]
+  colors      String[]
+  sizes       Size[]
+  stock       Int        @default(0)
+  sellerId    String
+  seller      User       @relation(fields: [sellerId], references: [id])
+  favorites   Favorite[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@unique([id, sellerId])
+  @@map("products")
+}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ShoppingCart, X, Trash2, CheckCircle2 } from "lucide-react";
 import { useProductStore } from "../../store/product";
+import Link from "next/link";
 
 export default function CartDrawer({ size = 24, className = "" }) {
   const [isMounted, setIsMounted] = useState(false);
@@ -10,6 +11,7 @@ export default function CartDrawer({ size = 24, className = "" }) {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("transfer");
+  const [lastTrackingId, setLastTrackingId] = useState("");
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional hydration-guard pattern
@@ -43,6 +45,51 @@ export default function CartDrawer({ size = 24, className = "" }) {
 
   const handleCheckoutSubmit = (e) => {
     e.preventDefault();
+    
+    // Create simulated order
+    const trackingNo = `SHIRTSY-${Math.floor(10000 + Math.random() * 90000)}`;
+    setLastTrackingId(trackingNo);
+
+    // Get user address if exists
+    let shippingAddress = "123/45 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110";
+    try {
+      const savedProfile = localStorage.getItem("userProfile");
+      if (savedProfile) {
+        const profile = JSON.parse(savedProfile);
+        if (profile.address) {
+          shippingAddress = profile.address;
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+
+    const newOrder = {
+      trackingNumber: trackingNo,
+      date: new Date().toLocaleDateString("th-TH"),
+      paymentMethod: paymentMethod,
+      total: cartTotal,
+      status: "placed", // Default start status
+      items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        image: item.image
+      })),
+      shippingAddress: shippingAddress
+    };
+
+    // Save order history in localStorage
+    try {
+      const existing = localStorage.getItem("shirtsy_orders");
+      const orders = existing ? JSON.parse(existing) : [];
+      orders.unshift(newOrder);
+      localStorage.setItem("shirtsy_orders", JSON.stringify(orders));
+    } catch (err) {
+      console.error(err);
+    }
+
     // Simulate payment process
     setIsCheckoutOpen(false);
     setIsOpen(false);
@@ -211,15 +258,29 @@ export default function CartDrawer({ size = 24, className = "" }) {
       {isSuccessModalOpen && (
         <div className="fixed inset-0 bg-black/40 z-[60] flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center text-center transform transition-all">
-            <CheckCircle2 size={64} className="text-green-500 mb-4" />
+            <CheckCircle2 size={64} className="text-green-500 mb-4 animate-bounce" />
             <h2 className="text-2xl font-bold text-slate-800 mb-2">Payment Successful!</h2>
-            <p className="text-slate-600 mb-8">Thank you for your purchase. We will email you the receipt shortly.</p>
-            <button 
-              onClick={() => setIsSuccessModalOpen(false)}
-              className="w-full bg-slate-900 text-white py-3 rounded-md font-medium hover:bg-slate-800 transition-colors"
-            >
-              Continue Shopping
-            </button>
+            <p className="text-slate-600 mb-2">Thank you for your purchase.</p>
+            <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 w-full mb-6">
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">หมายเลขพัสดุสำหรับติดตามสินค้า</span>
+              <p className="text-sm font-mono font-bold text-slate-800 mt-0.5">{lastTrackingId}</p>
+            </div>
+            
+            <div className="flex flex-col gap-2 w-full">
+              <Link 
+                href={`/tracking?id=${lastTrackingId}`}
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="w-full bg-slate-900 text-white py-3 rounded-md font-medium hover:bg-slate-800 transition-colors block text-center text-sm"
+              >
+                ติดตามการส่งสินค้า
+              </Link>
+              <button 
+                onClick={() => setIsSuccessModalOpen(false)}
+                className="w-full bg-slate-100 text-slate-700 py-3 rounded-md font-medium hover:bg-slate-200 transition-colors text-sm"
+              >
+                Continue Shopping
+              </button>
+            </div>
           </div>
         </div>
       )}

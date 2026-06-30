@@ -1,5 +1,6 @@
 "use client";
 import CartDrawer from "@/components/ui/CartDrawer";
+import FilterDrawer from "@/components/ui/FilterDrawer";
 import { useProductStore } from "@/store/product";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -16,6 +17,7 @@ import {
   ShoppingBag,
   ArrowLeft,
   ArrowRight,
+  X,
 } from "lucide-react";
 
 // Pagination ตามดีไซน์ที่อ้างอิง (@SCR-20260618-msaz.png):
@@ -180,6 +182,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/products")
@@ -242,146 +245,30 @@ export default function ProductsPage() {
       </div>
 
       {/* max-w-7xl mx-auto: จัดให้ส่วน "All Product" ทั้งหมด (sidebar + grid) อยู่กลางจอ ขอบซ้าย-ขวาเท่ากัน */}
-      <div className="max-w-7xl mx-auto px-6 py-8 flex gap-8">
-        {/* Filters sidebar — mt-140 ดันลงมาให้พ้น fixed navbar + รูปแบนเนอร์ */}
-        <aside className="w-64 mt-140 flex-shrink-0">
-          <div className="flex  justify-between items-center mb-5 pb-4 border-b border-gray-200">
-            <h2 className="font-bold text-lg text-gray-800">Filters</h2>
-            <button
-              onClick={() => {
-                setSelectedCategory(null);
-                setSelectedColors([]);
-                setSelectedSizes([]);
-                setSelectedSleeves([]);
-                setUploadedFile(null);
-              }}
-              className="text-sm text-gray-400 hover:text-black transition-colors"
-            >
-              Reset
-            </button>
-          </div>
+      <FilterDrawer
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        selectedColors={selectedColors}
+        setSelectedColors={setSelectedColors}
+        selectedSizes={selectedSizes}
+        setSelectedSizes={setSelectedSizes}
+        selectedSleeves={selectedSleeves}
+        setSelectedSleeves={setSelectedSleeves}
+        uploadedFile={uploadedFile}
+        setUploadedFile={setUploadedFile}
+        categories={categories}
+        colors={colors}
+        sizes={sizes}
+        sleeveTypes={sleeveTypes}
+        toggleItem={toggleItem}
+        handleAddCustomPrint={handleAddCustomPrint}
+      />
 
-          {/* หมวดหมู่สินค้า */}
-          <div className="mb-6 pb-5 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3">Categories</h3>
-            <ul className="space-y-1">
-              {categories.map((cat) => (
-                <li key={cat}>
-                  <button
-                    className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors ${
-                      selectedCategory === cat
-                        ? "bg-black text-white"
-                        : "text-gray-600 hover:bg-gray-100"
-                    }`}
-                    onClick={() =>
-                      setSelectedCategory(selectedCategory === cat ? null : cat)
-                    }
-                  >
-                    {cat}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* ประเภทแขนเสื้อ */}
-          <div className="mb-6 pb-5 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3">Sleeve Type</h3>
-            <ul className="space-y-2">
-              {sleeveTypes.map((sleeve) => (
-                <li key={sleeve}>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      className="w-4 h-4 rounded accent-black"
-                      checked={selectedSleeves.includes(sleeve)}
-                      onChange={() =>
-                        toggleItem(setSelectedSleeves, selectedSleeves, sleeve)
-                      }
-                    />
-                    <span className="text-sm text-gray-600">{sleeve}</span>
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* สีเสื้อ */}
-          <div className="mb-6 pb-5 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3">Color</h3>
-            <div className="flex flex-wrap gap-2">
-              {colors.map((color) => (
-                <button
-                  key={color}
-                  onClick={() =>
-                    toggleItem(setSelectedColors, selectedColors, color)
-                  }
-                  className={`w-7 h-7 rounded-full transition-transform ${
-                    selectedColors.includes(color)
-                      ? "scale-110 ring-2 ring-black ring-offset-1"
-                      : ""
-                  } ${color === "#ffffff" ? "border border-gray-300" : ""}`}
-                  style={{ backgroundColor: color }}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* ไซส์ */}
-          <div className="mb-6 pb-5 border-b border-gray-200">
-            <h3 className="font-semibold text-gray-800 mb-3">Size</h3>
-            <div className="flex flex-wrap gap-2">
-              {sizes.map((size) => (
-                <button
-                  key={size}
-                  onClick={() =>
-                    toggleItem(setSelectedSizes, selectedSizes, size)
-                  }
-                  className={`px-3 py-1 text-sm border rounded-lg transition-colors ${
-                    selectedSizes.includes(size)
-                      ? "bg-black text-white border-black"
-                      : "border-gray-300 text-gray-600 hover:border-gray-500"
-                  }`}
-                >
-                  {size}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* อัปโหลดภาพสกรีน — แค่ UI ยังไม่ได้ส่งไฟล์ไปไหน */}
-          <div className="pt-2">
-            <p className="text-sm text-gray-600 mb-3 text-center leading-relaxed">
-              เลือกรูปที่ต้องการสกรีนลงบนเสื้อ
-            </p>
-            {uploadedFile && (
-              <p className="text-xs text-green-600 mb-2 text-center truncate">
-                ✓ {uploadedFile.name}
-              </p>
-            )}
-            <label className="flex items-center justify-center gap-2 bg-pink-500 hover:bg-pink-600 text-white py-2.5 px-4 rounded-xl cursor-pointer transition-colors w-full">
-              <Upload size={15} />
-              <span className="text-sm font-medium">อัปโหลดรูป</span>
-              <input
-                type="file"
-                accept=".png,.jpg,.jpeg"
-                className="hidden"
-                onChange={(e) => setUploadedFile(e.target.files[0] || null)}
-              />
-            </label>
-          </div>
-          <div className="mt-3">
-            <button
-              onClick={handleAddCustomPrint}
-              className="w-full flex items-center justify-center gap-2 bg-black text-white py-2.5 px-4 rounded-xl text-sm hover:bg-gray-800 transition-colors"
-            >
-              <ShoppingCart size={15} />
-              Add to cart
-            </button>
-          </div>
-        </aside>
-
-        <main className="flex-1 mt-140">
+      {/* max-w-7xl mx-auto: จัดให้ส่วน "All Product" ทั้งหมด อยู่กลางจอ ขอบซ้าย-ขวาเท่ากัน */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        <main className="w-full mt-140">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">All Product</h1>
             <div className="flex items-center gap-2">
@@ -395,13 +282,16 @@ export default function ProductsPage() {
                   className="text-sm outline-none w-full text-gray-700 placeholder-gray-400"
                 />
               </div>
-              <button className="border border-gray-300 rounded-xl p-2.5 hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={() => setIsFilterOpen(true)}
+                className="border border-gray-300 rounded-xl p-2.5 hover:bg-gray-50 transition-colors"
+              >
                 <SlidersHorizontal size={15} className="text-gray-600" />
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {displayProducts.map((product) => (
               <div
                 key={product.id}
