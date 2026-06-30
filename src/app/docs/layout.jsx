@@ -1,37 +1,52 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import { BookOpen, Shield, Settings, Menu } from 'lucide-react';
 
 const DocsLayout = ({ children }) => {
     return (
-        <div className="flex h-screen bg-[#0a0a0a] text-[#ededed] font-sans antialiased">
+        <div className="flex h-screen bg-slate-50 text-slate-800 font-sans antialiased">
+            {/* Load Mermaid.js for drawing diagrams */}
+            <Script 
+                src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js" 
+                strategy="afterInteractive"
+                onLoad={() => {
+                    if (window.mermaid) {
+                        window.mermaid.initialize({ startOnLoad: true, theme: 'default' });
+                        window.mermaid.contentLoaded();
+                    }
+                }}
+            />
+
             {/* Sidebar */}
-            <aside className="w-64 bg-[#0a0a0a] border-r border-[#1a1a1a] hidden md:flex flex-col">
-                <div className="h-16 flex items-center px-6 border-b border-[#1a1a1a]">
-                    <span className="text-lg font-semibold tracking-tight text-white">เอกสารคู่มือ</span>
+            <aside className="w-64 bg-slate-50 border-r border-slate-200 hidden md:flex flex-col">
+                <div className="h-16 flex items-center px-6 border-b border-slate-200">
+                    <span className="text-lg font-semibold tracking-tight text-slate-900">เอกสารคู่มือ</span>
                 </div>
                 <nav className="flex-1 overflow-y-auto py-6">
                     {/* Overview */}
                     <div className="px-4 mb-6">
-                        <h4 className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-2 px-2">ภาพรวม</h4>
+                        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">ภาพรวม</h4>
                         <ul className="space-y-1">
                             <li>
-                                <Link href="/docs/policy" className="flex items-center px-2 py-1.5 text-sm font-medium text-[#a1a1aa] rounded-md hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                                <Link href="/docs/policy" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
                                     นโยบายและข้อตกลง
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/docs/systems" className="flex items-center px-2 py-1.5 text-sm font-medium text-[#a1a1aa] rounded-md hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                                <Link href="/docs/systems" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
                                     ข้อมูลระบบ (Systems)
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/docs/faq" className="flex items-center px-2 py-1.5 text-sm font-medium text-[#a1a1aa] rounded-md hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                                <Link href="/docs/faq" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
                                     คำถามที่พบบ่อย (FAQ)
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/docs/contact" className="flex items-center px-2 py-1.5 text-sm font-medium text-[#a1a1aa] rounded-md hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                                <Link href="/docs/contact" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
                                     ติดต่อเรา
                                 </Link>
                             </li>
@@ -40,10 +55,10 @@ const DocsLayout = ({ children }) => {
 
                     {/* Buyers */}
                     <div className="px-4 mb-6">
-                        <h4 className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-2 px-2">สำหรับลูกค้า</h4>
+                        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">สำหรับลูกค้า</h4>
                         <ul className="space-y-1">
                             <li>
-                                <Link href="/docs/buyers" className="flex items-center px-2 py-1.5 text-sm font-medium text-[#a1a1aa] rounded-md hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                                <Link href="/docs/buyers" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
                                     คู่มือการสั่งสกรีนเสื้อ
                                 </Link>
                             </li>
@@ -52,10 +67,10 @@ const DocsLayout = ({ children }) => {
 
                     {/* Creators */}
                     <div className="px-4 mb-6">
-                        <h4 className="text-xs font-semibold text-[#888] uppercase tracking-wider mb-2 px-2">สำหรับนักออกแบบ</h4>
+                        <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">สำหรับนักออกแบบ</h4>
                         <ul className="space-y-1">
                             <li>
-                                <Link href="/docs/creators" className="flex items-center px-2 py-1.5 text-sm font-medium text-[#a1a1aa] rounded-md hover:bg-[#1a1a1a] hover:text-white transition-colors">
+                                <Link href="/docs/creators" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
                                     คู่มือเปิดร้านและขายลายเสื้อ
                                 </Link>
                             </li>
@@ -65,17 +80,17 @@ const DocsLayout = ({ children }) => {
             </aside>
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col overflow-hidden bg-[#0a0a0a]">
+            <div className="flex-1 flex flex-col overflow-hidden bg-white">
                 {/* Header (Mobile) */}
-                <header className="h-16 bg-[#0a0a0a] border-b border-[#1a1a1a] flex items-center px-4 md:hidden">
-                    <button className="p-2 rounded-md text-[#a1a1aa] hover:text-white hover:bg-[#1a1a1a] focus:outline-none">
+                <header className="h-16 bg-white border-b border-slate-200 flex items-center px-4 md:hidden">
+                    <button className="p-2 rounded-md text-slate-500 hover:text-slate-800 hover:bg-slate-100 focus:outline-none">
                         <Menu className="h-5 w-5" aria-hidden="true" />
                     </button>
-                    <span className="ml-4 text-sm font-semibold text-white">เอกสารคู่มือ</span>
+                    <span className="ml-4 text-sm font-semibold text-slate-900">เอกสารคู่มือ</span>
                 </header>
 
                 {/* Content Area */}
-                <main className="flex-1 overflow-y-auto scroll-smooth bg-[#0a0a0a]">
+                <main className="flex-1 overflow-y-auto scroll-smooth bg-white">
                     <div className="max-w-[1200px] mx-auto w-full h-full p-6 md:p-10 lg:p-12">
                         {children}
                     </div>
