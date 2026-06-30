@@ -1,0 +1,50 @@
+enum OrderStatus {
+  PENDING      // รอการชำระเงิน
+  PAID         // ชำระเงินแล้ว รอผลิต/จัดส่ง
+  PROCESSING   // กำลังผลิต/สกรีนเสื้อ
+  SHIPPED      // จัดส่งสินค้าแล้ว
+  COMPLETED    // สิ้นสุดกระบวนการ (ลูกค้าได้รับแล้ว)
+  CANCELLED    // ยกเลิกออเดอร์
+}
+
+model Order {
+  id              String       @id @default(cuid())
+  userId          String       @map("user_id")
+  user            User         @relation(fields: [userId], references: [id])
+  status          OrderStatus  @default(PENDING)
+  totalAmount     Int          @map("total_amount")
+  shippingAddress String       @map("shipping_address")
+  phone           String?
+  items           OrderItem[]
+  payment         Payment?
+  createdAt       DateTime     @default(now()) @map("created_at")
+  updatedAt       DateTime     @updatedAt @map("updated_at")
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int      @id @default(autoincrement())
+  orderId   String   @map("order_id")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId Int      @map("product_id")
+  product   Product  @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Int      // ราคาสินค้า ณ ตอนสั่งซื้อ (Snapshot)
+
+  @@map("order_items")
+}
+
+model Payment {
+  id            String    @id @default(cuid())
+  orderId       String    @unique @map("order_id")
+  order         Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount        Int
+  method        String    // เช่น "QR_PROMPTPAY", "CREDIT_CARD", "COD"
+  status        String    // เช่น "PENDING", "SUCCESS", "FAILED"
+  transactionId String?   @map("transaction_id")
+  paidAt        DateTime? @map("paid_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@map("payments")
+}

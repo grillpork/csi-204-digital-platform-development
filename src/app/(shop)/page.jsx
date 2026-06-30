@@ -295,6 +295,7 @@ export default function ProductsPage() {
             {displayProducts.map((product) => (
               <div
                 key={product.id}
+                onClick={() => router.push(`/product/${product.id}`)}
                 className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
               >
                 <div className="aspect-square bg-gray-100 overflow-hidden">
@@ -327,7 +328,13 @@ export default function ProductsPage() {
                   <p className="font-bold text-gray-800 mb-3">
                     ฿{product.price}
                   </p>
-                  <button onClick={() => handleAddToCart(product)} className="w-full flex items-center justify-center gap-2 bg-black text-white py-2 rounded-xl text-sm hover:bg-gray-800 transition-colors">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleAddToCart(product);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 bg-black text-white py-2 rounded-xl text-sm hover:bg-gray-800 transition-colors"
+                  >
                     <ShoppingCart size={14} />
                     Add to cart
                   </button>

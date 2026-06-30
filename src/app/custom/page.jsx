@@ -1,20 +1,31 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Upload, ShoppingCart, CheckCircle2, Image as ImageIcon, ArrowLeft, Move, ZoomIn, ZoomOut, RotateCcw, Trash2, FlipHorizontal2 } from 'lucide-react';
+import { Upload, ShoppingCart, CheckCircle2, Image as ImageIcon, ArrowLeft, Move, ZoomIn, ZoomOut, RotateCcw, Trash2, FlipHorizontal2, Tag } from 'lucide-react';
 import { mockProducts } from '@/app/data/products';
 import { useProductStore } from '@/store/product';
+import { useAuth } from '@/context/AuthContext';
 
 const DEFAULT_PRINT_ZONE = { x: 0.27, y: 0.20, w: 0.46, h: 0.70 };
 
 function CustomShirtPageContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { user } = useAuth();
   const productId = parseInt(searchParams.get('id')) || 1;
   const product = mockProducts.find((p) => p.id === productId) || mockProducts[0];
 
   const addToCart = useProductStore((state) => state.addToCart);
+
+  // States for posting custom shirt for sale
+  const [showPostModal, setShowPostModal] = useState(false);
+  const [postName, setPostName] = useState(product.name ? `เสื้อยืดคัสตอมลายพิเศษ` : "เสื้อยืดคัสตอม");
+  const [postDescription, setPostDescription] = useState("เสื้อยืดสตรีทแวร์คัสตอมลายพิเศษ คุณภาพพรีเมียม");
+  const [postPrice, setPostPrice] = useState(product.price || 370);
+  const [postIsPublic, setPostIsPublic] = useState(true);
+  const [isPosting, setIsPosting] = useState(false);
 
   const [viewSide, setViewSide] = useState('front');
 
@@ -279,6 +290,12 @@ function CustomShirtPageContent() {
   };
 
   const handlePreorder = async () => {
+    if (!user) {
+      alert('กรุณาเข้าสู่ระบบก่อนทำการสั่งซื้อสินค้า');
+      router.push('/login');
+      return;
+    }
+
     const currentFile = viewSide === 'front' ? overlayFileFront : overlayFileBack;
     if (!currentFile) {
       alert('กรุณาอัปโหลดรูปภาพสกรีนเสื้อก่อนยืนยัน');
@@ -291,52 +308,154 @@ function CustomShirtPageContent() {
       // 1. Generate composite image blob
       const compositeBlob = await generateCompositeImage();
 
-      // 2. Prepare FormData
-      const formData = new FormData();
-      formData.append('designImage', compositeBlob, `custom-design-${viewSide}.png`);
-      formData.append('shirtSize', shirtSize);
-      formData.append('screenSize', screenSize);
-      formData.append('color', shirtColor);
-
-      // 3. Upload to server
-      const response = await fetch('/api/custom-upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-
       // Calculate price based on options
       let finalPrice = product.price;
       if (screenSize === 'A3') finalPrice += 100;
       if (screenSize === 'Logo') finalPrice -= 50;
 
-      // 4. Add the composite designed product to the shopping cart store
-      addToCart({
-        id: `custom-${product.id}-${Date.now()}`,
-        name: `${product.name} (Custom — ${viewSide === 'front' ? 'ด้านหน้า' : 'ด้านหลัง'})`,
-        price: finalPrice,
-        image: data.imageUrl, // Show the composite image containing the uploaded print
-        quantity: 1,
-        details: {
-          shirtSize,
-          screenSize,
-          printTechnique,
-          color: shirtColor,
-          side: viewSide
-        }
+      // 2. Auto-save customized shirt design as a draft product (isPublic = false)
+      const formData = new FormData();
+      formData.append('images', compositeBlob, `custom-design-${viewSide}.png`);
+      formData.append('name', `${product.name} (Custom — ${viewSide === 'front' ? 'ด้านหน้า' : 'ด้านหลัง'})`);
+      formData.append('description', `เสื้อยืดแต่งลายคัสตอมส่วนตัว ขนาดสกรีน ${screenSize}`);
+      formData.append('price', finalPrice.toString());
+      
+      const postCategory = product.category || 'TSHIRT';
+      formData.append('category', postCategory);
+      formData.append('colors', shirtColor);
+      formData.append('sizes', shirtSize);
+      formData.append('stock', '1');
+
+      // Append custom design metadata for manufacturing & reproduction
+      formData.append('isCustom', 'true');
+      formData.append('baseProductId', product.id.toString());
+      formData.append('overlayFile', currentFile); // Original transparent graphic
+      formData.append('overlayPositionX', overlayPos.x.toString());
+      formData.append('overlayPositionY', overlayPos.y.toString());
+      formData.append('overlaySize', overlaySize.toString());
+      formData.append('printSide', viewSide);
+      formData.append('screenSize', screenSize);
+      formData.append('printTechnique', printTechnique);
+      formData.append('isPublic', 'false'); // draft/private product
+
+      // 3. Post product creation to server
+      const productResponse = await fetch('/api/products', {
+        method: 'POST',
+        body: formData,
       });
 
-      setUploadSuccess(true);
+      const productResult = await productResponse.json();
+
+      if (!productResponse.ok) {
+        throw new Error(productResult.error || 'Failed to create customized product');
+      }
+
+      const createdProduct = productResult.data;
+
+      // 4. Add the newly created customized product ID to the cart
+      const cartResult = await addToCart({
+        id: createdProduct.id,
+      });
+
+      if (cartResult?.needLogin) {
+        router.push('/login');
+        return;
+      }
+
+      // 5. Redirect the user to checkout/payment drawer on the shop page
+      router.push('/?checkout=true');
     } catch (e) {
       console.error(e);
       alert('การสั่งซื้อล้มเหลว กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handlePostForSale = async () => {
+    if (!user) {
+      alert('กรุณาเข้าสู่ระบบก่อนทำการโพสขายสินค้า');
+      router.push('/login');
+      return;
+    }
+
+    const currentFile = viewSide === 'front' ? overlayFileFront : overlayFileBack;
+    if (!currentFile) {
+      alert('กรุณาอัปโหลดรูปภาพสกรีนเสื้อก่อนทำรายการ');
+      return;
+    }
+
+    if (!postName.trim() || !postDescription.trim()) {
+      alert('กรุณากรอกข้อมูลสินค้าให้ครบถ้วน');
+      return;
+    }
+
+    try {
+      setIsPosting(true);
+
+      // 1. Generate composite image blob
+      const compositeBlob = await generateCompositeImage();
+
+      // 2. Prepare FormData for API POST /api/products
+      const formData = new FormData();
+      formData.append('images', compositeBlob, `custom-design-${viewSide}.png`);
+      formData.append('name', postName);
+      formData.append('description', postDescription);
+      formData.append('price', postPrice.toString());
+      
+      const postCategory = product.category || 'TSHIRT';
+      formData.append('category', postCategory);
+      
+      // Add all available sizes and colors to the product listing
+      formData.append('colors', shirtColor);
+      const availableSizes = ["S", "M", "L", "XL", "XXL"];
+      availableSizes.forEach(sz => formData.append('sizes', sz));
+      
+      formData.append('stock', '100'); // print-on-demand stock
+
+      // Append custom design metadata for manufacturing & reproduction
+      formData.append('isCustom', 'true');
+      formData.append('baseProductId', product.id.toString());
+      formData.append('overlayFile', currentFile); // Original transparent graphic
+      formData.append('overlayPositionX', overlayPos.x.toString());
+      formData.append('overlayPositionY', overlayPos.y.toString());
+      formData.append('overlaySize', overlaySize.toString());
+      formData.append('printSide', viewSide);
+      formData.append('screenSize', screenSize);
+      formData.append('printTechnique', printTechnique);
+      formData.append('isPublic', postIsPublic ? 'true' : 'false');
+
+      // 3. Post to server
+      const response = await fetch('/api/products', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const resultData = await response.json();
+
+      if (!response.ok) {
+        if (resultData.errors) {
+          const errorsText = Object.entries(resultData.errors)
+            .map(([field, msgs]) => `${field}: ${msgs.join(', ')}`)
+            .join('\n');
+          throw new Error(errorsText || 'Validation failed');
+        }
+        throw new Error(resultData.error || 'Failed to post product');
+      }
+
+      alert('โพสขายสินค้าของคุณเรียบร้อยแล้ว!');
+      setShowPostModal(false);
+      
+      if (resultData.data?.id) {
+        router.push(`/product/${resultData.data.id}`);
+      } else {
+        router.push('/');
+      }
+    } catch (e) {
+      console.error(e);
+      alert(`การโพสขายล้มเหลว: ${e.message}`);
+    } finally {
+      setIsPosting(false);
     }
   };
 
@@ -629,14 +748,13 @@ function CustomShirtPageContent() {
                     )}
                   </button>
                   <button
+                    onClick={() => setShowPostModal(true)}
                     disabled={!overlayImage || isUploading}
-                    className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-3.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-                    title="บันทึกลงคอลเลกชั่น"
+                    className="flex items-center justify-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 text-blue-700 px-3 py-3.5 text-sm font-semibold hover:bg-blue-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                    title="โพสขายเสื้อชิ้นนี้"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                    </svg>
-                    บันทึก
+                    <Tag className="w-4 h-4" />
+                    โพสขาย
                   </button>
                 </div>
               )}
@@ -644,6 +762,84 @@ function CustomShirtPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Modal for posting custom shirt */}
+      {showPostModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 animate-in fade-in zoom-in-95 duration-200">
+            <h3 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
+              <Tag className="w-5 h-5 text-blue-600" />
+              ข้อมูลเพื่อโพสขายเสื้อยืด
+            </h3>
+            <p className="text-sm text-slate-500 mb-6">
+              กำหนดรายละเอียดสำหรับสินค้าชิ้นนี้เพื่อเผยแพร่ลงบนตลาดกลาง (Marketplace)
+            </p>
+
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">ชื่อสินค้า</label>
+                <input
+                  type="text"
+                  value={postName}
+                  onChange={(e) => setPostName(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="เช่น เสื้อยืดพิมพ์ลายกราฟิกแนวสตรีท"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">รายละเอียดสินค้า</label>
+                <textarea
+                  value={postDescription}
+                  onChange={(e) => setPostDescription(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                  placeholder="รายละเอียดลายสกรีน เนื้อผ้า ทรงเสื้อ..."
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">ราคาขาย (บาท)</label>
+                <input
+                  type="number"
+                  value={postPrice}
+                  onChange={(e) => setPostPrice(Math.max(1, parseInt(e.target.value) || 0))}
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-1.5">สถานะสินค้า</label>
+                <select
+                  value={postIsPublic ? "true" : "false"}
+                  onChange={(e) => setPostIsPublic(e.target.value === "true")}
+                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="true">เผยแพร่ทันที (Published)</option>
+                  <option value="false">บันทึกเป็นแบบร่าง (Draft)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowPostModal(false)}
+                disabled={isPosting}
+                className="flex-1 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 py-3 text-sm font-semibold transition-all disabled:opacity-50"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={handlePostForSale}
+                disabled={isPosting}
+                className="flex-1 rounded-xl bg-blue-600 hover:bg-blue-500 text-white py-3 text-sm font-semibold transition-all shadow-md disabled:bg-slate-300 disabled:cursor-not-allowed"
+              >
+                {isPosting ? 'กำลังโพส...' : 'โพสขายสินค้า'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

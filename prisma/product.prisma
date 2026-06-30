@@ -15,6 +15,7 @@ enum Category {
   TANK_TOP
 }
 
+
 model Product {
   id          Int        @id @default(autoincrement())
   name        String
@@ -30,6 +31,18 @@ model Product {
   favorites   Favorite[]
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  isCustom         Boolean  @default(false) @map("is_custom")
+  baseProductId    Int?     @map("base_product_id")
+  overlayImage     String?  @map("overlay_image")
+  overlayPositionX Float?   @map("overlay_position_x")
+  overlayPositionY Float?   @map("overlay_position_y")
+  overlaySize      Float?   @map("overlay_size")
+  printSide        String?  @map("print_side")
+  screenSize       String?  @map("screen_size")
+  printTechnique   String?  @map("print_technique")
+  isPublic         Boolean  @default(true) @map("is_public")
+  orderItems       OrderItem[]
 
   @@unique([id, sellerId])
   @@map("products")
