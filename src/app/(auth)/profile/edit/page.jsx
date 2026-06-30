@@ -5,24 +5,41 @@ import { useRouter } from 'next/navigation';
 export default function EditProfilePage() {
   const router = useRouter();
   
-  // โครงสร้างข้อมูลเริ่มต้น
-  const defaultData = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '0987654321', 
-    address: '123/45 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110', 
-    bio: 'Hello, world!',
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    bio: '',
     avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'
-  };
+  });
+  const [loading, setLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const [formData, setFormData] = useState(defaultData);
-
-  // ดึงข้อมูลเก่าที่เคยเซฟไว้ในเครื่องมาแสดงตอนเปิดหน้าเว็บ
+  // ดึงข้อมูลจริงจากระบบฐานข้อมูลมาแสดงตอนเปิดหน้าเว็บ
   useEffect(() => {
-    const savedData = localStorage.getItem('userProfile');
-    if (savedData) {
-      setFormData(JSON.parse(savedData));
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/user/profile');
+        if (res.ok) {
+          const data = await res.json();
+          const user = data.user;
+          setFormData({
+            name: user.name || '',
+            email: user.email || '',
+            phone: user.phone || '',
+            address: user.address || '',
+            bio: user.bio || '',
+            avatar: user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'
+          });
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
+    loadProfile();
   }, []);
 
   // ฟังก์ชันแปลงไฟล์รูปภาพเป็น Base64 String เพื่อให้เซฟลงเครื่องได้
@@ -42,13 +59,38 @@ export default function EditProfilePage() {
     setFormData({ ...formData, [name]: value });
   };
 
-  // ตอนกดปุ่มบันทึก: สั่งเซฟลงเครื่องคอมพิวเตอร์ผ่าน localStorage
-  const handleSubmit = (e) => {
+  // ตอนกดปุ่มบันทึก: สั่งเซฟลงเครื่องคอมพิวเตอร์และฐานข้อมูล
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    localStorage.setItem('userProfile', JSON.stringify(formData));
-    alert(`บันทึกข้อมูลและอัปเดตรูปโปรไฟล์สำเร็จ!`);
-    router.push('/profile'); 
+    try {
+      setIsSaving(true);
+      const res = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+      if (res.ok) {
+        alert('บันทึกข้อมูลสำเร็จ!');
+        router.push('/profile');
+      } else {
+        const data = await res.json();
+        alert(data.error || 'บันทึกข้อมูลล้มเหลว');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+        <div style={{ fontSize: '15px', color: '#6b7280' }}>กำลังโหลดข้อมูล...</div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
@@ -105,7 +147,9 @@ export default function EditProfilePage() {
             <textarea name="bio" rows="3" value={formData.bio} onChange={handleChange} style={{ ...inputStyle, resize: 'vertical' }} />
           </div>
 
-          <button type="submit" style={buttonStyle}>บันทึกข้อมูล</button>
+          <button type="submit" disabled={isSaving} style={{ ...buttonStyle, opacity: isSaving ? 0.6 : 1, cursor: isSaving ? 'not-allowed' : 'pointer' }}>
+            {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+          </button>
 
         </form>
       </div>

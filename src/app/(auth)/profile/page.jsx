@@ -6,23 +6,46 @@ import { Edit3 } from 'lucide-react';
 export default function ProfilePage() {
   const router = useRouter();
 
-  // ข้อมูลเริ่มต้นเผื่อกรณีเปิดครั้งแรกแล้วยังไม่มีข้อมูลในเครื่อง
-  const [user, setUser] = useState({
-    name: 'John Doe',
-    email: 'john@example.com',
-    phone: '0987654321',
-    address: '123/45 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพฯ 10110',
-    bio: 'Hello, world! ยินดีต้อนรับสู่โปรไฟล์ของฉัน',
-    avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80'
-  });
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // คอยดึงข้อมูลล่าสุดจาก localStorage มาโชว์ในหน้าหลัก
   useEffect(() => {
-    const savedData = localStorage.getItem('userProfile');
-    if (savedData) {
-      setUser(JSON.parse(savedData));
+    async function fetchProfile() {
+      try {
+        const res = await fetch('/api/user/profile');
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
+    fetchProfile();
   }, []);
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+        <div style={{ fontSize: '15px', color: '#6b7280' }}>กำลังโหลดข้อมูลโปรไฟล์...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '300px' }}>
+        <div style={{ fontSize: '15px', color: '#ef4444' }}>กรุณาเข้าสู่ระบบเพื่อดูโปรไฟล์</div>
+      </div>
+    );
+  }
+
+  const userAvatar = user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80';
+  const userBio = user.bio || 'ยังไม่ได้ระบุข้อมูลเกี่ยวกับตนเอง';
+  const userAddress = user.address || 'ยังไม่ได้ระบุที่อยู่จัดส่งสินค้า';
+  const userPhone = user.phone || 'ยังไม่ได้ระบุเบอร์โทรศัพท์';
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
@@ -45,11 +68,13 @@ export default function ProfilePage() {
           {/* แสดงรูปภาพโปรไฟล์ล่าสุดที่ดึงมาจากเครื่อง */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px', paddingBottom: '20px', borderBottom: '1px solid #f3f4f6' }}>
             <div style={{ width: '70px', height: '70px', borderRadius: '50%', overflow: 'hidden', border: '1px solid #e5e7eb' }}>
-              <img src={user.avatar} alt="User Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={userAvatar} alt="User Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             <div>
               <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>{user.name}</h2>
-              <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#6b7280' }}>สมาชิกทั่วไป</p>
+              <p style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#6b7280' }}>
+                {user.isSeller ? 'นักออกแบบ / ผู้ขาย (Seller)' : 'สมาชิกทั่วไป'}
+              </p>
             </div>
           </div>
 
@@ -65,17 +90,17 @@ export default function ProfilePage() {
 
           <div style={infoRowStyle}>
             <span style={labelStyle}>เบอร์โทรศัพท์</span>
-            <span style={valueStyle}>{user.phone}</span>
+            <span style={valueStyle}>{userPhone}</span>
           </div>
 
           <div style={infoRowStyle}>
             <span style={labelStyle}>เกี่ยวกับฉัน (Bio)</span>
-            <span style={valueStyle}>{user.bio}</span>
+            <span style={valueStyle}>{userBio}</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px' }}>
             <span style={labelStyle}>ที่อยู่สำหรับจัดส่งสินค้า</span>
-            <span style={{ ...valueStyle, lineHeight: '1.6' }}>{user.address}</span>
+            <span style={{ ...valueStyle, lineHeight: '1.6' }}>{userAddress}</span>
           </div>
 
         </div>
