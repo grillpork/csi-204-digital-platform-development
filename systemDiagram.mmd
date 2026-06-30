@@ -1,0 +1,60 @@
+flowchart LR
+    Start(["เข้าเว็บ"]) --> ViewProducts["ดูสินค้าในเว็บ (ไม่ต้อง Login)"]
+    ViewProducts --> ChoosePath{"เลือกทาง"}
+
+    %% Flow A: ซื้อสินค้าที่มีคนลงขาย
+    ChoosePath -->|"ซื้อสินค้าที่มีคนลงขาย"| AddCart["กด Add to Cart"]
+    AddCart --> CheckLoginCart{"Login แล้ว?"}
+    CheckLoginCart -->|"ไม่"| LoginPage["Login / Register"]
+    LoginPage --> AddCart
+    CheckLoginCart -->|"ใช่"| CheckStock1{"สต็อกพอ?"}
+    CheckStock1 -->|"ไม่พอ"| StockError["แจ้งเตือนสต็อกไม่พอ"]
+    StockError --> ViewProducts
+    CheckStock1 -->|"พอ"| CartPage["ตะกร้าสินค้า (เพิ่ม/ลบ/แก้ไข)"]
+    CartPage --> Checkout["Checkout"]
+    Checkout --> CheckStock2{"เช็คสต็อกซ้ำก่อนจ่าย"}
+    CheckStock2 -->|"ไม่พอ"| StockError
+    CheckStock2 -->|"พอ"| Payment
+
+    %% Flow B: Custom Order
+    ChoosePath -->|"ออกแบบ Custom เอง"| CustomDesign["หน้าออกแบบ Custom (เลือกภาพ/สี/ไซส์/Sleeve) ไม่ต้อง Login"]
+    CustomDesign --> ConfirmPreorder["กดยืนยันพรีออเดอร์"]
+    ConfirmPreorder --> CheckLoginCustom{"Login แล้ว?"}
+    CheckLoginCustom -->|"ไม่"| LoginPage2["Login / Register (ไม่เก็บ state ที่ออกแบบไว้)"]
+    LoginPage2 --> CustomDesign
+    CheckLoginCustom -->|"ใช่"| CalcPrice["คำนวณราคาอัตโนมัติ (Base price + ตัวเลือก)"]
+    CalcPrice --> Payment
+
+    Payment["ชำระเงิน QR PromptPay (External: Payment Gateway)"]
+    Payment --> CreateOrder[("สร้าง Order ใน DB")]
+    CreateOrder --> AdminQueue["ออเดอร์เข้า Admin Dashboard"]
+    AdminQueue --> AdminFulfill["Admin จัดการผลิต/แพ็ค/จัดส่ง"]
+    AdminFulfill --> Shipped["กดจัดส่งแล้ว"]
+    Shipped --> EndFlow(["จบ Flow"])
+    CreateOrder -.->|"แผนอนาคต"| FutureNotify["Notification (ยังไม่ implement รายละเอียด)"]
+
+    %% Side features (ขนาน ไม่อยู่บน Main Flow)
+    subgraph SideFeatures["Side Features (ขนาน ไม่อยู่ใน Main Flow)"]
+        Favorite["กด Favorite สินค้า (ต้อง Login)"]
+        BecomeSeller["กดสมัครเป็น Seller (isSeller=true ทันที ไม่ต้องลงทะเบียน)"]
+        BecomeSeller -.->|"ลิงก์: อยากลงทะเบียนรับเงินไหม"| RevenueReg["หน้าลงทะเบียนรับส่วนแบ่งรายได้"]
+        BecomeSeller --> SellerDash["Seller Dashboard: เพิ่ม/แก้ไขสินค้า"]
+    end
+
+    %% Infrastructure / External
+    subgraph Infra["Infrastructure / External"]
+        DB[("Neon PostgreSQL via Prisma")]
+        ImgStorage[("Local Disk: public/images, public/uploads/custom")]
+    end
+
+    LoginPage --> DB
+    LoginPage2 --> DB
+    CartPage --> DB
+    CheckStock1 --> DB
+    CheckStock2 --> DB
+    CreateOrder --> DB
+    SellerDash --> DB
+    SellerDash --> ImgStorage
+    CustomDesign --> ImgStorage
+    Favorite --> DB
+

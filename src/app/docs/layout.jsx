@@ -53,6 +53,16 @@ const DocsLayout = ({ children }) => {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/docs/api" className={getLinkClass("/docs/api")}>
+                                    รายละเอียด API (API Routes)
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/docs/schema" className={getLinkClass("/docs/schema")}>
+                                    โครงสร้าง Database Schema
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/docs/faq" className={getLinkClass("/docs/faq")}>
                                     คำถามที่พบบ่อย (FAQ)
                                 </Link>
@@ -60,6 +70,11 @@ const DocsLayout = ({ children }) => {
                             <li>
                                 <Link href="/docs/contact" className={getLinkClass("/docs/contact")}>
                                     ติดต่อเรา
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href="/docs/developers" className={getLinkClass("/docs/developers")}>
+                                    ทีมผู้พัฒนา (Developers)
                                 </Link>
                             </li>
                         </ul>

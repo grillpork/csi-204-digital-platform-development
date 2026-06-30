@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Star, ShoppingCart, ArrowLeft, Heart, Share2, Truck, ShieldCheck, RefreshCcw } from "lucide-react";
@@ -18,16 +18,66 @@ const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState(colors[0].name);
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
 
   const addToCart = useProductStore((state) => state.addToCart);
 
-  // หาสินค้าจาก id
-  const product = mockProducts.find((p) => p.id === parseInt(id)) || mockProducts[0];
+  useEffect(() => {
+    let active = true;
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) throw new Error("Not found");
+        const json = await res.json();
+        if (active) {
+          const dbProduct = json.data;
+          if (dbProduct) {
+            dbProduct.image = dbProduct.images?.[0] || "/placeholder.png";
+            dbProduct.rating = dbProduct.rating || 5;
+            dbProduct.reviews = dbProduct.reviews || 0;
+            setProduct(dbProduct);
+          }
+        }
+      } catch (err) {
+        // Fallback to mock product
+        if (active) {
+          const mock = mockProducts.find((p) => p.id === parseInt(id));
+          if (mock) {
+            setProduct(mock);
+          } else {
+            setProduct(mockProducts[0]);
+          }
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
+    fetchProduct();
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (product) {
+      if (product.colors && product.colors.length > 0) {
+        setSelectedColor(product.colors[0]);
+      }
+      if (product.sizes && product.sizes.length > 0) {
+        setSelectedSize(product.sizes[0]);
+      }
+    }
+  }, [product]);
 
   const handleAddToCart = () => {
+    if (!product) return;
     addToCart({
       id: `${product.id}-${selectedColor}-${selectedSize}`,
       name: `${product.name} (${selectedColor}, ${selectedSize})`,
@@ -36,6 +86,40 @@ export default function ProductDetailPage() {
       quantity: quantity,
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white text-gray-500 font-sans">
+        <span className="animate-pulse font-medium text-lg">กำลังโหลดข้อมูลสินค้า...</span>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-white text-gray-500 font-sans gap-4">
+        <span className="font-semibold text-xl text-gray-900">ไม่พบสินค้าที่คุณต้องการ</span>
+        <Link href="/" className="px-4 py-2 bg-black text-white rounded-xl font-medium hover:bg-gray-800 transition-colors">
+          กลับสู่หน้าหลัก
+        </Link>
+      </div>
+    );
+  }
+
+  const availableColors = product.colors && product.colors.length > 0
+    ? product.colors.map(col => {
+        const lowerCol = col.toLowerCase();
+        if (lowerCol === 'white') return { name: col, hex: '#ffffff' };
+        if (lowerCol === 'black') return { name: col, hex: '#000000' };
+        if (lowerCol === 'gray' || lowerCol === 'grey') return { name: col, hex: '#9CA3AF' };
+        if (lowerCol === 'navy') return { name: col, hex: '#1e3a8a' };
+        return { name: col, hex: '#cccccc' }; // Default gray
+      })
+    : colors;
+
+  const availableSizes = product.sizes && product.sizes.length > 0
+    ? product.sizes
+    : sizes;
 
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans pb-20">
@@ -119,7 +203,7 @@ export default function ProductDetailPage() {
                 <span className="text-sm text-gray-500">{selectedColor}</span>
               </div>
               <div className="flex gap-3">
-                {colors.map((c) => (
+                {availableColors.map((c) => (
                   <button
                     key={c.name}
                     onClick={() => setSelectedColor(c.name)}
@@ -140,7 +224,7 @@ export default function ProductDetailPage() {
                 <button className="text-sm text-blue-600 hover:underline">ตารางไซส์</button>
               </div>
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                {sizes.map((s) => (
+                {availableSizes.map((s) => (
                   <button
                     key={s}
                     onClick={() => setSelectedSize(s)}

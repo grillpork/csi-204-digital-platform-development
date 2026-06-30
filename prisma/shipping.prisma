@@ -1,0 +1,10 @@
+model Shipping {
+  id             Int      @id @default(autoincrement())
+  orderId        String   @unique @map("order_id")
+  carrier        String
+  trackingNumber String   @map("tracking_number")
+  status         String   @default("PENDING")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  @@map("shippings")
+}
