@@ -3,9 +3,21 @@
 import React from 'react';
 import Link from 'next/link';
 import Script from 'next/script';
+import { usePathname } from 'next/navigation';
 import { BookOpen, Shield, Settings, Menu } from 'lucide-react';
 
 const DocsLayout = ({ children }) => {
+    const pathname = usePathname();
+
+    const getLinkClass = (href) => {
+        const isActive = pathname === href;
+        return `flex items-center px-3 py-2 text-sm font-semibold rounded-xl transition-all ${
+            isActive 
+                ? "bg-blue-50 text-blue-700 shadow-sm font-bold" 
+                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        }`;
+    };
+
     return (
         <div className="flex h-screen bg-slate-50 text-slate-800 font-sans antialiased">
             {/* Load Mermaid.js for drawing diagrams */}
@@ -31,22 +43,22 @@ const DocsLayout = ({ children }) => {
                         <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">ภาพรวม</h4>
                         <ul className="space-y-1">
                             <li>
-                                <Link href="/docs/policy" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                                <Link href="/docs/policy" className={getLinkClass("/docs/policy")}>
                                     นโยบายและข้อตกลง
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/docs/systems" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                                <Link href="/docs/systems" className={getLinkClass("/docs/systems")}>
                                     ข้อมูลระบบ (Systems)
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/docs/faq" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                                <Link href="/docs/faq" className={getLinkClass("/docs/faq")}>
                                     คำถามที่พบบ่อย (FAQ)
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/docs/contact" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                                <Link href="/docs/contact" className={getLinkClass("/docs/contact")}>
                                     ติดต่อเรา
                                 </Link>
                             </li>
@@ -58,7 +70,7 @@ const DocsLayout = ({ children }) => {
                         <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">สำหรับลูกค้า</h4>
                         <ul className="space-y-1">
                             <li>
-                                <Link href="/docs/buyers" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                                <Link href="/docs/buyers" className={getLinkClass("/docs/buyers")}>
                                     คู่มือการสั่งสกรีนเสื้อ
                                 </Link>
                             </li>
@@ -70,7 +82,7 @@ const DocsLayout = ({ children }) => {
                         <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 px-2">สำหรับนักออกแบบ</h4>
                         <ul className="space-y-1">
                             <li>
-                                <Link href="/docs/creators" className="flex items-center px-2 py-1.5 text-sm font-medium text-slate-600 rounded-md hover:bg-slate-200 hover:text-slate-900 transition-colors">
+                                <Link href="/docs/creators" className={getLinkClass("/docs/creators")}>
                                     คู่มือเปิดร้านและขายลายเสื้อ
                                 </Link>
                             </li>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, ShoppingCart, CheckCircle2, Image as ImageIcon, ArrowLeft, Move, ZoomIn, ZoomOut, RotateCcw, Trash2, FlipHorizontal2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { useProductStore } from '@/store/product';
 
 const DEFAULT_PRINT_ZONE = { x: 0.27, y: 0.20, w: 0.46, h: 0.70 };
 
-export default function CustomShirtPage() {
+function CustomShirtPageContent() {
   const searchParams = useSearchParams();
   const productId = parseInt(searchParams.get('id')) || 1;
   const product = mockProducts.find((p) => p.id === productId) || mockProducts[0];
@@ -645,5 +645,17 @@ export default function CustomShirtPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CustomShirtPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500">
+        <span className="animate-pulse font-medium">กำลังโหลดหน้าระบบออกแบบ...</span>
+      </div>
+    }>
+      <CustomShirtPageContent />
+    </Suspense>
   );
 }
