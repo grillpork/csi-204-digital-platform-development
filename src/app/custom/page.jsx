@@ -277,14 +277,14 @@ function CustomShirtPageContent() {
 
           canvas.toBlob((blob) => {
             resolve(blob);
-          }, 'image/png');
+          }, 'image/webp', 0.9);
         };
         overlay.onerror = (err) => reject(err);
         overlay.src = overlayImage;
       } else {
         canvas.toBlob((blob) => {
           resolve(blob);
-        }, 'image/png');
+        }, 'image/webp', 0.9);
       }
     });
   };
@@ -315,7 +315,7 @@ function CustomShirtPageContent() {
 
       // 2. Auto-save customized shirt design as a draft product (isPublic = false)
       const formData = new FormData();
-      formData.append('images', compositeBlob, `custom-design-${viewSide}.png`);
+      formData.append('images', compositeBlob, `custom-design-${viewSide}.webp`);
       formData.append('name', `${product.name} (Custom — ${viewSide === 'front' ? 'ด้านหน้า' : 'ด้านหลัง'})`);
       formData.append('description', `เสื้อยืดแต่งลายคัสตอมส่วนตัว ขนาดสกรีน ${screenSize}`);
       formData.append('price', finalPrice.toString());
@@ -398,7 +398,7 @@ function CustomShirtPageContent() {
 
       // 2. Prepare FormData for API POST /api/products
       const formData = new FormData();
-      formData.append('images', compositeBlob, `custom-design-${viewSide}.png`);
+      formData.append('images', compositeBlob, `custom-design-${viewSide}.webp`);
       formData.append('name', postName);
       formData.append('description', postDescription);
       formData.append('price', postPrice.toString());

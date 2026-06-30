@@ -7,10 +7,15 @@ const imagesDir = path.join(process.cwd(), "public/images");
 // โดยไม่เสี่ยงทำลายรูปจริงของโปรเจกต์ระหว่างรันเทส
 const backupDir = `${imagesDir}.bak-test`;
 
+// 1x1 transparent PNG — ต้องเป็นรูปจริงเพราะ saveImages ใช้ sharp แปลงเป็น webp
+const ONE_PX_PNG_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
+
 function fakeFile(name) {
+  const buf = Buffer.from(ONE_PX_PNG_BASE64, "base64");
   return {
     name,
-    arrayBuffer: async () => new TextEncoder().encode("fake-image-bytes").buffer,
+    arrayBuffer: async () => buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength),
   };
 }
 

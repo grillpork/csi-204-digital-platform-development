@@ -6,7 +6,7 @@ import ProductsCommandBar from "./_components/ProductsCommandBar";
 export default async function SellerProductsPage() {
   const user = await requireUserPage();
   const products = await prisma.product.findMany({
-    where: { sellerId: user.id },
+    where: { sellerId: user.id, isCustom: false },
     orderBy: { createdAt: "desc" },
   });
 

@@ -54,7 +54,10 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid productId' }, { status: 400 });
     }
 
-    const product = await prisma.product.findUnique({ where: { id: productId } });
+    // isPublic: false คือ draft ส่วนตัว (เช่น custom order ที่ยังไม่โพสขาย) — ห้ามคนอื่นใส่ตะกร้า ยกเว้นเจ้าของเอง
+    const product = await prisma.product.findFirst({
+      where: { id: productId, OR: [{ isPublic: true }, { sellerId: me.id }] },
+    });
     if (!product) {
       return NextResponse.json({ error: 'Invalid productId' }, { status: 400 });
     }

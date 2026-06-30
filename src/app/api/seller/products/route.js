@@ -7,7 +7,7 @@ import { HttpError } from "@/lib/http";
 export async function GET() {
   try {
     const me = await requireUser();
-    const products = await prisma.product.findMany({ where: { sellerId: me.id } });
+    const products = await prisma.product.findMany({ where: { sellerId: me.id, isCustom: false } });
     return NextResponse.json({ data: products });
   } catch (err) {
     if (err instanceof HttpError) {
