@@ -14,6 +14,7 @@ export default function AuthForm({ mode }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   const isRegister = mode === "register";
@@ -21,30 +22,41 @@ export default function AuthForm({ mode }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
 
     const endpoint = isRegister ? "/api/auth/register" : "/api/auth/login";
     const body = isRegister ? { name, email, password } : { email, password };
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const contentType = response.headers.get("content-type") ?? "";
+      const data = contentType.includes("application/json")
+        ? await response.json()
+        : null;
 
-    if (!response.ok) {
-      const data = await response.json();
-      setError(data.error ?? "Something went wrong");
-      return;
-    }
+      if (!response.ok) {
+        setError(data?.error ?? "ไม่สามารถเข้าสู่ระบบได้ กรุณาลองใหม่อีกครั้ง");
+        return;
+      }
 
-    await refresh();
-    if (!localStorage.getItem("pagesViewed")) {
-      localStorage.setItem("pagesViewed", "[]");
-    }
-    if (!localStorage.getItem("productsViewed")) {
-      localStorage.setItem("productsViewed", "[]");
-    }
+      await refresh();
+      if (!localStorage.getItem("pagesViewed")) {
+        localStorage.setItem("pagesViewed", "[]");
+      }
+      if (!localStorage.getItem("productsViewed")) {
+        localStorage.setItem("productsViewed", "[]");
+      }
 
-    router.push("/");
+      router.push("/");
+    } catch {
+      setError("ไม่สามารถเชื่อมต่อระบบได้ กรุณาลองใหม่อีกครั้ง");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -187,9 +199,10 @@ export default function AuthForm({ mode }) {
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.99 }}
             type="submit"
-            className="w-full bg-slate-900 text-white rounded-xl py-3 text-sm font-semibold hover:bg-slate-800 active:scale-[0.98] transition-all mt-2 cursor-pointer shadow-lg shadow-slate-900/10"
+            disabled={isSubmitting}
+            className="w-full bg-slate-900 text-white rounded-xl py-3 text-sm font-semibold hover:bg-slate-800 active:scale-[0.98] transition-all mt-2 cursor-pointer shadow-lg shadow-slate-900/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isRegister ? "Get Started" : "Get Started"}
+            {isSubmitting ? "กำลังดำเนินการ..." : isRegister ? "สมัครสมาชิก" : "เข้าสู่ระบบ"}
           </motion.button>
         </form>
 

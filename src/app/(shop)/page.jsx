@@ -33,6 +33,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
     <div className="flex items-center justify-between mt-10">
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1}
         className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-700 hover:border-black transition-colors"
       >
         <ArrowLeft size={16} />
@@ -63,6 +64,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 
       <button
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages}
         className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-700 hover:border-black transition-colors"
       >
         Next
@@ -171,6 +173,9 @@ const colors = [
 ];
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 const sleeveTypes = ["Long Sleeve", "Short Sleeve", "No Sleeve"];
+const ITEMS_PER_PAGE = 8;
+const categoryValues = { "T-Shirt": "TSHIRT", Polo: "POLO", Hoodie: "HOODIE", "Long Sleeve": "LONG_SLEEVE", "Tank Top": "TANK_TOP" };
+const colorValues = { "#000000": "Black", "#ffffff": "White", "#9CA3AF": "Gray", "#EF4444": "Red", "#F97316": "Orange", "#EAB308": "Yellow", "#22C55E": "Green", "#3B82F6": "Blue", "#A855F7": "Purple" };
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -183,14 +188,17 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [productError, setProductError] = useState("");
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
-    fetch("/api/products")
-      .then((r) => r.json())
+    fetch("/api/products", { cache: "no-store" })
+      .then(async (r) => { const j = await r.json(); if (!r.ok) throw new Error(j.error || "โหลดสินค้าไม่สำเร็จ"); return j; })
       .then((j) => setProducts(j.data || []))
-      .catch(() => {});
+      .catch((error) => setProductError(error.message))
+      .finally(() => setLoadingProducts(false));
   }, []);
 
   useEffect(() => {
@@ -208,6 +216,17 @@ export default function ProductsPage() {
   // สลับกลับไปใช้ mock ได้ด้วยการเปลี่ยนเป็น true บรรทัดเดียว
   const USE_MOCK = false;
   const displayProducts = USE_MOCK ? mockProducts : products;
+  const filteredProducts = displayProducts.filter((product) => {
+    const matchesSearch = product.name.toLowerCase().includes(search.trim().toLowerCase());
+    const matchesCategory = !selectedCategory || product.category === categoryValues[selectedCategory];
+    const matchesColor = selectedColors.length === 0 || selectedColors.some((color) => product.colors?.includes(colorValues[color]));
+    const matchesSize = selectedSizes.length === 0 || selectedSizes.some((size) => product.sizes?.includes(size));
+    return matchesSearch && matchesCategory && matchesColor && matchesSize;
+  });
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / ITEMS_PER_PAGE));
+  const paginatedProducts = filteredProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  useEffect(() => { setCurrentPage(1); }, [search, selectedCategory, selectedColors, selectedSizes, selectedSleeves]);
 
   const addToCart = useProductStore((state) => state.addToCart);
 
@@ -306,7 +325,10 @@ export default function ProductsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {displayProducts.map((product) => (
+            {loadingProducts && <p className="col-span-full py-12 text-center text-gray-500">กำลังโหลดสินค้า…</p>}
+            {productError && <p role="alert" className="col-span-full rounded-xl bg-red-50 p-4 text-center text-red-700">{productError}</p>}
+            {!loadingProducts && !productError && paginatedProducts.length === 0 && <p className="col-span-full py-12 text-center text-gray-500">ไม่พบสินค้าที่ตรงกับตัวกรอง</p>}
+            {paginatedProducts.map((product) => (
               <div
                 key={product.id}
                 onClick={() => router.push(`/product/${product.id}`)}
@@ -360,11 +382,11 @@ export default function ProductsPage() {
             ))}
           </div>
 
-          <Pagination
+          {!loadingProducts && !productError && filteredProducts.length > 0 && <Pagination
             currentPage={currentPage}
-            totalPages={10}
+            totalPages={totalPages}
             onPageChange={setCurrentPage}
-          />
+          />}
         </main>
       </div>
     </div>

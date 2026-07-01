@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { Trash2, UserRound } from "lucide-react";
+import { formatThaiPhone, isValidThaiPhone, phoneDigits } from "@/lib/phone";
 
 async function readJson(response) {
   const text = await response.text();
@@ -25,7 +26,7 @@ export default function EditProfile() {
       .then(async (response) => {
         const body = await readJson(response);
         if (!response.ok) throw new Error(body.error || "โหลดข้อมูลบัญชีไม่สำเร็จ");
-        if (active) setForm({ ...body.user, phone: body.user.phone || "", address: body.user.address || "", bio: body.user.bio || "" });
+        if (active) setForm({ ...body.user, phone: formatThaiPhone(body.user.phone), address: body.user.address || "", bio: body.user.bio || "" });
       })
       .catch((error) => active && setMessage(error.message))
       .finally(() => active && setLoading(false));
@@ -34,7 +35,7 @@ export default function EditProfile() {
 
   function change(event) {
     const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: name === "phone" ? value.replace(/\D/g, "").slice(0, 10) : value }));
+    setForm((current) => ({ ...current, [name]: name === "phone" ? formatThaiPhone(value) : value }));
   }
 
   async function upload(event) {
@@ -66,7 +67,7 @@ export default function EditProfile() {
 
   async function submit(event) {
     event.preventDefault();
-    if (form.phone && !/^0\d{9}$/.test(form.phone)) {
+    if (form.phone && !isValidThaiPhone(form.phone)) {
       setMessage("เบอร์โทรศัพท์ต้องเป็นตัวเลข 10 หลักและขึ้นต้นด้วย 0");
       return;
     }
@@ -92,7 +93,7 @@ export default function EditProfile() {
       </div>
       <label className="block text-sm font-medium text-slate-600">ชื่อ-นามสกุล<input name="name" value={form.name} onChange={change} required minLength={2} maxLength={100} className="mt-1 w-full rounded-lg border border-slate-300 p-3" /></label>
       <label className="block text-sm font-medium text-slate-600">อีเมล<input type="email" value={form.email} disabled className="mt-1 w-full rounded-lg border border-slate-300 bg-slate-100 p-3" /><span className="mt-1 block text-xs text-slate-400">อีเมลสำหรับเข้าสู่ระบบไม่สามารถเปลี่ยนจากหน้านี้</span></label>
-      <label className="block text-sm font-medium text-slate-600">เบอร์โทรศัพท์<input name="phone" type="tel" inputMode="numeric" pattern="0[0-9]{9}" minLength={10} maxLength={10} placeholder="0812345678" value={form.phone} onChange={change} className="mt-1 w-full rounded-lg border border-slate-300 p-3" /><span className="mt-1 block text-xs text-slate-400">ตัวเลข 10 หลัก ขึ้นต้นด้วย 0 ({form.phone.length}/10)</span></label>
+      <label className="block text-sm font-medium text-slate-600">เบอร์โทรศัพท์<input name="phone" type="tel" inputMode="numeric" pattern="0[0-9]{2}-[0-9]{3}-[0-9]{4}" minLength={12} maxLength={12} placeholder="095-807-2692" value={form.phone} onChange={change} className="mt-1 w-full rounded-lg border border-slate-300 p-3" /><span className="mt-1 block text-xs text-slate-400">รูปแบบ 095-807-2692 ({phoneDigits(form.phone).length}/10 หลัก)</span></label>
       <label className="block text-sm font-medium text-slate-600">ที่อยู่จัดส่ง<textarea name="address" rows={4} value={form.address} onChange={change} className="mt-1 w-full rounded-lg border border-slate-300 p-3" /></label>
       <label className="block text-sm font-medium text-slate-600">เกี่ยวกับฉัน<textarea name="bio" maxLength={500} rows={3} value={form.bio} onChange={change} className="mt-1 w-full rounded-lg border border-slate-300 p-3" /></label>
       {message && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{message}</p>}

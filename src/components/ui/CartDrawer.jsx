@@ -5,6 +5,7 @@ import { ShoppingCart, X, Trash2, CheckCircle2, CreditCard, QrCode, Truck, Loade
 import { useProductStore } from "../../store/product";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
+import { formatThaiPhone } from "@/lib/phone";
 
 export default function CartDrawer({ size = 24, className = "" }) {
   const searchParams = useSearchParams();
@@ -339,8 +340,12 @@ export default function CartDrawer({ size = 24, className = "" }) {
                     type="tel"
                     required
                     value={shippingPhone}
-                    onChange={(e) => setShippingPhone(e.target.value)}
-                    placeholder="08X-XXX-XXXX"
+                    onChange={(e) => setShippingPhone(formatThaiPhone(e.target.value))}
+                    placeholder="095-807-2692"
+                    inputMode="numeric"
+                    pattern="0[0-9]{2}-[0-9]{3}-[0-9]{4}"
+                    minLength={12}
+                    maxLength={12}
                     className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-hidden focus:border-slate-900 transition-colors"
                   />
                 </div>

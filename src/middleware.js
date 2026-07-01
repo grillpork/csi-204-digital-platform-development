@@ -7,8 +7,6 @@ export async function middleware(request) {
   const token = request.cookies.get("token")?.value;
   const payload = token ? await verifyToken(token) : null;
 
-  const isAuthPath = pathname === "/login" || pathname === "/register";
-  
   const isProtectedPath = 
     pathname.startsWith("/account") || 
     pathname.startsWith("/cart") || 
@@ -21,11 +19,7 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL(payload ? "/" : "/login", request.url));
   }
 
-  if (payload) {
-    if (isAuthPath) {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-  } else {
+  if (!payload) {
     if (isProtectedPath) {
       return NextResponse.redirect(new URL("/login", request.url));
     }

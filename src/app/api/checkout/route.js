@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireUser } from "@/lib/auth/dal";
 import { HttpError } from "@/lib/http";
+import { isValidThaiPhone, phoneDigits } from "@/lib/phone";
 
 const OMISE_SECRET_KEY = process.env.OMISE_SECRET_KEY;
 
@@ -41,6 +42,9 @@ export async function POST(request) {
         { error: "กรุณากรอกข้อมูลการจัดส่งให้ครบถ้วน" },
         { status: 400 }
       );
+    }
+    if (!isValidThaiPhone(shippingPhone)) {
+      return NextResponse.json({ error: "เบอร์โทรศัพท์ต้องอยู่ในรูปแบบ 095-807-2692" }, { status: 400 });
     }
 
     // 1. ดึงสินค้าในตะกร้าของ User
@@ -184,7 +188,7 @@ export async function POST(request) {
           status: orderStatus,
           total_amount: grandTotal,
           shippingAddress: `${shippingName}\n${shippingAddress}`,
-          phone: shippingPhone,
+          phone: phoneDigits(shippingPhone),
           items: {
             create: orderItemsData.map((item) => ({
               productId: item.productId,

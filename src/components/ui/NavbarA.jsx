@@ -8,7 +8,7 @@ import CartDrawer from "./CartDrawer";
 import { useAuth } from "@/context/AuthContext";
 
 export default function NavbarA() {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const pathname = usePathname();
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -68,7 +68,9 @@ export default function NavbarA() {
                 className="hover:text-black cursor-pointer transition-colors"
               />
             </Suspense>
-            {user ? (
+            {loading ? (
+              <span className="inline-block h-8 w-8 animate-pulse rounded-full bg-slate-100" aria-label="กำลังตรวจสอบสถานะเข้าสู่ระบบ" />
+            ) : user ? (
               <div className="relative">
                 <button
                   onClick={() => setShowDropdown(!showDropdown)}
@@ -120,7 +122,7 @@ export default function NavbarA() {
                 )}
               </div>
             ) : (
-              <Link href="/login">
+              <Link href="/login" aria-label="เข้าสู่ระบบ" className="inline-flex p-1">
                 <User
                   size={20}
                   className="hover:text-black cursor-pointer transition-colors"
