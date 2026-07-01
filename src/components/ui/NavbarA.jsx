@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, User, LogOut, Edit3, Package, ShoppingBag, Truck, ChevronDown, Home, Palette, FileText } from "lucide-react";
+import { Heart, User, LogOut, Edit3, Package, ShoppingBag, Truck, ChevronDown, Home, Palette, FileText, ShoppingCart } from "lucide-react";
 import CartDrawer from "./CartDrawer";
 import { useAuth } from "@/context/AuthContext";
 
@@ -58,10 +58,16 @@ export default function NavbarA() {
           </div>
           
           <div className="flex items-center gap-4">
-            <CartDrawer
-              size={20}
-              className="hover:text-black cursor-pointer transition-colors"
-            />
+            <Suspense fallback={
+              <button className="relative inline-flex hover:text-black cursor-pointer transition-colors">
+                <ShoppingCart size={20} />
+              </button>
+            }>
+              <CartDrawer
+                size={20}
+                className="hover:text-black cursor-pointer transition-colors"
+              />
+            </Suspense>
             {user ? (
               <div className="relative">
                 <button

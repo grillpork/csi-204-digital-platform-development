@@ -6,7 +6,7 @@ model User {
   address   String?
   phone     String?
   bio       String?
-  avatarUrl String?    @map("avatar_url")
+  avatarUrl String?    @map("avatar")
   roleId    Int        @default(1)
   isSeller  Boolean    @default(false) @map("is_seller")
   shopName  String?    @map("shop_name")

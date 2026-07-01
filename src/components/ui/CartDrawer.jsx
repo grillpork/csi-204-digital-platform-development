@@ -4,8 +4,12 @@ import { useState, useEffect } from "react";
 import { ShoppingCart, X, Trash2, CheckCircle2, CreditCard, QrCode, Truck, Loader2 } from "lucide-react";
 import { useProductStore } from "../../store/product";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 
 export default function CartDrawer({ size = 24, className = "" }) {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
@@ -67,6 +71,18 @@ export default function CartDrawer({ size = 24, className = "" }) {
       document.body.style.overflow = "unset";
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (searchParams && searchParams.get("checkout") === "true") {
+      setIsOpen(true);
+      setIsCheckoutOpen(true);
+
+      const params = new URLSearchParams(window.location.search);
+      params.delete("checkout");
+      const newQuery = params.toString() ? `?${params.toString()}` : "";
+      router.replace(window.location.pathname + newQuery);
+    }
+  }, [searchParams, router]);
 
   const cart = useProductStore((state) => state.cart);
   const fetchCart = useProductStore((state) => state.fetchCart);

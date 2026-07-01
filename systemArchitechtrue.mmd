@@ -1,0 +1,45 @@
+flowchart TD
+    subgraph F1["จัดการสินค้า / ตะกร้า"]
+        F1_UI["หน้าสินค้า, ตะกร้า, จัดการสินค้า"]
+        F1_Logic["API + Validation"]
+        F1_UI --> F1_Logic
+    end
+
+    subgraph F2["ชำระเงิน"]
+        F2_UI["หน้าชำระเงิน, สรุปออเดอร์"]
+        F2_Logic["API คำนวณราคา / ภาษี / ค่าส่ง"]
+        F2_UI --> F2_Logic
+    end
+
+    subgraph F3["ออกแบบลายสกรีน"]
+        F3_UI["หน้าออกแบบ / เลือกเทมเพลต"]
+        F3_Logic["API จัดการเทมเพลต"]
+        F3_UI --> F3_Logic
+    end
+
+    subgraph F4["คำสั่งซื้อ / จัดส่ง"]
+        F4_UI["หน้าประวัติคำสั่งซื้อ, สถานะจัดส่ง"]
+        F4_Logic["API จัดการออเดอร์"]
+        F4_UI --> F4_Logic
+    end
+
+    subgraph F5["โปรไฟล์ผู้ใช้"]
+        F5_UI["หน้าโปรไฟล์, Favorite"]
+        F5_Logic["API จัดการผู้ใช้"]
+        F5_UI --> F5_Logic
+    end
+
+    subgraph Infra["Shared Infrastructure"]
+        DB[("Neon PostgreSQL")]
+        ImgStorage[("Image Storage")]
+        PaymentGW["Payment Gateway (External)"]
+    end
+
+    F1_Logic --> DB
+    F1_Logic --> ImgStorage
+    F2_Logic --> DB
+    F2_Logic --> PaymentGW
+    F3_Logic --> DB
+    F3_Logic --> ImgStorage
+    F4_Logic --> DB
+    F5_Logic --> DB
