@@ -1,15 +1,16 @@
 sequenceDiagram
     title Marketplace สำหรับขายลายเสื้อแบบ Print-on-Demand
 
-    actor Designer as นักออกแบบ
+    actor Designer as นักออกแบบ/ผู้ใช้
     actor Customer as ลูกค้า
+    actor Admin as ผู้ดูแลระบบ
 
     participant Website as เว็บไซต์ E-Commerce
     participant Auth as ระบบยืนยันตัวตน
+    participant Profile as ระบบโปรไฟล์
     participant Artwork as ระบบจัดการลายเสื้อ
     participant Printing as ระบบจัดการแพ็กเกจสกรีน
-    participant Pricing as ระบบประเมินราคา
-    participant Revenue as ระบบคำนวณส่วนแบ่งรายได้
+    participant AdminPanel as Admin Dashboard
     participant Product as ระบบสินค้า
     participant Cart as ระบบตะกร้าสินค้า
     participant Order as ระบบคำสั่งซื้อ
@@ -21,132 +22,203 @@ sequenceDiagram
     participant KYC as ระบบ KYC
     participant DB as ฐานข้อมูล
 
-    
-        Note over Designer,Website: นักออกแบบเข้าสู่ระบบ
+    Note over Designer,Website: สมัครสมาชิก / เข้าสู่ระบบ
 
-        Designer->>Website: เข้าสู่ระบบ
-        Website->>DB: ตรวจสอบข้อมูลผู้ใช้
-        DB-->>Website: ข้อมูลผู้ใช้
-        Website-->>Designer: เข้าสู่ระบบสำเร็จ
+    Designer->>Website: สมัครสมาชิก / เข้าสู่ระบบ
+    Website->>Auth: ตรวจสอบ/สร้างบัญชี
+    Auth->>DB: บันทึก/อ่านข้อมูลผู้ใช้
+    DB-->>Auth: ข้อมูลผู้ใช้
+    Auth-->>Website: session token
+    Website-->>Designer: เข้าสู่ระบบสำเร็จ
 
-        Note over Designer: สามารถลงผลงานได้ทันที<br/>ยังไม่ต้องยืนยันตัวตน
-    
+    Note over Designer,Profile: จัดการโปรไฟล์
 
-    
-        Note over Designer,Artwork: อัปโหลดลายเสื้อ
+    Designer->>Website: แก้ไขโปรไฟล์ / รูปโปรไฟล์
+    Website->>Profile: อัปเดตข้อมูล (จำกัดเบอร์โทร 10 หลัก)
+    Profile->>DB: บันทึกข้อมูล
+    DB-->>Profile: สำเร็จ
+    Profile-->>Website: โปรไฟล์อัปเดตแล้ว
+    Website-->>Designer: แสดงโปรไฟล์ใหม่
 
-        Designer->>Website: อัปโหลดลายเสื้อ
-        Website->>Artwork: ตรวจสอบไฟล์
-        Artwork->>Artwork: ตรวจสอบประเภทไฟล์
-        Artwork->>Artwork: ตรวจสอบความละเอียด
-        Artwork->>Artwork: ตรวจสอบขนาดรูป
-        Artwork->>DB: บันทึกลายเสื้อ
-        DB-->>Artwork: สำเร็จ
-        Artwork-->>Website: อัปโหลดสำเร็จ
-    
+    Note over Designer,Artwork: อัปโหลดลายเสื้อ (B2 — โพสขาย)
 
-    
-        Note over Designer,Printing: เลือกแพ็กเกจการสกรีน
+    Designer->>Website: อัปโหลดลายเสื้อ + เลือกสี/ไซส์/Sleeve
+    Website->>Artwork: ตรวจสอบไฟล์
+    Artwork->>Artwork: ตรวจสอบประเภทไฟล์
+    Artwork->>Artwork: ตรวจสอบความละเอียด
+    Artwork->>Artwork: ตรวจสอบขนาดรูป
+    Artwork->>DB: บันทึกร่าง (isPublic: false)
+    DB-->>Artwork: สำเร็จ
+    Artwork-->>Website: บันทึกร่างสำเร็จ
+    Website-->>Designer: ร่างถูกบันทึกแล้ว
 
-        Designer->>Website: เลือก DTF / DTG
-        Website->>Printing: ส่งข้อมูลแพ็กเกจ
-        Printing-->>Website: ข้อมูลต้นทุน
-    
+    Note over Designer,Printing: เลือกแพ็กเกจการสกรีน
 
-    
-        Note over Website,Pricing: ประเมินราคาขาย
+    Designer->>Website: เลือก DTF / DTG + ขนาดสกรีน
+    Website->>Printing: ส่งข้อมูลแพ็กเกจ
+    Printing-->>Website: ข้อมูลต้นทุน
+    Website-->>Designer: แสดงรายละเอียดแพ็กเกจ
 
-        Website->>Pricing: ประเมินราคาสินค้า
-        Pricing->>Pricing: วิเคราะห์ต้นทุนเสื้อ
-        Pricing->>Pricing: วิเคราะห์การสกรีน
-        Pricing->>Pricing: วิเคราะห์คุณภาพไฟล์
-        Pricing->>Pricing: วิเคราะห์ข้อมูลตลาด
-        Pricing->>Pricing: คำนวณราคาขาย
-        Pricing-->>Website: ราคาขายที่เหมาะสม
+    Designer->>Website: กดส่งขออนุมัติ
+    Website->>AdminPanel: ส่งคำขออนุมัติ (ร่าง + ข้อมูลลาย)
+    AdminPanel->>DB: บันทึกสถานะ pending review
+    Website-->>Designer: รอ Admin ตรวจสอบ
 
-        Website->>Revenue: คำนวณส่วนแบ่งรายได้
-        Revenue-->>Website: รายได้ต่อการขาย
+    Note over Admin,AdminPanel: Admin ตรวจสอบ + กำหนดราคา/สต็อก (Pricing)
 
-        Website-->>Designer: แสดงราคาขายและรายได้
-    
+    Admin->>AdminPanel: ดูคำขออนุมัติ
+    AdminPanel->>DB: ดึงข้อมูลร่างสินค้า
+    DB-->>AdminPanel: ข้อมูลลายเสื้อ
 
-    
-        Note over Designer,Product: เผยแพร่สินค้า
-
-        Designer->>Website: เผยแพร่สินค้า
-        Website->>Product: สร้างสินค้า
-        Product->>DB: บันทึกสินค้า
+    alt อนุมัติ
+        Admin->>AdminPanel: กำหนดราคา + จำนวนสต็อก + อนุมัติ
+        AdminPanel->>Product: สร้างสินค้า (isPublic: true)
+        Product->>DB: บันทึกสินค้าพร้อมจำหน่าย
         DB-->>Product: สำเร็จ
-        Product-->>Website: พร้อมจำหน่าย
-        Website-->>Designer: เผยแพร่สำเร็จ
-    
+        Product-->>AdminPanel: สินค้าพร้อมจำหน่าย
+        AdminPanel-->>Website: แจ้งผู้ออกแบบ
+        Website-->>Designer: สินค้าขึ้น Marketplace แล้ว
+    else ปฏิเสธ
+        Admin->>AdminPanel: เขียนคำแนะนำ + ปฏิเสธ
+        AdminPanel->>DB: บันทึกสถานะ rejected + คำแนะนำ
+        AdminPanel-->>Website: ส่งคำแนะนำกลับ
+        Website-->>Designer: ลายถูกปฏิเสธ + คำแนะนำการแก้ไข
+        Designer->>Website: แก้ไขลาย + ส่งขออนุมัติใหม่
+    end
 
-    
-        Note over Customer,Payment: ลูกค้าซื้อสินค้า
+    Note over Designer,AdminPanel: ถอนคำขออนุมัติ (ก่อน Admin ตัดสินใจ)
 
-        Customer->>Website: ค้นหาสินค้า
-        Website->>Product: ดึงข้อมูลสินค้า
-        Product->>DB: อ่านข้อมูลสินค้า
-        DB-->>Product: รายการสินค้า
-        Product-->>Website: ส่งข้อมูลสินค้า
-        Website-->>Customer: แสดงสินค้า
+    Designer->>Website: ถอนคำขออนุมัติ
+    Website->>AdminPanel: ยกเลิกคำขอ
+    AdminPanel->>DB: อัปเดตสถานะกลับเป็น draft
+    DB-->>AdminPanel: สำเร็จ
+    Website-->>Designer: คำขอถูกถอนแล้ว (กลับเป็นร่าง)
 
-        Customer->>Website: เพิ่มลงตะกร้า
-        Website->>Cart: เพิ่มสินค้า
-        Cart->>DB: บันทึกตะกร้า
+    Note over Customer,Product: กด Favorite สินค้า
 
-        Customer->>Website: Checkout
-        Website->>Order: สร้างคำสั่งซื้อ
+    Customer->>Website: กด Favorite สินค้าที่ถูกใจ
+    Website->>Product: เพิ่ม/ลบ Favorite
+    Product->>DB: บันทึก Favorite (userId + productId)
+    DB-->>Product: สำเร็จ
+    Website-->>Customer: อัปเดตรายการโปรด
+
+    Note over Customer,Cart: B1 — ลูกค้าออกแบบ Custom + พรีออเดอร์ใช้เอง
+
+    Customer->>Website: เข้าหน้าออกแบบ Custom
+    Customer->>Website: อัปโหลดลาย + เลือกสี/ไซส์/Sleeve/เทคนิคสกรีน
+    Website->>Website: คำนวณราคาอัตโนมัติ (Base price + ตัวเลือก)
+    Website-->>Customer: แสดงราคา
+    Customer->>Website: กดยืนยันพรีออเดอร์
+    Website->>Product: สร้างสินค้า Custom (isCustom: true, isPublic: false)
+    Product->>DB: บันทึกสินค้า + รูป
+    DB-->>Product: productId
+    Website->>Cart: เพิ่มสินค้า Custom ลงตะกร้า
+    Cart->>DB: บันทึกตะกร้า
+    Website-->>Customer: เพิ่มลงตะกร้าแล้ว
+
+    Note over Customer,Payment: ลูกค้าซื้อสินค้า (Flow A + B1)
+
+    Customer->>Website: ค้นหา/ดูสินค้า
+    Website->>Product: ดึงข้อมูลสินค้า (isPublic: true)
+    Product->>DB: อ่านข้อมูลสินค้า
+    DB-->>Product: รายการสินค้า
+    Website-->>Customer: แสดงสินค้า
+
+    Customer->>Website: เพิ่มลงตะกร้า
+    Website->>Cart: ตรวจสต็อก + เพิ่มสินค้า
+    Cart->>DB: บันทึกตะกร้า
+    Website-->>Customer: อัปเดตตะกร้า
+
+    Customer->>Website: Checkout
+    Website->>Cart: ตรวจสต็อกซ้ำก่อนจ่าย
+    Cart->>DB: ตรวจสต็อก
+    DB-->>Cart: สต็อกพอ
+
+    Website-->>Customer: แสดงช่องทางชำระเงิน
+
+    alt COD เก็บเงินปลายทาง
+        Customer->>Website: เลือก COD
+        Website->>Order: สร้างคำสั่งซื้อ (status: PENDING)
         Order->>DB: บันทึกคำสั่งซื้อ
+        DB-->>Order: orderId
+        Order-->>Website: สำเร็จ
+        Website-->>Customer: ยืนยันออเดอร์ (จ่ายเมื่อรับสินค้า)
 
-        Order->>Payment: ขอชำระเงิน
-        Payment-->>Customer: แสดงช่องทางชำระเงิน
-        Customer->>Payment: ยืนยันการชำระ
-        Payment-->>Order: ชำระเงินสำเร็จ
-    
+    else QR PromptPay — จ่ายตอนนี้
+        Customer->>Website: เลือก QR PromptPay
+        Website->>Order: สร้างคำสั่งซื้อ (status: รอชำระ)
+        Order->>DB: บันทึกคำสั่งซื้อ
+        Order->>Payment: ขอสร้าง QR
+        Payment-->>Customer: แสดง QR PromptPay
+        Customer->>Payment: scan QR + ยืนยันการชำระ
+        Payment-->>Order: ชำระเงินสำเร็จ (status: PAID)
+        Order->>DB: อัปเดตสถานะ
+        Website-->>Customer: ยืนยันการชำระ
 
-    
-        Note over Production,Shipping: การผลิตและจัดส่ง
+    else QR PromptPay — จ่ายทีหลัง (Deferred)
+        Customer->>Website: เลือก QR PromptPay แต่ไม่จ่ายตอนนี้
+        Website->>Order: สร้างคำสั่งซื้อ (status: รอชำระ)
+        Order->>DB: บันทึกคำสั่งซื้อ
+        Website-->>Customer: บันทึก Pending Order แล้ว (กลับมาดู QR ได้ทีหลัง)
+        Customer->>Website: กลับมาดูประวัติออเดอร์ + กด QR
+        Website->>Order: ดึง QR ของ Pending Order
+        Order->>Payment: ขอ QR
+        Payment-->>Customer: แสดง QR PromptPay
+        Customer->>Payment: scan QR + ยืนยัน
+        Payment-->>Order: ชำระเงินสำเร็จ (status: PAID)
+    end
 
-        Order->>Production: ส่งคำสั่งผลิต
-        Production->>Inventory: ตรวจสอบสต็อกเสื้อ
-        Inventory-->>Production: พร้อมผลิต
+    Note over Customer,Order: ยกเลิก Pending Order
 
-        Production->>Production: พิมพ์ลาย
-        Production->>Production: ตรวจสอบคุณภาพ
-        Production->>Production: บรรจุสินค้า
+    Customer->>Website: ยกเลิก Pending Order
+    Website->>Order: ยกเลิกคำสั่งซื้อ
+    Order->>DB: อัปเดตสถานะ CANCELLED
+    Order->>Inventory: คืน stock
+    Inventory->>DB: อัปเดตสต็อก
+    Website-->>Customer: ยกเลิกสำเร็จ + stock คืนแล้ว
 
-        Production->>Shipping: ขอจัดส่ง
-        Shipping->>DB: บันทึกเลข Tracking
-        DB-->>Shipping: Tracking Number
-        Shipping-->>Order: แจ้งเลขพัสดุ
-        Order-->>Customer: แจ้งหมายเลขติดตามสินค้า
-    
+    Note over Admin,Shipping: การผลิตและจัดส่ง
 
-    
-        Note over Designer,KYC: ถอนเงินและยืนยันตัวตน
+    Order->>Production: ส่งคำสั่งผลิต
+    Production->>Inventory: ตรวจสอบสต็อกเสื้อ
+    Inventory-->>Production: พร้อมผลิต
 
-        Designer->>Website: ขอถอนเงิน
-        Website->>Withdraw: ตรวจสอบสถานะ KYC
-        Withdraw->>DB: ตรวจสอบข้อมูลผู้ใช้
+    Production->>Production: พิมพ์ลาย
+    Production->>Production: ตรวจสอบคุณภาพ
+    Production->>Production: บรรจุสินค้า
 
-        alt ยังไม่ยืนยันตัวตน
-            DB-->>Withdraw: ยังไม่ผ่าน
-            Withdraw-->>Website: ต้องยืนยันตัวตน
-            Website-->>Designer: แสดงหน้าอัปโหลดเอกสาร
+    Production->>Shipping: ขอจัดส่ง
+    Shipping->>DB: บันทึกเลข Tracking
+    DB-->>Shipping: Tracking Number
+    Shipping-->>Order: แจ้งเลขพัสดุ
+    Order->>DB: อัปเดตสถานะ SHIPPED
+    Order-->>Customer: แจ้งหมายเลขติดตามสินค้า
 
-            Designer->>Website: ส่งบัตรประชาชนและบัญชีธนาคาร
-            Website->>KYC: ตรวจสอบข้อมูล
-            KYC->>DB: บันทึกผลการตรวจสอบ
-            DB-->>KYC: ผ่าน
-            KYC-->>Website: ยืนยันตัวตนสำเร็จ
-        else ยืนยันแล้ว
-            DB-->>Withdraw: ผ่านแล้ว
-        end
+    Admin->>AdminPanel: เปลี่ยนสถานะออเดอร์ (ดูและจัดการ)
+    AdminPanel->>DB: อัปเดตสถานะออเดอร์
+    AdminPanel-->>Customer: แจ้งสถานะล่าสุด
 
-        Website->>Withdraw: ดำเนินการถอนเงิน
-        Withdraw->>DB: บันทึกธุรกรรม
-        DB-->>Withdraw: สำเร็จ
-        Withdraw-->>Website: ถอนเงินสำเร็จ
-        Website-->>Designer: แจ้งผลการถอนเงิน
-    
+    Note over Designer,KYC: ถอนเงินและยืนยันตัวตน
+
+    Designer->>Website: ขอถอนเงิน
+    Website->>Withdraw: ตรวจสอบสถานะ KYC
+    Withdraw->>DB: ตรวจสอบข้อมูลผู้ใช้
+
+    alt ยังไม่ยืนยันตัวตน
+        DB-->>Withdraw: ยังไม่ผ่าน
+        Withdraw-->>Website: ต้องยืนยันตัวตน
+        Website-->>Designer: แสดงหน้าอัปโหลดเอกสาร
+        Designer->>Website: ส่งบัตรประชาชนและบัญชีธนาคาร
+        Website->>KYC: ตรวจสอบข้อมูล
+        KYC->>DB: บันทึกผลการตรวจสอบ
+        DB-->>KYC: ผ่าน
+        KYC-->>Website: ยืนยันตัวตนสำเร็จ
+    else ยืนยันแล้ว
+        DB-->>Withdraw: ผ่านแล้ว
+    end
+
+    Website->>Withdraw: ดำเนินการถอนเงิน
+    Withdraw->>DB: บันทึกธุรกรรม
+    DB-->>Withdraw: สำเร็จ
+    Withdraw-->>Website: ถอนเงินสำเร็จ
+    Website-->>Designer: แจ้งผลการถอนเงิน

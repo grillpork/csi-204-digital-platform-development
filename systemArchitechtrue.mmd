@@ -1,32 +1,42 @@
 flowchart TD
     subgraph F1["จัดการสินค้า / ตะกร้า"]
-        F1_UI["หน้าสินค้า, ตะกร้า, จัดการสินค้า"]
-        F1_Logic["API + Validation"]
+        F1_UI["หน้าสินค้า, ตะกร้า (Flow A: ซื้อสินค้าที่ลงขาย)"]
+        F1_Logic["API + Validation + เช็คสต็อก x2 (เพิ่ม + Checkout)"]
         F1_UI --> F1_Logic
     end
 
-    subgraph F2["ชำระเงิน"]
-        F2_UI["หน้าชำระเงิน, สรุปออเดอร์"]
-        F2_Logic["API คำนวณราคา / ภาษี / ค่าส่ง"]
-        F2_UI --> F2_Logic
+    subgraph F3["ออกแบบลายสกรีน"]
+        F3_UI["หน้าออกแบบ Custom (เลือกภาพ/สี/ไซส์/Sleeve)"]
+        F3_Choice["B1: พรีออเดอร์ใช้เอง (ราคา auto-calc)\nB2: โพสขาย → ส่ง/ถอนคำขออนุมัติ"]
+        F3_Logic["API บันทึกร่าง / Admin ตรวจสอบ + Pricing\n(Admin กำหนดราคา/สต็อก)"]
+        F3_UI --> F3_Choice
+        F3_Choice --> F3_Logic
     end
 
-    subgraph F3["ออกแบบลายสกรีน"]
-        F3_UI["หน้าออกแบบ / เลือกเทมเพลต"]
-        F3_Logic["API จัดการเทมเพลต"]
-        F3_UI --> F3_Logic
+    subgraph F2["ชำระเงิน"]
+        F2_UI["หน้า Checkout / สรุปออเดอร์"]
+        F2_Choice["COD เก็บเงินปลายทาง\nQR PromptPay (จ่ายตอนนี้ หรือ Deferred จ่ายทีหลัง)"]
+        F2_Logic["API สร้างออเดอร์ + Payment Gateway\nCancel Pending Order + คืน stock"]
+        F2_UI --> F2_Choice
+        F2_Choice --> F2_Logic
     end
 
     subgraph F4["คำสั่งซื้อ / จัดส่ง"]
-        F4_UI["หน้าประวัติคำสั่งซื้อ, สถานะจัดส่ง"]
-        F4_Logic["API จัดการออเดอร์"]
+        F4_UI["Admin Dashboard: รับออเดอร์, ผลิต, จัดส่ง, เปลี่ยนสถานะ\nUser: ประวัติออเดอร์, Tracking Number"]
+        F4_Logic["API จัดการออเดอร์ + สถานะ (PENDING/PAID/SHIPPED)"]
         F4_UI --> F4_Logic
     end
 
     subgraph F5["โปรไฟล์ผู้ใช้"]
-        F5_UI["หน้าโปรไฟล์, Favorite"]
-        F5_Logic["API จัดการผู้ใช้"]
+        F5_UI["หน้าโปรไฟล์, Favorite\nSeller: ดูร่าง / สินค้าที่ลงขายไว้"]
+        F5_Logic["API จัดการผู้ใช้ / Favorite"]
         F5_UI --> F5_Logic
+    end
+
+    subgraph F6["Revenue / KYC"]
+        F6_UI["หน้าลงทะเบียนรับส่วนแบ่งรายได้\nยืนยันตัวตน (บัตรประชาชน + บัญชีธนาคาร)"]
+        F6_Logic["API KYC + ถอนเงิน"]
+        F6_UI --> F6_Logic
     end
 
     subgraph Infra["Shared Infrastructure"]
@@ -36,10 +46,10 @@ flowchart TD
     end
 
     F1_Logic --> DB
-    F1_Logic --> ImgStorage
     F2_Logic --> DB
     F2_Logic --> PaymentGW
     F3_Logic --> DB
     F3_Logic --> ImgStorage
     F4_Logic --> DB
     F5_Logic --> DB
+    F6_Logic --> DB

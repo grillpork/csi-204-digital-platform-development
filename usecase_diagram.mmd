@@ -1,51 +1,76 @@
-graph TB
-    %% Actors
-    subgraph Users [Actors]
-        Designer((นักออกแบบ))
-        Customer((ลูกค้า))
-        SystemActor((ระบบผลิต & ขนส่ง))
-    end
+graph LR
+    %% ── Left Actor ───────────────────────────────
+    User(("🧍 User"))
 
-    %% Use Cases Boundary
-    subgraph PODSystem [ระบบ Marketplace Print-on-Demand]
+    %% ── System Boundary ──────────────────────────
+    subgraph System ["🛒 Shirtsty Shop"]
+        direction TB
+
         %% Common
-        UC_Login(เข้าสู่ระบบ)
-        
-        %% Designer Use Cases
-        UC_Upload(อัปโหลดลายเสื้อ)
-        UC_SelectPackage(เลือกแพ็กเกจการสกรีน)
-        UC_Pricing(ประเมินราคาราคาสินค้า)
-        UC_Publish(เผยแพร่สินค้าพร้อมจำหน่าย)
-        UC_KYC(ยืนยันตัวตน KYC)
-        UC_Withdraw(ถอนเงินรายได้)
-        
-        %% Customer Use Cases
-        UC_Search(ค้นหาและดูสินค้า)
-        UC_Cart(จัดการตะกร้าสินค้า)
-        UC_Checkout(สั่งซื้อและชำระเงิน)
-        
-        %% Production & Shipping
-        UC_Produce(จัดการการผลิตสินค้า)
-        UC_Ship(จัดส่งและแจ้งเลขพัสดุ)
+        UC_Register(["สมัครสมาชิก"])
+        UC_Login(["เข้าสู่ระบบ"])
+        UC_Profile(["จัดการโปรไฟล์"])
+        UC_Favorite(["Favorite"])
+        UC_OrderHistory(["ดูประวัติออเดอร์ + Tracking"])
+
+        %% ฝั่งซื้อ
+        UC_Search(["ค้นหาสินค้า"])
+        UC_Cart(["จัดการตะกร้า"])
+        UC_Checkout(["สั่งซื้อ / ชำระเงิน\n(COD / QR PromptPay)"])
+        UC_Cancel(["ยกเลิก Pending Order"])
+        UC_Custom(["Custom Preorder\n(B1)"])
+
+        %% ฝั่งออกแบบ/ขาย
+        UC_Upload(["อัปโหลดลาย + เลือกสี/ไซส์"])
+        UC_Package(["เลือกแพ็กเกจสกรีน\n(DTF / DTG)"])
+        UC_Draft(["บันทึกร่าง"])
+        UC_Submit(["ส่งขออนุมัติ"])
+        UC_Retract(["ถอนคำขออนุมัติ"])
+        UC_Withdraw(["ถอนเงินรายได้"])
+        UC_KYC(["ยืนยันตัวตน KYC"])
+
+        %% Admin
+        UC_Review(["ตรวจสอบลาย\nอนุมัติ / ปฏิเสธ"])
+        UC_Price(["กำหนดราคา / สต็อก"])
+        UC_Publish(["เผยแพร่สินค้า\nบน Marketplace"])
+        UC_ManageOrder(["ดูและเปลี่ยน\nสถานะออเดอร์"])
+        UC_Produce(["จัดการการผลิต"])
+        UC_Ship(["จัดส่ง + User ยืนยันรับสินค้า"])
+
+        %% ── Include / Extend ──────────────────────
+        UC_Submit      -.->|"<<include>>"| UC_Draft
+        UC_Submit      -.->|"<<include>>"| UC_Package
+        UC_Review      -.->|"<<include>>"| UC_Price
+        UC_Review      -.->|"<<include>>"| UC_Publish
+        UC_Checkout    -.->|"<<include>>"| UC_Login
+        UC_Custom      -.->|"<<include>>"| UC_Login
+        UC_Withdraw    -.->|"<<include>>"| UC_KYC
+        UC_Cancel      -.->|"<<extend>>" | UC_OrderHistory
     end
 
-    %% Relationships
-    Designer --> UC_Login
-    Designer --> UC_Upload
-    Designer --> UC_SelectPackage
-    Designer --> UC_Pricing
-    Designer --> UC_Publish
-    Designer --> UC_Withdraw
-    
-    Customer --> UC_Search
-    Customer --> UC_Cart
-    Customer --> UC_Checkout
-    
-    SystemActor --> UC_Produce
-    SystemActor --> UC_Ship
+    %% ── Right Actor ──────────────────────────────
+    Admin(("🧍 Admin"))
 
-    %% Includes & Extends
-    UC_Withdraw -.->|include| UC_KYC
-    UC_Pricing -.->|include| UC_SelectPackage
-    UC_Publish -.->|include| UC_Pricing
-    UC_Checkout -.->|include| UC_Login
+    %% ── User → Use Cases ─────────────────────────
+    User --> UC_Register
+    User --> UC_Login
+    User --> UC_Profile
+    User --> UC_Favorite
+    User --> UC_OrderHistory
+    User --> UC_Search
+    User --> UC_Cart
+    User --> UC_Checkout
+    User --> UC_Cancel
+    User --> UC_Custom
+    User --> UC_Upload
+    User --> UC_Package
+    User --> UC_Draft
+    User --> UC_Submit
+    User --> UC_Retract
+    User --> UC_Withdraw
+
+    %% ── Admin → Use Cases ────────────────────────
+    Admin --> UC_Review
+    Admin --> UC_ManageOrder
+    Admin --> UC_Produce
+    Admin --> UC_Ship

@@ -14,31 +14,66 @@ flowchart LR
     CartPage --> Checkout["Checkout"]
     Checkout --> CheckStock2{"เช็คสต็อกซ้ำก่อนจ่าย"}
     CheckStock2 -->|"ไม่พอ"| StockError
-    CheckStock2 -->|"พอ"| Payment
+    CheckStock2 -->|"พอ"| PaymentChoice{"เลือกวิธีชำระ"}
 
-    %% Flow B: Custom Order
-    ChoosePath -->|"ออกแบบ Custom เอง"| CustomDesign["หน้าออกแบบ Custom (เลือกภาพ/สี/ไซส์/Sleeve) ไม่ต้อง Login"]
-    CustomDesign --> ConfirmPreorder["กดยืนยันพรีออเดอร์"]
-    ConfirmPreorder --> CheckLoginCustom{"Login แล้ว?"}
-    CheckLoginCustom -->|"ไม่"| LoginPage2["Login / Register (ไม่เก็บ state ที่ออกแบบไว้)"]
-    LoginPage2 --> CustomDesign
-    CheckLoginCustom -->|"ใช่"| CalcPrice["คำนวณราคาอัตโนมัติ (Base price + ตัวเลือก)"]
-    CalcPrice --> Payment
+    %% Payment: COD
+    PaymentChoice -->|"COD เก็บเงินปลายทาง"| CreateOrder[("สร้าง Order ใน DB")]
 
-    Payment["ชำระเงิน QR PromptPay (External: Payment Gateway)"]
-    Payment --> CreateOrder[("สร้าง Order ใน DB")]
+    %% Payment: QR PromptPay
+    PaymentChoice -->|"QR PromptPay"| QROption{"จ่ายตอนนี้หรือทีหลัง?"}
+    QROption -->|"จ่ายตอนนี้"| QRNow["แสดง QR → scan → ยืนยันการชำระ"]
+    QROption -->|"จ่ายทีหลัง (Pending)"| CreateOrder
+    QRNow --> CreateOrder
+
+    %% Order fulfillment
     CreateOrder --> AdminQueue["ออเดอร์เข้า Admin Dashboard"]
     AdminQueue --> AdminFulfill["Admin จัดการผลิต/แพ็ค/จัดส่ง"]
-    AdminFulfill --> Shipped["กดจัดส่งแล้ว"]
+    AdminFulfill --> Shipped["กดจัดส่งแล้ว (Tracking Number)"]
     Shipped --> EndFlow(["จบ Flow"])
-    CreateOrder -.->|"แผนอนาคต"| FutureNotify["Notification (ยังไม่ implement รายละเอียด)"]
+
+    %% Order side actions (dashed)
+    CreateOrder -.->|"ดูประวัติ/Tracking"| OrderHistory["ดูประวัติออเดอร์ + Tracking"]
+    CreateOrder -.->|"ยกเลิก Pending Order"| CancelOrder["ยกเลิก Order + คืน stock"]
+    CancelOrder --> ViewProducts
+    CreateOrder -.->|"แผนอนาคต"| FutureNotify["Notification"]
+
+    %% Custom Design entry (ไม่ต้อง Login)
+    ChoosePath -->|"ออกแบบ Custom เอง"| CustomDesign["หน้าออกแบบ Custom (เลือกภาพ/สี/ไซส์/Sleeve) ไม่ต้อง Login"]
+    CustomDesign --> ChooseAction{"จะทำอะไรกับลายนี้?"}
+
+    %% Flow B1: พรีออเดอร์ใช้เอง
+    ChooseAction -->|"พรีออเดอร์ใช้เอง"| ConfirmPreorder["กดยืนยันพรีออเดอร์"]
+    ConfirmPreorder --> CheckLoginB1{"Login แล้ว?"}
+    CheckLoginB1 -->|"ไม่"| LoginPage2["Login / Register (ไม่เก็บ state ที่ออกแบบไว้)"]
+    LoginPage2 --> CustomDesign
+    CheckLoginB1 -->|"ใช่"| CalcPrice["คำนวณราคาอัตโนมัติ (Base price + ตัวเลือก)"]
+    CalcPrice --> CartPage
+
+    %% Flow B2: โพสขาย
+    ChooseAction -->|"โพสขาย"| CheckLoginB2{"Login แล้ว?"}
+    CheckLoginB2 -->|"ไม่"| LoginPage3["Login / Register (ไม่เก็บ state ที่ออกแบบไว้)"]
+    LoginPage3 --> CustomDesign
+    CheckLoginB2 -->|"ใช่"| SaveDraft[("บันทึกร่าง (isPublic: false)\nUser ลงแค่ลายเสื้อ")]
+    SaveDraft --> AdminReview{"Admin ตรวจสอบลาย + ตั้งราคา/สต็อก (Pricing)"}
+    AdminReview -->|"อนุมัติ"| Published["สินค้าขึ้น Marketplace (isPublic: true)"]
+    Published --> ViewProducts
+    AdminReview -->|"ไม่อนุมัติ"| Feedback["ส่งคำแนะนำกลับ User"]
+    Feedback --> EditDraft["User แก้ไข Draft เดิม"]
+    EditDraft --> SaveDraft
+    AdminReview -->|"user ถอนคำขอ"| RetractDraft["ถอนคำขออนุมัติ → กลับเป็น Draft"]
+    RetractDraft --> SellerDash
 
     %% Side features (ขนาน ไม่อยู่บน Main Flow)
     subgraph SideFeatures["Side Features (ขนาน ไม่อยู่ใน Main Flow)"]
-        Favorite["กด Favorite สินค้า (ต้อง Login)"]
-        BecomeSeller["กดสมัครเป็น Seller (isSeller=true ทันที ไม่ต้องลงทะเบียน)"]
+        ProfileMgmt["โปรไฟล์: ดู/แก้ข้อมูล + รูปโปรไฟล์ (ต้อง Login)"]
+        Favorite["กด Favorite / นำออกจากรายการโปรด (ต้อง Login)"]
+        BecomeSeller["กดสมัครเป็น Seller (isSeller=true ทันที)"]
         BecomeSeller -.->|"ลิงก์: อยากลงทะเบียนรับเงินไหม"| RevenueReg["หน้าลงทะเบียนรับส่วนแบ่งรายได้"]
-        BecomeSeller --> SellerDash["Seller Dashboard: เพิ่ม/แก้ไขสินค้า"]
+        RevenueReg --> KYCCheck{"KYC ผ่านแล้ว?"}
+        KYCCheck -->|"ยังไม่ผ่าน"| KYCVerify["ยืนยันตัวตน (บัตรประชาชน + บัญชีธนาคาร)"]
+        KYCVerify --> KYCCheck
+        KYCCheck -->|"ผ่านแล้ว"| RevenueActive["รับส่วนแบ่งรายได้ได้"]
+        BecomeSeller --> SellerDash["Seller Dashboard: ดูร่าง / สินค้าที่ลงขายไว้"]
     end
 
     %% Infrastructure / External
@@ -49,12 +84,15 @@ flowchart LR
 
     LoginPage --> DB
     LoginPage2 --> DB
+    LoginPage3 --> DB
     CartPage --> DB
     CheckStock1 --> DB
     CheckStock2 --> DB
+    SaveDraft --> DB
+    SaveDraft --> ImgStorage
     CreateOrder --> DB
     SellerDash --> DB
-    SellerDash --> ImgStorage
     CustomDesign --> ImgStorage
     Favorite --> DB
-
+    OrderHistory --> DB
+    ProfileMgmt --> DB
