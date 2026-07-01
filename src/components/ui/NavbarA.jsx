@@ -14,7 +14,7 @@ export default function NavbarA() {
 
   const dropdownItems = [
     { label: "โปรไฟล์ของฉัน", href: "/profile", icon: User },
-    { label: "แก้ไขโปรไฟล์", href: "/profile/edit", icon: Edit3 },
+    // { label: "แก้ไขโปรไฟล์", href: "/profile/edit", icon: Edit3 },
     { label: "สินค้าของฉัน", href: "/profile/products", icon: Package },
     { label: "สินค้าที่ถูกใจ", href: "/profile/favorites", icon: Heart },
     { label: "ประวัติการสั่งซื้อ", href: "/profile/orders", icon: ShoppingBag },
