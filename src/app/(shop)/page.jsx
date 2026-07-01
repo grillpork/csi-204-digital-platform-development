@@ -174,6 +174,7 @@ const sleeveTypes = ["Long Sleeve", "Short Sleeve", "No Sleeve"];
 
 export default function ProductsPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
@@ -182,6 +183,7 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [products, setProducts] = useState([]);
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
@@ -190,6 +192,18 @@ export default function ProductsPage() {
       .then((j) => setProducts(j.data || []))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!user) return setFavoriteIds(new Set());
+    fetch('/api/favorites').then(r=>r.ok?r.json():{data:[]}).then(j=>setFavoriteIds(new Set((j.data||[]).map(p=>p.id))));
+  }, [user]);
+
+  const handleFavorite = async (productId) => {
+    if (!user) return router.push('/login');
+    const active = favoriteIds.has(productId);
+    const res = await fetch('/api/favorites',{method:active?'DELETE':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({productId})});
+    if (res.ok) setFavoriteIds(prev=>{const next=new Set(prev);active?next.delete(productId):next.add(productId);return next});
+  };
 
   // สลับกลับไปใช้ mock ได้ด้วยการเปลี่ยนเป็น true บรรทัดเดียว
   const USE_MOCK = false;
@@ -297,12 +311,15 @@ export default function ProductsPage() {
                 key={product.id}
                 className="border border-gray-200 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
               >
-                <div className="aspect-square bg-gray-100 overflow-hidden">
+                <div className="relative aspect-square bg-gray-100 overflow-hidden">
                   <img
                     src={product.image || product.images?.[0] || "https://josephineco.com/cdn/shop/files/6217024316_010_1.jpg?v=1773234174&width=2048"}
                     alt={product.name}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
+                  <button onClick={(e)=>{e.stopPropagation();handleFavorite(product.id)}} aria-label={favoriteIds.has(product.id)?'นำออกจากรายการโปรด':'เพิ่มในรายการโปรด'} className="absolute right-3 top-3 rounded-full bg-white/90 p-2 shadow-sm">
+                    <Heart size={17} className={favoriteIds.has(product.id)?'fill-red-500 text-red-500':'text-gray-600'}/>
+                  </button>
                 </div>
                 <div className="p-4">
                   <p className="font-medium text-gray-800 text-sm mb-1">

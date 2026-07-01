@@ -27,6 +27,8 @@ beforeAll(async () => {
       sizes: [],
       stock: 10,
       sellerId: testUserId,
+      is_public: true,
+      approvalStatus: "APPROVED",
     },
   });
   testProductId = product.id;

@@ -25,12 +25,14 @@ export default function DashboardLayout({ children }) {
   const navigation = [
     { name: "Overview", href: "/dashboard/overview", icon: LayoutDashboard },
     { name: "Orders", href: "/dashboard/order", icon: ShoppingBag },
+    { name: "ตรวจแบบเสื้อ", href: "/dashboard/designs", icon: Store },
     { name: "Settings", href: "#", icon: Settings },
   ];
 
   const getPageTitle = () => {
     if (pathname.includes("/overview")) return "Overview Analytics";
     if (pathname.includes("/order")) return "Order Management";
+    if (pathname.includes("/designs")) return "ตรวจและอนุมัติแบบเสื้อ";
     return "Admin Dashboard";
   };
 

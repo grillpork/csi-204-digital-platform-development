@@ -13,7 +13,13 @@ export async function middleware(request) {
     pathname.startsWith("/account") || 
     pathname.startsWith("/cart") || 
     pathname.startsWith("/checkout") || 
-    pathname.startsWith("/seller");
+    pathname.startsWith("/seller") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/dashboard");
+
+  if (pathname.startsWith("/dashboard") && payload?.role !== "admin") {
+    return NextResponse.redirect(new URL(payload ? "/" : "/login", request.url));
+  }
 
   if (payload) {
     if (isAuthPath) {
@@ -36,5 +42,7 @@ export const config = {
     "/cart/:path*",
     "/checkout/:path*",
     "/seller/:path*",
+    "/profile/:path*",
+    "/dashboard/:path*",
   ],
 };

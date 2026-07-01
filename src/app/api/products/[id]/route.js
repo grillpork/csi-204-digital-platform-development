@@ -14,7 +14,7 @@ export async function GET(request, { params }) {
   }
 
   try {
-    const product = await prisma.product.findUnique({ where: { id: productId } });
+    const product = await prisma.product.findFirst({ where: { id: productId, is_public: true, approvalStatus: 'APPROVED' } });
     if (!product) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }

@@ -1,0 +1,39 @@
+model Order {
+  id              String      @id @default(cuid())
+  userId          String      @map("user_id")
+  status          OrderStatus @default(PENDING)
+  total_amount    Int
+  shippingAddress String      @map("shipping_address")
+  phone           String?
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  items           OrderItem[]
+  user            User        @relation(fields: [userId], references: [id])
+  payments        payments?
+  shipping        Shipping?
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   String  @map("order_id")
+  productId Int     @map("product_id")
+  quantity  Int
+  price     Int
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PENDING_PAYMENT
+  PAYMENT_EXPIRED
+  PAID
+  PROCESSING
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}

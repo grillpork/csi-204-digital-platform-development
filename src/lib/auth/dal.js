@@ -24,7 +24,7 @@ export async function getCurrentUser() {
   });
   if (!user) return null;
 
-  return { id: user.id, name: user.name, email: user.email, role: user.role?.name };
+  return { id: user.id, name: user.name, email: user.email, phone: user.phone, address: user.address, bio: user.bio, avatarUrl: user.avatarUrl, isSeller: user.isSeller, role: user.role?.name };
 }
 // ไว้ตรวจว่าเป็นคนขายไหม ตรวจผ่าน token จำใน cache
 export const getSessionUser = cache(async () => {
@@ -33,13 +33,27 @@ export const getSessionUser = cache(async () => {
   if (!payload) return null;
   return prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true },
+    select: { id: true, name: true, email: true, role: { select: { name: true } }, isSeller: true },
   });
 });
 // ตรวจสิทธิ์และนำไปส่งหน้าที่ควรไป
 export async function requireUserPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
+  return user;
+}
+
+export async function requireAdminPage() {
+  const user = await getSessionUser();
+  if (!user) redirect("/login");
+  if (user.role?.name !== "admin") redirect("/");
+  return user;
+}
+
+export async function requireAdmin() {
+  const user = await getSessionUser();
+  if (!user) throw new HttpError(401, "กรุณาเข้าสู่ระบบ");
+  if (user.role?.name !== "admin") throw new HttpError(403, "ไม่มีสิทธิ์ใช้งานส่วนนี้");
   return user;
 }
 // ตรวจสิทธิ์และส่ง error

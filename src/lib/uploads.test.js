@@ -2,7 +2,7 @@ import { saveImages } from "@/lib/uploads";
 import { rename, rm, stat } from "fs/promises";
 import path from "path";
 
-const imagesDir = path.join(process.cwd(), "public/images");
+const imagesDir = path.join(process.cwd(), "public/uploads/products");
 // ย้าย public/images/ จริงไปพักไว้ชั่วคราว (ไม่ลบทิ้ง) เพื่อจำลอง "โฟลเดอร์ไม่มีอยู่"
 // โดยไม่เสี่ยงทำลายรูปจริงของโปรเจกต์ระหว่างรันเทส
 const backupDir = `${imagesDir}.bak-test`;
@@ -10,6 +10,8 @@ const backupDir = `${imagesDir}.bak-test`;
 function fakeFile(name) {
   return {
     name,
+    type: "image/png",
+    size: 16,
     arrayBuffer: async () => new TextEncoder().encode("fake-image-bytes").buffer,
   };
 }
@@ -31,11 +33,11 @@ describe("saveImages", () => {
     });
   });
 
-  it("saves files and returns /images/ paths even when public/images/ doesn't exist yet", async () => {
+  it("saves files and returns local upload paths when R2 is not configured", async () => {
     savedPaths = await saveImages([fakeFile("test-upload.png")]);
 
     expect(savedPaths).toHaveLength(1);
-    expect(savedPaths[0]).toMatch(/^\/images\//);
+    expect(savedPaths[0]).toMatch(/^\/uploads\/products\//);
   });
 
   it("actually writes the file to disk at the returned path", async () => {

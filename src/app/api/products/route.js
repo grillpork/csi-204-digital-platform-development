@@ -10,7 +10,7 @@ import { saveImages } from "@/lib/uploads";
 //ตัวอย่าง api all product
 export async function GET(request) {
   try {
-    const products = await prisma.product.findMany();
+    const products = await prisma.product.findMany({ where: { is_public: true, approvalStatus: 'APPROVED' }, orderBy: { createdAt: 'desc' } });
     return NextResponse.json({ data: products });
   } catch (error) {
     console.error('GET /api/products:', error);
@@ -46,7 +46,7 @@ export async function POST(req) {
 
     const images = await saveImages(files);
     const product = await prisma.product.create({
-      data: { ...result.data, images, sellerId: me.id },
+      data: { ...result.data, images, sellerId: me.id, is_public: false, approvalStatus: 'PENDING', submittedAt: new Date() },
     });
 
     return NextResponse.json({ data: product }, { status: 201 });

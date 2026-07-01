@@ -5,14 +5,17 @@ model User {
   password  String
   address   String?
   phone     String?
+  bio       String?
+  avatarUrl String?    @map("avatar_url")
   roleId    Int        @default(1)
-  role      Role       @relation(fields: [roleId], references: [id])
   isSeller  Boolean    @default(false) @map("is_seller")
   shopName  String?    @map("shop_name")
-  products  Product[]
+  createdAt DateTime   @default(now()) @map("created_at")
   cart      Cart?
   favorites Favorite[]
-  createdAt DateTime   @default(now()) @map("created_at")
+  orders    Order[]
+  products  Product[]
+  role      Role       @relation(fields: [roleId], references: [id])
 
   @@map("users")
 }

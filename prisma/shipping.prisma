@@ -5,6 +5,7 @@ model Shipping {
   trackingNumber String   @map("tracking_number")
   status         String   @default("PENDING")
   updatedAt      DateTime @updatedAt @map("updated_at")
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("shippings")
 }

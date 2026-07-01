@@ -1,0 +1,13 @@
+model payments {
+  id             String    @id
+  order_id       String    @unique
+  amount         Int
+  method         String
+  status         String
+  transaction_id String?
+  paid_at        DateTime?
+  qr_code_url    String?
+  expires_at     DateTime?
+  created_at     DateTime  @default(now())
+  orders         Order     @relation(fields: [order_id], references: [id], onDelete: Cascade)
+}

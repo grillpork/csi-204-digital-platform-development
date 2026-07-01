@@ -54,9 +54,12 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid productId' }, { status: 400 });
     }
 
-    const product = await prisma.product.findUnique({ where: { id: productId } });
+    const product = await prisma.product.findFirst({ where: { id: productId, is_public: true, approvalStatus: 'APPROVED' } });
     if (!product) {
       return NextResponse.json({ error: 'Invalid productId' }, { status: 400 });
+    }
+    if (product.stock < quantity) {
+      return NextResponse.json({ error: 'สินค้ามีจำนวนไม่เพียงพอ' }, { status: 409 });
     }
 
     let cart = await prisma.cart.findUnique({ where: { userId: me.id } });

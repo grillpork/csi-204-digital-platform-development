@@ -5,7 +5,6 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, ShoppingCart, CheckCircle2, Image as ImageIcon, ArrowLeft, Move, ZoomIn, ZoomOut, RotateCcw, Trash2, FlipHorizontal2 } from 'lucide-react';
 import { mockProducts } from '@/app/data/products';
-import { useProductStore } from '@/store/product';
 
 const DEFAULT_PRINT_ZONE = { x: 0.27, y: 0.20, w: 0.46, h: 0.70 };
 
@@ -13,8 +12,6 @@ function CustomShirtPageContent() {
   const searchParams = useSearchParams();
   const productId = parseInt(searchParams.get('id')) || 1;
   const product = mockProducts.find((p) => p.id === productId) || mockProducts[0];
-
-  const addToCart = useProductStore((state) => state.addToCart);
 
   const [viewSide, setViewSide] = useState('front');
 
@@ -278,7 +275,7 @@ function CustomShirtPageContent() {
     });
   };
 
-  const handlePreorder = async () => {
+  const handleSaveDesign = async (submitForReview = false) => {
     const currentFile = viewSide === 'front' ? overlayFileFront : overlayFileBack;
     if (!currentFile) {
       alert('กรุณาอัปโหลดรูปภาพสกรีนเสื้อก่อนยืนยัน');
@@ -310,26 +307,17 @@ function CustomShirtPageContent() {
 
       const data = await response.json();
 
-      // Calculate price based on options
-      let finalPrice = product.price;
-      if (screenSize === 'A3') finalPrice += 100;
-      if (screenSize === 'Logo') finalPrice -= 50;
-
-      // 4. Add the composite designed product to the shopping cart store
-      addToCart({
-        id: `custom-${product.id}-${Date.now()}`,
-        name: `${product.name} (Custom — ${viewSide === 'front' ? 'ด้านหน้า' : 'ด้านหลัง'})`,
-        price: finalPrice,
-        image: data.imageUrl, // Show the composite image containing the uploaded print
-        quantity: 1,
-        details: {
-          shirtSize,
-          screenSize,
-          printTechnique,
-          color: shirtColor,
-          side: viewSide
-        }
-      });
+      const create = await fetch('/api/designs', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
+        name:`${product.name} — แบบของฉัน`, description:`เสื้อออกแบบเอง สี ${shirtColor} ไซส์ ${shirtSize} สกรีน ${screenSize} (${printTechnique})`,
+        image:data.imageUrl, category:'TSHIRT', color:shirtColor, sizes:[shirtSize === '2XL' ? 'XXL' : shirtSize], printSide:viewSide, screenSize, printTechnique
+      }) });
+      const created = await create.json();
+      if (!create.ok) throw new Error(created.error || 'บันทึกแบบไม่สำเร็จ');
+      if (submitForReview) {
+        const submit = await fetch('/api/designs/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:created.data.id})});
+        const result = await submit.json();
+        if(!submit.ok) throw new Error(result.error || 'ส่งตรวจไม่สำเร็จ');
+      }
 
       setUploadSuccess(true);
     } catch (e) {
@@ -597,8 +585,8 @@ function CustomShirtPageContent() {
               {uploadSuccess ? (
                 <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 text-center">
                   <CheckCircle2 className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                  <p className="text-green-600 font-semibold mb-1">สั่งซื้อสำเร็จ!</p>
-                  <p className="text-xs text-green-600/80 mb-3">รายการของคุณถูกบันทึกแล้ว</p>
+                  <p className="text-green-600 font-semibold mb-1">บันทึกแบบเสื้อแล้ว</p>
+                  <p className="text-xs text-green-600/80 mb-3">ดูสถานะและจัดการแบบได้ที่ “สินค้าของฉัน”</p>
                   <button
                     onClick={() => {
                       setOverlayImageFront(null);
@@ -609,13 +597,13 @@ function CustomShirtPageContent() {
                     }}
                     className="text-xs px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded-md transition-colors"
                   >
-                    สั่งเพิ่มอีกตัว
+                    ออกแบบเพิ่ม
                   </button>
                 </div>
               ) : (
                 <div className="flex gap-2">
                   <button
-                    onClick={handlePreorder}
+                    onClick={() => handleSaveDesign(true)}
                     disabled={!overlayImage || isUploading}
                     className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-3 py-3.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed transition-all"
                   >
@@ -623,12 +611,13 @@ function CustomShirtPageContent() {
                       <span className="animate-pulse">กำลังประมวลผล...</span>
                     ) : (
                       <>
-                        <ShoppingCart className="w-4 h-4" />
-                        พรีออเดอร์
+                        <CheckCircle2 className="w-4 h-4" />
+                        ส่งให้แอดมินตรวจ
                       </>
                     )}
                   </button>
                   <button
+                    onClick={() => handleSaveDesign(false)}
                     disabled={!overlayImage || isUploading}
                     className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-3.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                     title="บันทึกลงคอลเลกชั่น"
@@ -636,7 +625,7 @@ function CustomShirtPageContent() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
-                    บันทึก
+                    บันทึกแบบร่าง
                   </button>
                 </div>
               )}

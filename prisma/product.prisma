@@ -1,3 +1,40 @@
+model Product {
+  id                 Int            @id @default(autoincrement())
+  name               String
+  description        String
+  price              Int
+  category           Category
+  images             String[]
+  colors             String[]
+  sizes              Size[]
+  stock              Int            @default(0)
+  sellerId           String
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+  is_custom          Boolean        @default(false)
+  base_product_id    Int?
+  overlay_image      String?
+  overlay_position_x Float?
+  overlay_position_y Float?
+  overlay_size       Float?
+  print_side         String?
+  screen_size        String?
+  print_technique    String?
+  is_public          Boolean        @default(false)
+  approvalStatus     ApprovalStatus @default(DRAFT) @map("approval_status")
+  submittedAt        DateTime?      @map("submitted_at")
+  reviewedAt         DateTime?      @map("reviewed_at")
+  reviewedById       String?        @map("reviewed_by_id")
+  rejectionReason    String?        @map("rejection_reason")
+  favorites          Favorite[]
+  orderItems         OrderItem[]
+  cartItems          CartItem[]
+  seller             User           @relation(fields: [sellerId], references: [id])
+
+  @@unique([id, sellerId])
+  @@map("products")
+}
+
 enum Size {
   XS
   S
@@ -15,22 +52,9 @@ enum Category {
   TANK_TOP
 }
 
-model Product {
-  id          Int        @id @default(autoincrement())
-  name        String
-  description String
-  price       Int
-  category    Category
-  images      String[]
-  colors      String[]
-  sizes       Size[]
-  stock       Int        @default(0)
-  sellerId    String
-  seller      User       @relation(fields: [sellerId], references: [id])
-  favorites   Favorite[]
-  createdAt   DateTime   @default(now()) @map("created_at")
-  updatedAt   DateTime   @updatedAt @map("updated_at")
-
-  @@unique([id, sellerId])
-  @@map("products")
+enum ApprovalStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
 }
