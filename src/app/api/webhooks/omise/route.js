@@ -1,64 +1,72 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
+import { retrieveOmiseCharge, verifyOmiseWebhookSignature } from "@/lib/payment/omise-webhook";
 
 export async function POST(request) {
   try {
+    const rawBody = await request.text();
     const webhookSecret = process.env.OMISE_WEBHOOK_SECRET;
-    if (!webhookSecret || request.headers.get("authorization") !== `Bearer ${webhookSecret}`) {
-      return NextResponse.json({ error: "Unauthorized webhook" }, { status: 401 });
-    }
-    const payload = await request.json();
 
-    console.log("Received Omise Webhook:", payload.key);
-
-    // ตรวจสอบว่าเป็น Event ของการชำระเงินสำเร็จหรือไม่
-    if (payload.key === "charge.complete") {
-      const charge = payload.data;
-      const chargeId = charge.id;
-      const status = charge.status;
-
-      if (status === "successful") {
-        // ค้นหารายการชำระเงินในระบบของเรา
-        const payment = await prisma.payments.findUnique({
-          where: { id: chargeId },
-        });
-
-        if (payment) {
-          const order = await prisma.order.findUnique({ where: { id: payment.order_id }, select: { status: true } });
-          if (!order || ["CANCELLED", "PAYMENT_EXPIRED"].includes(order.status)) {
-            await prisma.payments.update({ where: { id: chargeId }, data: { status: "paid_after_closed", paid_at: new Date() } });
-            console.warn(`Payment ${chargeId} arrived after order ${payment.order_id} was closed; manual refund/review required`);
-            return NextResponse.json({ received: true, requiresReview: true });
-          }
-          // ใช้ transaction เพื่ออัปเดตทั้งตาราง payments และ orders
-          await prisma.$transaction([
-            prisma.payments.update({
-              where: { id: chargeId },
-              data: {
-                status: "successful",
-                paid_at: new Date(),
-              },
-            }),
-            prisma.order.update({
-              where: { id: payment.order_id },
-              data: {
-                status: "PAID",
-              },
-            }),
-          ]);
-          console.log(`Order ${payment.order_id} marked as PAID via Omise Webhook`);
-        } else {
-          console.warn(`Payment ID ${chargeId} not found in our database`);
-        }
-      }
+    if (webhookSecret && !verifyOmiseWebhookSignature({
+      rawBody,
+      signatureHeader: request.headers.get("omise-signature"),
+      timestampHeader: request.headers.get("omise-signature-timestamp"),
+      secret: webhookSecret,
+    })) {
+      return NextResponse.json({ error: "Invalid webhook signature" }, { status: 401 });
     }
 
-    return NextResponse.json({ received: true });
-  } catch (err) {
-    console.error("Omise Webhook Error:", err);
-    return NextResponse.json(
-      { error: "Webhook handler failed" },
-      { status: 500 }
-    );
+    let payload;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+    }
+
+    // Event อื่นไม่เปลี่ยนสถานะออเดอร์ แต่ตอบ 200 เพื่อให้ Omise ไม่ส่งซ้ำ
+    if (payload.key !== "charge.complete") {
+      return NextResponse.json({ received: true });
+    }
+
+    const chargeId = payload.data?.id;
+    if (!chargeId) return NextResponse.json({ error: "Missing charge ID" }, { status: 400 });
+
+    const payment = await prisma.payments.findUnique({
+      where: { id: chargeId },
+      include: { orders: { select: { status: true } } },
+    });
+    // ไม่เปิดเผยข้อมูลภายใน และตอบรับ event ที่ไม่เกี่ยวข้องกับระบบนี้
+    if (!payment) return NextResponse.json({ received: true });
+
+    // ตรวจสถานะกับ Omise API โดยตรง ไม่เชื่อข้อมูลจาก webhook เพียงอย่างเดียว
+    const charge = await retrieveOmiseCharge(chargeId);
+    const expectedSatang = Math.round(Number(payment.amount) * 100);
+    if (charge.status !== "successful" || charge.currency?.toLowerCase() !== "thb" || charge.amount !== expectedSatang) {
+      return NextResponse.json({ received: true, verified: false });
+    }
+
+    if (["CANCELLED", "PAYMENT_EXPIRED"].includes(payment.orders.status)) {
+      await prisma.payments.update({
+        where: { id: chargeId },
+        data: { status: "paid_after_closed", paid_at: new Date() },
+      });
+      return NextResponse.json({ received: true, verified: true, requiresReview: true });
+    }
+
+    await prisma.$transaction([
+      prisma.payments.update({
+        where: { id: chargeId },
+        data: { status: "successful", paid_at: new Date() },
+      }),
+      prisma.order.updateMany({
+        where: { id: payment.order_id, status: { in: ["PENDING", "PENDING_PAYMENT"] } },
+        data: { status: "PAID" },
+      }),
+    ]);
+
+    return NextResponse.json({ received: true, verified: true });
+  } catch (error) {
+    console.error("Omise webhook error:", error);
+    return NextResponse.json({ error: "Webhook handler failed" }, { status: 500 });
   }
 }
