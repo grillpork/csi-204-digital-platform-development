@@ -31,7 +31,7 @@ export function verifyOmiseWebhookSignature({ rawBody, signatureHeader, timestam
 
 export async function retrieveOmiseCharge(chargeId, secretKey = process.env.OMISE_SECRET_KEY) {
   if (!secretKey) throw new Error("OMISE_SECRET_KEY is not configured");
-  if (!/^chrg_[a-zA-Z0-9]+$/.test(chargeId)) throw new Error("Invalid charge ID");
+  if (!/^chrg_(?:test_)?[a-zA-Z0-9]+$/.test(chargeId)) throw new Error("Invalid charge ID");
 
   const response = await fetch(`https://api.omise.co/charges/${encodeURIComponent(chargeId)}`, {
     headers: { Authorization: `Basic ${Buffer.from(`${secretKey}:`).toString("base64")}` },

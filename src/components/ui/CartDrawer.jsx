@@ -267,17 +267,20 @@ export default function CartDrawer({ size = 24, className = "" }) {
           ) : (
             <div className="flex flex-col gap-4">
               {cart.map((item) => (
-                <div key={item.id} className="flex gap-3 border-b pb-4 border-slate-100">
+                <div key={`${item.id}-${item.size || 'M'}-${item.color || 'White'}`} className="flex gap-3 border-b pb-4 border-slate-100">
                   {item.image && (
                     <img src={item.image} alt={item.name} className="w-16 h-20 object-cover rounded-md bg-slate-50" />
                   )}
                   <div className="flex-1 min-w-0">
                     <h3 className="font-medium text-sm text-slate-950 truncate">{item.name}</h3>
+                    {item.size && item.color && (
+                      <p className="text-slate-500 text-xs mt-0.5">ไซส์: {item.size} | สี: {item.color}</p>
+                    )}
                     <p className="text-slate-400 text-xs mt-0.5">฿{item.price.toLocaleString("th-TH")} × {item.quantity}</p>
                     <p className="font-semibold text-sm text-slate-900 mt-1">฿{(item.price * item.quantity).toLocaleString("th-TH")}</p>
                   </div>
                   <button 
-                    onClick={() => removeFromCart(item.id)}
+                    onClick={() => removeFromCart(item.id, item.size || 'M', item.color || 'White')}
                     className="text-slate-400 hover:text-red-500 self-start p-1 hover:bg-red-50 rounded-md transition-colors"
                   >
                     <Trash2 size={16} />

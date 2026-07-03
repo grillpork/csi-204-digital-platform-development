@@ -17,11 +17,19 @@ export const useProductStore = create(
           set({ cart: data });
         }
       },
-      addToCart: async (product) => {
+      addToCart: async (product, quantity = null, size = null, color = null) => {
+        const qty = quantity !== null ? quantity : (product.quantity || 1);
+        const sz = size !== null ? size : (product.size || 'M');
+        const clr = color !== null ? color : (product.color || 'White');
         const res = await fetch('/api/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId: product.id }),
+          body: JSON.stringify({
+            productId: product.id,
+            quantity: qty,
+            size: sz,
+            color: clr
+          }),
         });
         if (res.status === 401) {
           return { needLogin: true };
@@ -32,8 +40,8 @@ export const useProductStore = create(
         }
         return {};
       },
-      removeFromCart: async (productId) => {
-        const res = await fetch(`/api/cart/${productId}`, { method: 'DELETE' });
+      removeFromCart: async (productId, size = 'M', color = 'White') => {
+        const res = await fetch(`/api/cart/${productId}?size=${encodeURIComponent(size)}&color=${encodeURIComponent(color)}`, { method: 'DELETE' });
         if (res.ok) {
           const { data } = await res.json();
           set({ cart: data });

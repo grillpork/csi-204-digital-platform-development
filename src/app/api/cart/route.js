@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db/prisma';
 import { requireUser } from '@/lib/auth/dal';
 import { HttpError } from '@/lib/http';
 
-// โหลด cart items แล้ว join product เอง (CartItem ไม่มี relation product ใน schema)
+// โหลด cart items แล้ว join product เอง
 async function loadCartItems(cartId) {
   const items = await prisma.cartItem.findMany({ where: { cartId } });
   if (items.length === 0) return [];
@@ -15,7 +15,7 @@ async function loadCartItems(cartId) {
     .map((i) => {
       const p = byId.get(i.productId);
       return p
-        ? { id: p.id, name: p.name, price: p.price, image: p.images?.[0] ?? null, quantity: i.quantity }
+        ? { id: p.id, name: p.name, price: p.price, image: p.images?.[0] ?? null, quantity: i.quantity, size: i.size, color: i.color }
         : null;
     })
     .filter(Boolean);
@@ -50,6 +50,8 @@ export async function POST(request) {
     const body = await request.json();
     const productId = Number(body.productId);
     const quantity = parseInt(body.quantity, 10) || 1;
+    const size = body.size ? String(body.size).trim() : 'M';
+    const color = body.color ? String(body.color).trim() : 'White';
     if (!Number.isInteger(productId)) {
       return NextResponse.json({ error: 'Invalid productId' }, { status: 400 });
     }
@@ -68,7 +70,7 @@ export async function POST(request) {
     }
 
     const existingItem = await prisma.cartItem.findFirst({
-      where: { cartId: cart.id, productId },
+      where: { cartId: cart.id, productId, size, color },
     });
     if (existingItem) {
       await prisma.cartItem.update({
@@ -77,7 +79,7 @@ export async function POST(request) {
       });
     } else {
       await prisma.cartItem.create({
-        data: { cartId: cart.id, productId, quantity },
+        data: { cartId: cart.id, productId, quantity, size, color },
       });
     }
 

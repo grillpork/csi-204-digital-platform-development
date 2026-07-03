@@ -11,7 +11,7 @@ const DEFAULT_PRINT_ZONE = { x: 0.27, y: 0.20, w: 0.46, h: 0.70 };
 function CustomShirtPageContent() {
   const searchParams = useSearchParams();
   const productId = parseInt(searchParams.get('id')) || 1;
-  const product = mockProducts.find((p) => p.id === productId) || mockProducts[0];
+  const [product, setProduct] = useState(mockProducts.find((p) => p.id === productId) || mockProducts[0]);
 
   const [viewSide, setViewSide] = useState('front');
 
@@ -52,6 +52,76 @@ function CustomShirtPageContent() {
   // Submission
   const [isUploading, setIsUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
+
+  // Edit mode states
+  const [editDesignId, setEditDesignId] = useState(null);
+  const [existingImageUrl, setExistingImageUrl] = useState('');
+  const [existingOverlayUrl, setExistingOverlayUrl] = useState('');
+
+  const designIdQuery = searchParams.get('designId');
+
+  // Keep product in sync with 'id' parameter changes if not editing a design
+  useEffect(() => {
+    if (!designIdQuery) {
+      const p = mockProducts.find((x) => x.id === productId) || mockProducts[0];
+      setProduct(p);
+    }
+  }, [productId, designIdQuery]);
+
+  useEffect(() => {
+    if (designIdQuery) {
+      fetch(`/api/designs?id=${designIdQuery}`)
+        .then((r) => r.json())
+        .then((j) => {
+          if (j.data) {
+            const d = j.data;
+            setEditDesignId(d.id);
+            setExistingImageUrl(d.images[0] || '');
+            setExistingOverlayUrl(d.overlay_image || '');
+            if (d.colors && d.colors[0]) setShirtColor(d.colors[0]);
+            if (d.sizes && d.sizes[0]) setShirtSize(d.sizes[0] === 'XXL' ? '2XL' : d.sizes[0]);
+            if (d.screen_size) setScreenSize(d.screen_size);
+            if (d.print_technique) setPrintTechnique(d.print_technique);
+
+            // Load the correct base product template
+            if (d.base_product_id) {
+              const bp = mockProducts.find(p => p.id === d.base_product_id);
+              if (bp) setProduct(bp);
+            }
+
+            // Load Front side design
+            if (d.overlay_image && d.overlay_image !== d.images[0] && d.overlay_image !== d.images[1]) {
+              setOverlayImageFront(d.overlay_image);
+              setOverlayPosFront({
+                x: d.overlay_position_x !== null ? d.overlay_position_x : 150,
+                y: d.overlay_position_y !== null ? d.overlay_position_y : 200
+              });
+              setOverlaySizeFront(d.overlay_size !== null ? d.overlay_size : 120);
+            }
+
+            // Load Back side design
+            if (d.overlay_image_back && d.overlay_image_back !== d.images[0] && d.overlay_image_back !== d.images[1]) {
+              setOverlayImageBack(d.overlay_image_back);
+              setOverlayPosBack({
+                x: d.overlay_position_x_back !== null ? d.overlay_position_x_back : 150,
+                y: d.overlay_position_y_back !== null ? d.overlay_position_y_back : 200
+              });
+              setOverlaySizeBack(d.overlay_size_back !== null ? d.overlay_size_back : 120);
+            }
+
+            // Set visible print side
+            if (d.print_side) {
+              setViewSide(d.print_side);
+            } else if (d.overlay_image_back && !d.overlay_image) {
+              setViewSide('back');
+            } else {
+              setViewSide('front');
+            }
+          }
+        })
+        .catch((err) => console.error("Error loading design for editing:", err));
+    }
+  }, [designIdQuery]);
 
   const canvasRef = useRef(null);
   const templateImgRef = useRef(null);
@@ -130,6 +200,7 @@ function CustomShirtPageContent() {
         setUploadSuccess(false);
       });
       reader.readAsDataURL(file);
+      e.target.value = ''; // Reset input value to allow uploading same file again
     }
   };
 
@@ -205,16 +276,31 @@ function CustomShirtPageContent() {
     }
   }, [isDragging, handlePointerMove, handlePointerUp]);
 
-  const generateCompositeImage = () => {
+  const getSafeImageUrl = (url) => {
+    if (!url) return '';
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return `/api/proxy-image?url=${encodeURIComponent(url)}`;
+    }
+    return url;
+  };
+
+  const generateCompositeImageForSide = (side) => {
     return new Promise((resolve, reject) => {
       const container = canvasRef.current;
-      const templateImg = templateImgRef.current;
-      if (!container || !templateImg) {
+      if (!container) {
         reject(new Error("Canvas elements not loaded"));
         return;
       }
 
-      // Create a high-resolution canvas with 4:3.5 aspect ratio
+      // Determine template image URL based on color & side
+      const templateImgUrl = side === 'front'
+        ? (shirtColor === 'Black' ? '/img/black-t-shirt/Gemini_Generated_Image_8n8u4z8n8u4z8n8u_2-removebg-preview.png' : (product.templateImgFront || product.image))
+        : (shirtColor === 'Black' ? '/img/black-t-shirt/Gemini_Generated_Image_8n8u4z8n8u4z8n8u_3-removebg-preview.png' : (product.templateImgBack || product.image));
+
+      const overlayImgUrl = side === 'front' ? overlayImageFront : overlayImageBack;
+      const overlayPos = side === 'front' ? overlayPosFront : overlayPosBack;
+      const overlaySize = side === 'front' ? overlaySizeFront : overlaySizeBack;
+
       const canvas = document.createElement('canvas');
       canvas.width = 800;
       canvas.height = 700;
@@ -222,62 +308,66 @@ function CustomShirtPageContent() {
 
       const containerW = 800;
       const containerH = 700;
-      const imgRatio = templateImg.naturalWidth / templateImg.naturalHeight;
-      const containerRatio = containerW / containerH;
 
-      let renderedW, renderedH;
-      if (imgRatio > containerRatio) {
-        renderedW = containerW;
-        renderedH = containerW / imgRatio;
-      } else {
-        renderedH = containerH;
-        renderedW = containerH * imgRatio;
-      }
+      const templateImg = new Image();
+      templateImg.crossOrigin = "anonymous";
+      templateImg.onload = () => {
+        const imgRatio = templateImg.naturalWidth / templateImg.naturalHeight;
+        const containerRatio = containerW / containerH;
 
-      const imgOffsetX = (containerW - renderedW) / 2;
-      const imgOffsetY = (containerH - renderedH) / 2;
+        let renderedW, renderedH;
+        if (imgRatio > containerRatio) {
+          renderedW = containerW;
+          renderedH = containerW / imgRatio;
+        } else {
+          renderedH = containerH;
+          renderedW = containerH * imgRatio;
+        }
 
-      // Draw template image
-      ctx.drawImage(templateImg, imgOffsetX, imgOffsetY, renderedW, renderedH);
+        const imgOffsetX = (containerW - renderedW) / 2;
+        const imgOffsetY = (containerH - renderedH) / 2;
 
-      // Draw overlay image
-      if (overlayImage) {
-        const overlay = new Image();
-        overlay.crossOrigin = "anonymous";
-        overlay.onload = () => {
-          // Scale client coordinates to high-resolution canvas size (800x700)
-          const scaleX = 800 / container.clientWidth;
-          const scaleY = 700 / container.clientHeight;
+        ctx.drawImage(templateImg, imgOffsetX, imgOffsetY, renderedW, renderedH);
 
-          const canvasOverlayX = overlayPos.x * scaleX;
-          const canvasOverlayY = overlayPos.y * scaleY;
-          const canvasOverlaySize = overlaySize * scaleX;
+        if (overlayImgUrl) {
+          const overlay = new Image();
+          overlay.crossOrigin = "anonymous";
+          overlay.onload = () => {
+            const scaleX = 800 / container.clientWidth;
+            const scaleY = 700 / container.clientHeight;
 
-          ctx.drawImage(
-            overlay,
-            canvasOverlayX - canvasOverlaySize / 2,
-            canvasOverlayY - canvasOverlaySize / 2,
-            canvasOverlaySize,
-            canvasOverlaySize
-          );
+            const canvasOverlayX = overlayPos.x * scaleX;
+            const canvasOverlayY = overlayPos.y * scaleY;
+            const canvasOverlaySize = overlaySize * scaleX;
 
-          canvas.toBlob((blob) => {
-            resolve(blob);
-          }, 'image/png');
-        };
-        overlay.onerror = (err) => reject(err);
-        overlay.src = overlayImage;
-      } else {
-        canvas.toBlob((blob) => {
-          resolve(blob);
-        }, 'image/png');
-      }
+            ctx.drawImage(
+              overlay,
+              canvasOverlayX - canvasOverlaySize / 2,
+              canvasOverlayY - canvasOverlaySize / 2,
+              canvasOverlaySize,
+              canvasOverlaySize
+            );
+
+            canvas.toBlob((blob) => resolve(blob), 'image/png');
+          };
+          overlay.onerror = (err) => reject(err);
+          // Load overlay through proxy to avoid CORS security exception
+          overlay.src = getSafeImageUrl(overlayImgUrl);
+        } else {
+          canvas.toBlob((blob) => resolve(blob), 'image/png');
+        }
+      };
+      templateImg.onerror = (err) => reject(err);
+      // Load template through proxy if it's external
+      templateImg.src = getSafeImageUrl(templateImgUrl);
     });
   };
 
   const handleSaveDesign = async (submitForReview = false) => {
-    const currentFile = viewSide === 'front' ? overlayFileFront : overlayFileBack;
-    if (!currentFile) {
+    const hasFront = !!overlayImageFront || !!overlayFileFront;
+    const hasBack = !!overlayImageBack || !!overlayFileBack;
+
+    if (!hasFront && !hasBack && !editDesignId) {
       alert('กรุณาอัปโหลดรูปภาพสกรีนเสื้อก่อนยืนยัน');
       return;
     }
@@ -285,44 +375,124 @@ function CustomShirtPageContent() {
     try {
       setIsUploading(true);
 
-      // 1. Generate composite image blob
-      const compositeBlob = await generateCompositeImage();
+      let finalOverlayFrontUrl = overlayImageFront;
+      let finalOverlayBackUrl = overlayImageBack;
 
-      // 2. Prepare FormData
-      const formData = new FormData();
-      formData.append('designImage', compositeBlob, `custom-design-${viewSide}.png`);
-      formData.append('shirtSize', shirtSize);
-      formData.append('screenSize', screenSize);
-      formData.append('color', shirtColor);
-
-      // 3. Upload to server
-      const response = await fetch('/api/custom-upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
+      // 1. Upload Front Overlay if it's a new file
+      if (overlayFileFront) {
+        const rawFormData = new FormData();
+        rawFormData.append('designImage', overlayFileFront);
+        const rawResponse = await fetch('/api/custom-upload', {
+          method: 'POST',
+          body: rawFormData,
+        });
+        if (!rawResponse.ok) throw new Error('Failed to upload raw front overlay image');
+        const rawData = await rawResponse.json();
+        finalOverlayFrontUrl = rawData.imageUrl;
       }
 
-      const data = await response.json();
+      // 2. Upload Back Overlay if it's a new file
+      if (overlayFileBack) {
+        const rawFormData = new FormData();
+        rawFormData.append('designImage', overlayFileBack);
+        const rawResponse = await fetch('/api/custom-upload', {
+          method: 'POST',
+          body: rawFormData,
+        });
+        if (!rawResponse.ok) throw new Error('Failed to upload raw back overlay image');
+        const rawData = await rawResponse.json();
+        finalOverlayBackUrl = rawData.imageUrl;
+      }
 
-      const create = await fetch('/api/designs', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({
-        name:`${product.name} — แบบของฉัน`, description:`เสื้อออกแบบเอง สี ${shirtColor} ไซส์ ${shirtSize} สกรีน ${screenSize} (${printTechnique})`,
-        image:data.imageUrl, category:'TSHIRT', color:shirtColor, sizes:[shirtSize === '2XL' ? 'XXL' : shirtSize], printSide:viewSide, screenSize, printTechnique
-      }) });
-      const created = await create.json();
-      if (!create.ok) throw new Error(created.error || 'บันทึกแบบไม่สำเร็จ');
+      // 3. Generate and upload composite images
+      const imagesArray = [];
+
+      if (hasFront) {
+        const frontBlob = await generateCompositeImageForSide('front');
+        const formData = new FormData();
+        formData.append('designImage', frontBlob, `custom-design-front.png`);
+        formData.append('shirtSize', shirtSize);
+        formData.append('screenSize', screenSize);
+        formData.append('color', shirtColor);
+
+        const response = await fetch('/api/custom-upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!response.ok) throw new Error('Failed to upload front preview image');
+        const data = await response.json();
+        imagesArray.push(data.imageUrl);
+      }
+
+      if (hasBack) {
+        const backBlob = await generateCompositeImageForSide('back');
+        const formData = new FormData();
+        formData.append('designImage', backBlob, `custom-design-back.png`);
+        formData.append('shirtSize', shirtSize);
+        formData.append('screenSize', screenSize);
+        formData.append('color', shirtColor);
+
+        const response = await fetch('/api/custom-upload', {
+          method: 'POST',
+          body: formData,
+        });
+        if (!response.ok) throw new Error('Failed to upload back preview image');
+        const data = await response.json();
+        imagesArray.push(data.imageUrl);
+      }
+
+      if (imagesArray.length === 0 && editDesignId && existingImageUrl) {
+        imagesArray.push(existingImageUrl);
+      }
+
+      const payload = {
+        id: editDesignId,
+        name: editDesignId ? `${product.name} — แบบของฉัน (แก้ไข)` : `${product.name} — แบบของฉัน`,
+        description: `เสื้อออกแบบเอง สี ${shirtColor} ไซส์ ${shirtSize} สกรีน ${screenSize} (${printTechnique})`,
+        images: imagesArray,
+        overlay_image: finalOverlayFrontUrl,
+        overlay_position_x: hasFront ? overlayPosFront.x : null,
+        overlay_position_y: hasFront ? overlayPosFront.y : null,
+        overlay_size: hasFront ? overlaySizeFront : null,
+        overlay_image_back: finalOverlayBackUrl,
+        overlay_position_x_back: hasBack ? overlayPosBack.x : null,
+        overlay_position_y_back: hasBack ? overlayPosBack.y : null,
+        overlay_size_back: hasBack ? overlaySizeBack : null,
+        baseProductId: productId,
+        category: 'TSHIRT',
+        color: shirtColor,
+        sizes: [shirtSize === '2XL' ? 'XXL' : shirtSize],
+        printSide: viewSide,
+        screenSize,
+        printTechnique
+      };
+
+      const url = '/api/designs';
+      const method = editDesignId ? 'PATCH' : 'POST';
+      const updateResponse = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const result = await updateResponse.json();
+      if (!updateResponse.ok) throw new Error(result.error || 'บันทึกแบบไม่สำเร็จ');
+
+      const savedId = editDesignId || result.data.id;
+
       if (submitForReview) {
-        const submit = await fetch('/api/designs/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:created.data.id})});
-        const result = await submit.json();
-        if(!submit.ok) throw new Error(result.error || 'ส่งตรวจไม่สำเร็จ');
+        const submit = await fetch('/api/designs/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: savedId })
+        });
+        const submitResult = await submit.json();
+        if (!submit.ok) throw new Error(submitResult.error || 'ส่งตรวจไม่สำเร็จ');
       }
 
       setUploadSuccess(true);
     } catch (e) {
       console.error(e);
-      alert('การสั่งซื้อล้มเหลว กรุณาลองใหม่อีกครั้ง');
+      alert(e.message || 'การดำเนินการล้มเหลว กรุณาลองใหม่อีกครั้ง');
     } finally {
       setIsUploading(false);
     }
@@ -404,14 +574,6 @@ function CustomShirtPageContent() {
                   <span className="text-xs text-slate-500 ml-1 w-10">{overlaySize}px</span>
                 </div>
 
-                {/* Reset position */}
-                <button
-                  onClick={() => { setOverlayPos({ x: 150, y: 200 }); setOverlaySize(120); }}
-                  className="flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-800 bg-slate-50 border border-slate-200 px-3 py-2 rounded-lg transition-colors"
-                >
-                  <RotateCcw size={14} />
-                  รีเซ็ต
-                </button>
 
                 {/* Remove overlay */}
                 <button
@@ -517,6 +679,7 @@ function CustomShirtPageContent() {
                     {overlayImage ? 'เปลี่ยนรูปภาพ' : 'เลือกรูปภาพ'}
                   </span>
                   <input
+                    key={viewSide}
                     id="file-upload-custom"
                     type="file"
                     className="sr-only"

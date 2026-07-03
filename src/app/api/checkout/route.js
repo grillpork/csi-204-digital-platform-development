@@ -89,6 +89,8 @@ export async function POST(request) {
         productId: item.productId,
         quantity: item.quantity,
         priceAtOrder: product.price,
+        size: item.size,
+        color: item.color,
       });
     }
 
@@ -190,6 +192,8 @@ export async function POST(request) {
               productId: item.productId,
               quantity: item.quantity,
               price: item.priceAtOrder,
+              size: item.size,
+              color: item.color,
             })),
           },
         },

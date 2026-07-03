@@ -17,6 +17,10 @@ model Product {
   overlay_position_x Float?
   overlay_position_y Float?
   overlay_size       Float?
+  overlay_image_back      String?
+  overlay_position_x_back Float?
+  overlay_position_y_back Float?
+  overlay_size_back       Float?
   print_side         String?
   screen_size        String?
   print_technique    String?

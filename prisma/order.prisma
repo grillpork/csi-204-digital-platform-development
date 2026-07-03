@@ -21,6 +21,8 @@ model OrderItem {
   productId Int     @map("product_id")
   quantity  Int
   price     Int
+  size      String  @default("M")
+  color     String  @default("White")
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product @relation(fields: [productId], references: [id])
 

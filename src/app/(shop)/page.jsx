@@ -192,6 +192,8 @@ export default function ProductsPage() {
   const [productError, setProductError] = useState("");
   const [favoriteIds, setFavoriteIds] = useState(new Set());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [sizeModalProduct, setSizeModalProduct] = useState(null);
+  const [selectedModalSize, setSelectedModalSize] = useState(null);
 
   useEffect(() => {
     fetch("/api/products", { cache: "no-store" })
@@ -271,14 +273,22 @@ export default function ProductsPage() {
     }
   };
 
-  // กดแล้วเพิ่มสินค้าจริงจาก grid เข้าตะกร้า
-  const handleAddToCart = async (product) => {
-    const result = await addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image || product.images?.[0],
-    });
+  // กดแล้วเปิด Modal ให้เลือกไซส์ก่อนเพิ่มลงตะกร้า
+  const handleAddToCart = (product) => {
+    setSizeModalProduct(product);
+    if (product.sizes && product.sizes.length > 0) {
+      setSelectedModalSize(product.sizes[0]);
+    } else {
+      setSelectedModalSize('M');
+    }
+  };
+
+  // กดยืนยันจาก Modal เพื่อบันทึกลงตะกร้าจริงๆ
+  const confirmAddToCart = async () => {
+    if (!sizeModalProduct) return;
+    const color = sizeModalProduct.colors?.[0] || 'White';
+    const result = await addToCart(sizeModalProduct, 1, selectedModalSize, color);
+    setSizeModalProduct(null);
     if (result?.needLogin) {
       router.push("/login");
     }
@@ -409,6 +419,46 @@ export default function ProductsPage() {
           />}
         </main>
       </div>
+      
+      {sizeModalProduct && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl transition-all scale-100 font-sans">
+            <h3 className="text-lg font-bold text-slate-900 mb-2">เลือกไซส์เสื้อ</h3>
+            <p className="text-sm text-slate-500 mb-4 truncate">{sizeModalProduct.name}</p>
+            
+            <div className="flex flex-wrap gap-2 mb-6 justify-center">
+              {(sizeModalProduct.sizes && sizeModalProduct.sizes.length > 0 ? sizeModalProduct.sizes : ['S', 'M', 'L', 'XL']).map((sz) => (
+                <button
+                  key={sz}
+                  onClick={() => setSelectedModalSize(sz)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
+                    selectedModalSize === sz
+                      ? 'bg-slate-900 border-slate-900 text-white shadow-md'
+                      : 'border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                >
+                  {sz}
+                </button>
+              ))}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSizeModalProduct(null)}
+                className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={confirmAddToCart}
+                className="flex-1 py-2.5 rounded-xl bg-slate-900 text-white hover:bg-slate-800 text-sm font-medium transition-colors"
+              >
+                เพิ่มลงตะกร้า
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

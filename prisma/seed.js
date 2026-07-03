@@ -50,17 +50,22 @@ async function main() {
     create: { name: 'Shirtsy Admin', email: 'admin@shirtsy.local', password: await bcrypt.hash('AdminTest!2026', 12), roleId: adminRole.id },
   });
 
+  const allowedImages = [
+    '/img/black-t-shirt/simple-black-t-shirt-worn-by-man.jpg',
+    '/img/white-t-shirt/wh-t-shirt-cover.jpg'
+  ];
+
   const catalog = [
-    ['เสื้อยืดคอตตอนคลาสสิก', 'TSHIRT', 290, 120, '/img/white-t-shirt/wh-t-shirt-cover.jpg', ['White','Black'], ['S','M','L','XL']],
-    ['เสื้อยืดโอเวอร์ไซซ์มินิมอล', 'TSHIRT', 390, 80, '/images/1782492211769-2oxslzifnwu-test.png', ['White','Gray'], ['M','L','XL','XXL']],
-    ['เสื้อโปโลทำงานพรีเมียม', 'POLO', 490, 65, '/images/1782492893964-zd9aa4mk6g-test.png', ['Black','Navy'], ['S','M','L','XL']],
-    ['ฮู้ดดี้ผ้าคอตตอนหนา', 'HOODIE', 790, 40, '/images/1782506792467-mfw6lw9datk-690587754_1733216234671297_1761071839488886865_n.png', ['Black','Gray'], ['M','L','XL']],
-    ['เสื้อแขนยาว Everyday', 'LONG_SLEEVE', 450, 55, '/images/1782685941069-yf77vik6g1-71-lp7NYU5L._AC_UF894,1000_QL80_.jpg', ['White','Black'], ['S','M','L','XL']],
-    ['เสื้อกล้าม Active', 'TANK_TOP', 320, 70, '/images/1782685941070-8vq8y9qxsos-189fa748c3_gojo-blue-eyes-jujutsu-kaisen-hd-live.webp', ['White','Black'], ['S','M','L']],
-    ['เสื้อยืด Essential สีดำ', 'TSHIRT', 310, 100, '/img/white-t-shirt/template/wh-t-shirt-TEM-f.png', ['Black'], ['S','M','L','XL','XXL']],
-    ['เสื้อยืดสกรีนหน้าอก', 'TSHIRT', 420, 75, '/img/white-t-shirt/template/wh-t-shirt-TEM-b.png', ['White','Cream'], ['S','M','L','XL']],
-    ['โปโล Smart Casual', 'POLO', 550, 50, '/img/white-t-shirt/template/wh-t-shirt-TEM-f-removebg.png', ['Navy','White'], ['M','L','XL']],
-    ['ฮู้ดดี้ Everyday Zip', 'HOODIE', 890, 35, '/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png', ['Black','Gray'], ['M','L','XL','XXL']],
+    ['เสื้อยืดคอตตอนคลาสสิก', 'TSHIRT', 290, 120, allowedImages[1], ['White'], ['S','M','L','XL']],
+    ['เสื้อยืดโอเวอร์ไซซ์มินิมอล', 'TSHIRT', 390, 80, allowedImages[0], ['Black'], ['M','L','XL','XXL']],
+    ['เสื้อโปโลทำงานพรีเมียม', 'POLO', 490, 65, allowedImages[0], ['Black'], ['S','M','L','XL']],
+    ['ฮู้ดดี้ผ้าคอตตอนหนา', 'HOODIE', 790, 40, allowedImages[0], ['Black'], ['M','L','XL']],
+    ['เสื้อแขนยาว Everyday', 'LONG_SLEEVE', 450, 55, allowedImages[1], ['White'], ['S','M','L','XL']],
+    ['เสื้อกล้าม Active', 'TANK_TOP', 320, 70, allowedImages[1], ['White'], ['S','M','L']],
+    ['เสื้อยืด Essential สีดำ', 'TSHIRT', 310, 100, allowedImages[0], ['Black'], ['S','M','L','XL','XXL']],
+    ['เสื้อยืดสกรีนหน้าอก', 'TSHIRT', 420, 75, allowedImages[1], ['White'], ['S','M','L','XL']],
+    ['โปโล Smart Casual', 'POLO', 550, 50, allowedImages[1], ['White'], ['M','L','XL']],
+    ['ฮู้ดดี้ Everyday Zip', 'HOODIE', 890, 35, allowedImages[0], ['Black'], ['M','L','XL','XXL']],
   ];
 
   // Generate 90 additional products programmatically to reach exactly 100 items
@@ -72,23 +77,16 @@ async function main() {
     'LONG_SLEEVE': 'เสื้อแขนยาว Cozy',
     'TANK_TOP': 'เสื้อกล้าม Gym Sport'
   };
-  const colorsList = [['White'], ['Black'], ['Gray'], ['Navy'], ['Black', 'Gray'], ['White', 'Navy'], ['White', 'Black']];
   const sizesList = [['S', 'M', 'L'], ['M', 'L', 'XL'], ['S', 'M', 'L', 'XL'], ['M', 'L', 'XL', 'XXL']];
-  const imagesMap = {
-    'TSHIRT': '/img/white-t-shirt/wh-t-shirt-cover.jpg',
-    'POLO': '/images/1782492893964-zd9aa4mk6g-test.png',
-    'HOODIE': '/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png',
-    'LONG_SLEEVE': '/images/1782685941069-yf77vik6g1-71-lp7NYU5L._AC_UF894,1000_QL80_.jpg',
-    'TANK_TOP': '/images/1782685941070-8vq8y9qxsos-189fa748c3_gojo-blue-eyes-jujutsu-kaisen-hd-live.webp'
-  };
 
   for (let i = 1; i <= 90; i++) {
     const category = categoriesList[i % categoriesList.length];
     const name = `${categoriesNames[category]} รุ่นที่ ${i}`;
     const price = 250 + ((i * 15) % 650);
     const stock = 10 + ((i * 7) % 150);
-    const image = imagesMap[category];
-    const colors = colorsList[i % colorsList.length];
+    // Alternate between black shirt image and white shirt image
+    const image = allowedImages[i % allowedImages.length];
+    const colors = image === allowedImages[0] ? ['Black'] : ['White'];
     const sizes = sizesList[i % sizesList.length];
     catalog.push([name, category, price, stock, image, colors, sizes]);
   }

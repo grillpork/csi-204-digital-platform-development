@@ -78,13 +78,7 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    addToCart({
-      id: product.id,
-      name: `${product.name} (${selectedColor}, ${selectedSize})`,
-      price: product.price,
-      image: product.image,
-      quantity: quantity,
-    });
+    addToCart(product, quantity, selectedSize, selectedColor);
   };
 
   if (loading) {
