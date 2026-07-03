@@ -18,7 +18,6 @@ export default function NavbarA() {
     { label: "สินค้าของฉัน", href: "/profile/products", icon: Package },
     { label: "สินค้าที่ถูกใจ", href: "/profile/favorites", icon: Heart },
     { label: "ประวัติการสั่งซื้อ", href: "/profile/orders", icon: ShoppingBag },
-    { label: "ติดตามพัสดุ", href: "/tracking", icon: Truck },
   ];
 
   // Hide navbar on login, register, and dashboard pages
@@ -27,7 +26,6 @@ export default function NavbarA() {
 
   const menuItems = [
     { label: "หน้าแรก", href: "/", icon: Home },
-    { label: "ติดตามพัสดุ", href: "/tracking", icon: Truck },
     { label: "สั่งทำเสื้อ", href: "/custom", icon: Palette },
     { label: "เอกสาร", href: "/docs/policy", icon: FileText }
   ];

@@ -7,7 +7,8 @@ export async function POST(request) {
     const rawBody = await request.text();
     const webhookSecret = process.env.OMISE_WEBHOOK_SECRET;
 
-    if (webhookSecret && !verifyOmiseWebhookSignature({
+    const isProd = process.env.NODE_ENV === "production";
+    if (isProd && webhookSecret && !verifyOmiseWebhookSignature({
       rawBody,
       signatureHeader: request.headers.get("omise-signature"),
       timestampHeader: request.headers.get("omise-signature-timestamp"),

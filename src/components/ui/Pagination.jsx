@@ -11,7 +11,8 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
     <div className="flex items-center justify-between mt-10">
       <button
         onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-        className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-700 hover:border-black transition-colors"
+        disabled={currentPage === 1}
+        className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-700 hover:border-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-300"
       >
         <ArrowLeft size={16} />
         ก่อนหน้า
@@ -41,7 +42,8 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
 
       <button
         onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-        className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-700 hover:border-black transition-colors"
+        disabled={currentPage === totalPages}
+        className="flex items-center gap-2 border border-gray-300 rounded-full px-4 py-2.5 text-sm text-gray-700 hover:border-black transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-300"
       >
         ถัดไป
         <ArrowRight size={16} />

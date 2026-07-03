@@ -159,10 +159,6 @@ export async function POST(request) {
           { status: 400 }
         );
       }
-    } else if (paymentMethod === "cod") {
-      // เก็บเงินปลายทาง ไม่ต้องทำธุรกรรมผ่าน Omise
-      paymentStatus = "UNPAID";
-      orderStatus = "PENDING";
     } else {
       return NextResponse.json(
         { error: "ช่องทางการชำระเงินไม่ถูกต้อง" },

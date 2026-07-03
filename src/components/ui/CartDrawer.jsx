@@ -37,6 +37,8 @@ export default function CartDrawer({ size = 24, className = "" }) {
   const [createdOrderId, setCreatedOrderId] = useState(null);
   const [paymentExpiresAt, setPaymentExpiresAt] = useState(null);
   const [isPendingPayment, setIsPendingPayment] = useState(false);
+  const [purchaseAmount, setPurchaseAmount] = useState(0);
+
 
   useEffect(() => {
     setIsMounted(true);
@@ -165,6 +167,7 @@ export default function CartDrawer({ size = 24, className = "" }) {
       // 3. จัดการผลลัพธ์
       if (paymentMethod === "transfer" && result.qrCodeUrl) {
         // แสดง QR Code PromptPay ให้สแกน
+        setPurchaseAmount(cartTotal);
         setPromptPayQr(result.qrCodeUrl);
         setCreatedOrderId(result.orderId);
         setPaymentExpiresAt(result.expiresAt);
@@ -174,6 +177,7 @@ export default function CartDrawer({ size = 24, className = "" }) {
         window.location.href = result.authorizeUri;
       } else {
         // ชำระเงินสำเร็จ (บัตรเครดิตแบบธรรมดา หรือ COD)
+        setPurchaseAmount(cartTotal);
         setLastTrackingId(result.orderId);
         setIsCheckoutOpen(false);
         setIsOpen(false);
@@ -365,7 +369,7 @@ export default function CartDrawer({ size = 24, className = "" }) {
               {/* Payment Methods */}
               <div className="space-y-3 pt-2">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">ช่องทางชำระเงิน</h3>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("transfer")}
@@ -389,14 +393,6 @@ export default function CartDrawer({ size = 24, className = "" }) {
                   >
                     <CreditCard size={20} />
                     บัตรเครดิต
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPaymentMethod("cod")}
-                    className={`p-3 border rounded-xl flex flex-col items-center gap-1.5 text-xs font-medium transition-all ${paymentMethod === "cod" ? "border-slate-900 bg-slate-50 text-slate-950" : "border-slate-200 text-slate-500 hover:bg-slate-50"}`}
-                  >
-                    <Truck size={20} />
-                    เก็บปลายทาง
                   </button>
                 </div>
               </div>
@@ -488,7 +484,7 @@ export default function CartDrawer({ size = 24, className = "" }) {
                   กำลังดำเนินการ...
                 </>
               ) : (
-                paymentMethod === "cod" ? "ยืนยันสั่งซื้อสินค้า" : "ชำระเงิน"
+                "ชำระเงิน"
               )}
             </button>
           </div>
@@ -508,7 +504,7 @@ export default function CartDrawer({ size = 24, className = "" }) {
 
             <div className="bg-slate-50 p-3 rounded-lg w-full mb-6 border border-slate-100">
               <span className="text-[10px] text-slate-400 font-bold uppercase">ยอดเงินที่ต้องชำระ</span>
-              <p className="text-lg font-bold text-slate-950 mt-0.5">฿{cartTotal.toLocaleString("th-TH")}</p>
+              <p className="text-lg font-bold text-slate-950 mt-0.5">฿{purchaseAmount.toLocaleString("th-TH")}</p>
               {paymentExpiresAt && <p className="mt-1 text-[10px] text-slate-500">QR ใช้ได้ถึง {new Date(paymentExpiresAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.</p>}
             </div>
 
@@ -543,11 +539,11 @@ export default function CartDrawer({ size = 24, className = "" }) {
             
             <div className="flex flex-col gap-2 w-full">
               <Link 
-                href={`/tracking?id=${lastTrackingId}`}
+                href="/profile/orders"
                 onClick={() => setIsSuccessModalOpen(false)}
                 className="w-full bg-slate-900 text-white py-2.5 rounded-lg font-medium hover:bg-slate-800 transition-colors block text-center text-sm"
               >
-                {isPendingPayment ? "ไปที่ประวัติคำสั่งซื้อ" : "ติดตามการส่งสินค้า"}
+                {isPendingPayment ? "ไปที่ประวัติคำสั่งซื้อ" : "ดูคำสั่งซื้อของฉัน"}
               </Link>
               <button 
                 onClick={() => setIsSuccessModalOpen(false)}

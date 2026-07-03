@@ -2,7 +2,7 @@
 import CartDrawer from "@/components/ui/CartDrawer";
 import FilterDrawer from "@/components/ui/FilterDrawer";
 import { useProductStore } from "@/store/product";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
@@ -173,7 +173,7 @@ const colors = [
 ];
 const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 const sleeveTypes = ["Long Sleeve", "Short Sleeve", "No Sleeve"];
-const ITEMS_PER_PAGE = 8;
+const ITEMS_PER_PAGE = 60;
 const categoryValues = { "T-Shirt": "TSHIRT", Polo: "POLO", Hoodie: "HOODIE", "Long Sleeve": "LONG_SLEEVE", "Tank Top": "TANK_TOP" };
 const colorValues = { "#000000": "Black", "#ffffff": "White", "#9CA3AF": "Gray", "#EF4444": "Red", "#F97316": "Orange", "#EAB308": "Yellow", "#22C55E": "Green", "#3B82F6": "Blue", "#A855F7": "Purple" };
 
@@ -227,6 +227,26 @@ export default function ProductsPage() {
   const paginatedProducts = filteredProducts.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   useEffect(() => { setCurrentPage(1); }, [search, selectedCategory, selectedColors, selectedSizes, selectedSleeves]);
+
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    const element = document.getElementById("product-list");
+    if (element) {
+      const offset = 100; // Offset to clear sticky header and spacing
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+    }
+  }, [currentPage]);
 
   const addToCart = useProductStore((state) => state.addToCart);
 
@@ -301,7 +321,7 @@ export default function ProductsPage() {
 
       {/* max-w-7xl mx-auto: จัดให้ส่วน "All Product" ทั้งหมด อยู่กลางจอ ขอบซ้าย-ขวาเท่ากัน */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <main className="w-full mt-140">
+        <main id="product-list" className="w-full mt-140">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">All Product</h1>
             <div className="flex items-center gap-2">

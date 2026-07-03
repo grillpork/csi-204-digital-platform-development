@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db/prisma";
 import { requireUser } from "@/lib/auth/dal";
 import { HttpError } from "@/lib/http";
+import { retrieveOmiseCharge } from "@/lib/payment/omise-webhook";
 
 export async function GET() {
   try {
@@ -19,6 +20,34 @@ export async function GET() {
         }
       });
     }
+
+    // Sync PENDING_PAYMENT orders with Omise in real-time
+    const pendingOrders = await prisma.order.findMany({
+      where: { userId: user.id, status: "PENDING_PAYMENT" },
+      include: { payments: true }
+    });
+    for (const order of pendingOrders) {
+      if (order.payments && order.payments.id) {
+        try {
+          const charge = await retrieveOmiseCharge(order.payments.id);
+          if (charge.status === "successful") {
+            await prisma.$transaction([
+              prisma.payments.update({
+                where: { id: order.payments.id },
+                data: { status: "successful", paid_at: new Date() },
+              }),
+              prisma.order.updateMany({
+                where: { id: order.id, status: "PENDING_PAYMENT" },
+                data: { status: "PAID" },
+              }),
+            ]);
+          }
+        } catch (err) {
+          console.error(`Failed to sync charge ${order.payments.id} for order ${order.id}:`, err);
+        }
+      }
+    }
+
     const orders = await prisma.order.findMany({
       where: { userId: user.id }, orderBy: { createdAt: "desc" },
       include: { items: { include: { product: true } }, payments: true },

@@ -63,13 +63,43 @@ async function main() {
     ['ฮู้ดดี้ Everyday Zip', 'HOODIE', 890, 35, '/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png', ['Black','Gray'], ['M','L','XL','XXL']],
   ];
 
+  // Generate 90 additional products programmatically to reach exactly 100 items
+  const categoriesList = ['TSHIRT', 'POLO', 'HOODIE', 'LONG_SLEEVE', 'TANK_TOP'];
+  const categoriesNames = {
+    'TSHIRT': 'เสื้อยืดสตรีทมินิมอล',
+    'POLO': 'เสื้อโปโลสปอร์ตพรีเมียม',
+    'HOODIE': 'เสื้อฮู้ดสเก็ตเตอร์',
+    'LONG_SLEEVE': 'เสื้อแขนยาว Cozy',
+    'TANK_TOP': 'เสื้อกล้าม Gym Sport'
+  };
+  const colorsList = [['White'], ['Black'], ['Gray'], ['Navy'], ['Black', 'Gray'], ['White', 'Navy'], ['White', 'Black']];
+  const sizesList = [['S', 'M', 'L'], ['M', 'L', 'XL'], ['S', 'M', 'L', 'XL'], ['M', 'L', 'XL', 'XXL']];
+  const imagesMap = {
+    'TSHIRT': '/img/white-t-shirt/wh-t-shirt-cover.jpg',
+    'POLO': '/images/1782492893964-zd9aa4mk6g-test.png',
+    'HOODIE': '/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png',
+    'LONG_SLEEVE': '/images/1782685941069-yf77vik6g1-71-lp7NYU5L._AC_UF894,1000_QL80_.jpg',
+    'TANK_TOP': '/images/1782685941070-8vq8y9qxsos-189fa748c3_gojo-blue-eyes-jujutsu-kaisen-hd-live.webp'
+  };
+
+  for (let i = 1; i <= 90; i++) {
+    const category = categoriesList[i % categoriesList.length];
+    const name = `${categoriesNames[category]} รุ่นที่ ${i}`;
+    const price = 250 + ((i * 15) % 650);
+    const stock = 10 + ((i * 7) % 150);
+    const image = imagesMap[category];
+    const colors = colorsList[i % colorsList.length];
+    const sizes = sizesList[i % sizesList.length];
+    catalog.push([name, category, price, stock, image, colors, sizes]);
+  }
+
   for (const [name, category, price, stock, image, colors, sizes] of catalog) {
     const existing = await prisma.product.findFirst({ where: { name, sellerId: seller.id } });
     const data = { name, description: `${name} ผลิตสำหรับลูกค้าไทย เนื้อผ้าใส่สบาย เหมาะสำหรับสวมใส่และนำไปสกรีน`, category, price, stock, images: [image], colors, sizes, sellerId: seller.id, is_public: true, approvalStatus: 'APPROVED', reviewedAt: new Date() };
     if (existing) await prisma.product.update({ where: { id: existing.id }, data });
     else await prisma.product.create({ data });
   }
-  console.log('✅ Catalog products ready: 10 items');
+  console.log(`✅ Catalog products ready: ${catalog.length} items`);
 }
 
 main()
