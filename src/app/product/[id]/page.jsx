@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Star, ShoppingCart, ArrowLeft, Heart, Share2, Truck, ShieldCheck, RefreshCcw } from "lucide-react";
 import { useProductStore } from "@/store/product";
-import { mockProducts } from "@/app/data/products";
 
 const colors = [
   { name: "Black", hex: "#000000" },
@@ -44,14 +43,8 @@ export default function ProductDetailPage() {
           }
         }
       } catch (err) {
-        // Fallback to mock product
         if (active) {
-          const mock = mockProducts.find((p) => p.id === parseInt(id));
-          if (mock) {
-            setProduct(mock);
-          } else {
-            setProduct(mockProducts[0]);
-          }
+          setProduct(null);
         }
       } finally {
         if (active) {

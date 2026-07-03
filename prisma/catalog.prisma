@@ -1,0 +1,35 @@
+model ShirtType {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g. เสื้อยืด, เสื้อโปโล, เสื้อฮู้ด
+  code        String   @unique // e.g. TSHIRT, POLO, HOODIE
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("shirt_types")
+}
+
+model ShirtSize {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g. S, M, L, XL
+  code        String   @unique // e.g. S, M, L, XL
+  chestSize   String?  // e.g. อก 38"
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("shirt_sizes")
+}
+
+model ShirtQuality {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g. Cotton 100%, Semi-Premium, Premium
+  description String?  // e.g. ผ้าหนานุ่ม สกรีนพรีเมียม
+  price       Int      @default(0) // Extra price adjustment
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("shirt_qualities")
+}

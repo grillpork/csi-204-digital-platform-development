@@ -14,7 +14,8 @@ import {
   Store,
   ChevronDown,
   LogOut,
-  User
+  User,
+  Wallet
 } from "lucide-react";
 
 export default function DashboardLayout({ children }) {
@@ -26,13 +27,16 @@ export default function DashboardLayout({ children }) {
     { name: "Overview", href: "/dashboard/overview", icon: LayoutDashboard },
     { name: "Orders", href: "/dashboard/order", icon: ShoppingBag },
     { name: "ตรวจแบบเสื้อ", href: "/dashboard/designs", icon: Store },
-    { name: "Settings", href: "#", icon: Settings },
+    { name: "จัดการสเปกสินค้า", href: "/dashboard/catalog", icon: Settings },
+    { name: "จัดการรายได้", href: "/dashboard/revenue", icon: Wallet },
   ];
 
   const getPageTitle = () => {
     if (pathname.includes("/overview")) return "Overview Analytics";
     if (pathname.includes("/order")) return "Order Management";
     if (pathname.includes("/designs")) return "ตรวจและอนุมัติแบบเสื้อ";
+    if (pathname.includes("/catalog")) return "จัดการสเปกสินค้า (ประเภท, Size, คุณภาพ)";
+    if (pathname.includes("/revenue")) return "จัดการรายได้ดีไซเนอร์";
     return "Admin Dashboard";
   };
 
@@ -107,7 +111,7 @@ export default function DashboardLayout({ children }) {
         
         {/* Topbar Header */}
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 relative z-30 shadow-sm">
-          {/* Left: Mobile Menu Trigger & Title */}
+          {/* Left: Mobile Menu Trigger */}
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setSidebarOpen(true)}
@@ -115,29 +119,10 @@ export default function DashboardLayout({ children }) {
             >
               <Menu size={20} />
             </button>
-            <h1 className="text-lg font-bold text-slate-900">{getPageTitle()}</h1>
           </div>
 
           {/* Right: Actions & Admin Profile */}
           <div className="flex items-center gap-4">
-            {/* Search (Desktop) */}
-            <div className="relative hidden md:block w-64">
-              <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
-                <Search size={16} />
-              </span>
-              <input
-                type="text"
-                placeholder="Search analytics..."
-                className="w-full bg-slate-50 border border-slate-200 rounded-full pl-9 pr-4 py-1.5 text-xs text-slate-700 placeholder-slate-400 outline-none focus:border-slate-300 focus:bg-white transition-all"
-              />
-            </div>
-
-            {/* Notifications Trigger */}
-            <button className="p-2 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all relative">
-              <Bell size={18} />
-              <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white animate-pulse" />
-            </button>
-
             {/* Profile Dropdown */}
             <div className="relative">
               <button 
