@@ -38,16 +38,16 @@ function CustomShirtPageContent() {
   const [overlayFileBack, setOverlayFileBack] = useState(null);
   const setOverlayFile = viewSide === 'front' ? setOverlayFileFront : setOverlayFileBack;
 
-  // Current template image
-  const currentTemplateImg = viewSide === 'front'
-    ? (product.templateImgFront || product.image)
-    : (product.templateImgBack || product.image);
-
   // Shirt options
   const [shirtSize, setShirtSize] = useState('M');
   const [screenSize, setScreenSize] = useState('A4');
   const [shirtColor, setShirtColor] = useState('White');
   const [printTechnique, setPrintTechnique] = useState('DFT');
+
+  // Current template image
+  const currentTemplateImg = viewSide === 'front'
+    ? (shirtColor === 'Black' ? '/img/black-t-shirt/Gemini_Generated_Image_8n8u4z8n8u4z8n8u_2-removebg-preview.png' : (product.templateImgFront || product.image))
+    : (shirtColor === 'Black' ? '/img/black-t-shirt/Gemini_Generated_Image_8n8u4z8n8u4z8n8u_3-removebg-preview.png' : (product.templateImgBack || product.image));
 
   // Submission
   const [isUploading, setIsUploading] = useState(false);
