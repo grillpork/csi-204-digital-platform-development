@@ -125,32 +125,51 @@ export default function ReviewDesigns() {
         </div>
       )}
 
-      {/* Control panel: Filter & Search */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-        
-        {/* Status filters */}
-        <div className="flex bg-slate-100 p-1 rounded-xl self-start">
-          {["ALL", "PENDING", "APPROVED", "REJECTED"].map((status) => (
-            <button
-              key={status}
-              onClick={() => setStatusFilter(status)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                statusFilter === status
-                  ? "bg-white text-slate-900 shadow-sm"
-                  : "text-slate-500 hover:text-slate-950"
+      {/* 4-Column Grid Cards (Acts as filter tabs) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { id: "ALL", title: "ทั้งหมด (All)", desc: "ผลงานออกแบบทั้งหมด", icon: Layers, count: items.length },
+          { id: "PENDING", title: "รอตรวจสอบ (Pending)", desc: "ผลงานที่รอการพิจารณา", icon: AlertCircle, count: items.filter(i => i.approvalStatus === "PENDING").length },
+          { id: "APPROVED", title: "อนุมัติแล้ว (Approved)", desc: "ผลงานที่อนุมัติลงร้านค้า", icon: Check, count: items.filter(i => i.approvalStatus === "APPROVED").length },
+          { id: "REJECTED", title: "ปฏิเสธแล้ว (Rejected)", desc: "ผลงานที่ไม่ผ่านเงื่อนไข", icon: X, count: items.filter(i => i.approvalStatus === "REJECTED").length }
+        ].map((card) => {
+          const Icon = card.icon;
+          const isActive = statusFilter === card.id;
+          return (
+            <div 
+              key={card.id}
+              onClick={() => setStatusFilter(card.id)}
+              className={`p-5 rounded-3xl cursor-pointer transition-all border ${
+                isActive
+                  ? "bg-slate-900 text-white shadow-lg border-slate-900 active:scale-98"
+                  : "bg-white text-slate-800 border-slate-100 hover:shadow-md hover:border-slate-200"
               }`}
             >
-              {status === "ALL" && "ทั้งหมด"}
-              {status === "PENDING" && "รอตรวจสอบ"}
-              {status === "APPROVED" && "อนุมัติแล้ว"}
-              {status === "REJECTED" && "ปฏิเสธแล้ว"}
-            </button>
-          ))}
-        </div>
+              <div className="flex justify-between items-start">
+                <div className={`p-3 rounded-2xl ${isActive ? "bg-white/10 text-white" : "bg-indigo-50 text-indigo-650"}`}>
+                  <Icon size={20} />
+                </div>
+                <span className={`text-[11px] font-bold px-3 py-1 rounded-full tracking-wide ${
+                  isActive ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600"
+                }`}>
+                  {card.count} รายการ
+                </span>
+              </div>
+              <div className="mt-4 space-y-1">
+                <h3 className="text-sm font-bold">{card.title}</h3>
+                <p className={`text-[11px] leading-relaxed ${isActive ? "text-slate-300" : "text-slate-400"}`}>
+                  {card.desc}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-        {/* Search Input */}
-        <div className="relative w-full md:w-72">
-          <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
+      {/* Search Input Container */}
+      <div className="flex justify-end">
+        <div className="relative w-full md:w-80">
+          <span className="absolute inset-y-0 left-4 flex items-center text-slate-400">
             <Search size={16} />
           </span>
           <input
@@ -158,13 +177,13 @@ export default function ReviewDesigns() {
             placeholder="ค้นหาชื่อแบบเสื้อ, ชื่อผู้สร้าง..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-750 placeholder-slate-400 outline-none focus:border-indigo-500 focus:bg-white transition-all"
+            className="w-full bg-white border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-slate-700 placeholder-slate-400 outline-none focus:border-indigo-500 focus:shadow-sm transition-all"
           />
         </div>
       </div>
 
       {/* Table Container */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 text-slate-400">
             <Loader2 size={36} className="animate-spin text-indigo-600" />

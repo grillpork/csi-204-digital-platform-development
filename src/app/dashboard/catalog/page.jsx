@@ -300,181 +300,213 @@ export default function CatalogManagement() {
         </div>
       )}
 
-      {/* Main Title Banner */}
-      <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-8 rounded-3xl shadow-lg relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-12 translate-x-20 pointer-events-none" />
-        <div className="relative z-10 space-y-2">
-          <h1 className="text-3xl font-extrabold tracking-tight">ตั้งค่าสเปกสินค้าเสื้อ</h1>
-          <p className="text-slate-300 text-sm max-w-xl">
-            จัดการข้อมูลที่ใช้ในการตั้งชื่อประเภทเสื้อ ขนาดรอบอก และตัวเลือกเนื้อผ้า/คุณภาพการผลิตสำหรับลูกค้าในหน้าดีไซเนอร์และ Marketplace
-          </p>
-        </div>
-        <button
-          onClick={() => {
-            setShowAddForm(!showAddForm);
-            // Reset input values
-            setNewName("");
-            setNewCode("");
-            setNewDesc("");
-            setNewPrice(0);
-          }}
-          className="relative z-10 cursor-pointer self-start md:self-center flex items-center gap-2 px-5 py-3 rounded-2xl bg-white text-slate-900 font-bold hover:bg-slate-100 active:scale-95 transition-all text-sm shadow-md"
-        >
-          {showAddForm ? <X size={16} /> : <Plus size={16} />}
-          <span>{showAddForm ? "ยกเลิกการเพิ่ม" : "เพิ่มสเปกใหม่"}</span>
-        </button>
+      {/* Clean Page Title Header */}
+      <div className="space-y-1">
+        <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">ตั้งค่าสเปกสินค้าเสื้อ</h1>
+        <p className="text-slate-500 text-xs">
+          จัดการข้อมูลที่ใช้ในการตั้งชื่อประเภทเสื้อ ขนาดรอบอก และตัวเลือกเนื้อผ้า/คุณภาพการผลิตสำหรับลูกค้าในหน้าดีไซเนอร์และ Marketplace
+        </p>
       </div>
 
-      {/* Dynamic Add Form (Dropdown Panel) */}
+      {/* Add Dialog Modal */}
       {showAddForm && (
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-150 animate-fade-in">
-          <h3 className="text-md font-bold text-slate-800 mb-4 flex items-center gap-2">
-            <Plus size={18} className="text-indigo-600" />
-            <span>เพิ่มตัวเลือก {activeTab === "type" ? "ประเภทเสื้อ" : activeTab === "size" ? "ไซส์เสื้อ" : "คุณภาพเนื้อผ้า"}</span>
-          </h3>
-          <form onSubmit={handleAddItem} className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ชื่อภาษาไทย</label>
-              <input
-                type="text"
-                placeholder={activeTab === "type" ? "เช่น เสื้อคอปกลายขวาง" : activeTab === "size" ? "เช่น M" : "เช่น Cotton 100% (Premium)"}
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-                required
-              />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+          {/* Backdrop */}
+          <div 
+            onClick={() => setShowAddForm(false)}
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity"
+          />
+
+          {/* Modal Content */}
+          <div className="relative bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-md w-full p-6 overflow-hidden animate-zoom-in z-10">
+            <div className="flex items-center justify-between border-b pb-4 mb-4">
+              <h3 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                <Plus size={18} className="text-indigo-600" />
+                <span>เพิ่มตัวเลือก {activeTab === "type" ? "ประเภทเสื้อ" : activeTab === "size" ? "ไซส์เสื้อ" : "คุณภาพเนื้อผ้า"}</span>
+              </h3>
+              <button 
+                onClick={() => setShowAddForm(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-650 hover:bg-slate-50 transition-all cursor-pointer"
+              >
+                <X size={18} />
+              </button>
             </div>
 
-            {activeTab !== "quality" && (
+            <form onSubmit={handleAddItem} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">รหัสอ้างอิงภาษาอังกฤษ (Code)</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ชื่อภาษาไทย</label>
                 <input
                   type="text"
-                  placeholder={activeTab === "type" ? "เช่น POLO_STRIPE" : "เช่น M"}
-                  value={newCode}
-                  onChange={e => setNewCode(e.target.value)}
+                  placeholder={activeTab === "type" ? "เช่น เสื้อคอปกลายขวาง" : activeTab === "size" ? "เช่น M" : "เช่น Cotton 100% (Premium)"}
+                  value={newName}
+                  onChange={e => setNewName(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
                   required
                 />
               </div>
-            )}
 
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
-                {activeTab === "type" ? "คำอธิบายเสื้อ" : activeTab === "size" ? "รายละเอียดรอบอก" : "รายละเอียดคุณภาพผ้า"}
-              </label>
-              <input
-                type="text"
-                placeholder={activeTab === "type" ? "เช่น เสื้อโปโลพิมพ์แถบเท่ๆ" : activeTab === "size" ? "เช่น อก 38\"" : "เช่น นุ่มพิเศษ ทนทาน ไม่ย้วยง่าย"}
-                value={newDesc}
-                onChange={e => setNewDesc(e.target.value)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
-              />
-            </div>
+              {activeTab !== "quality" && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">รหัสอ้างอิงภาษาอังกฤษ (Code)</label>
+                  <input
+                    type="text"
+                    placeholder={activeTab === "type" ? "เช่น POLO_STRIPE" : "เช่น M"}
+                    value={newCode}
+                    onChange={e => setNewCode(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                    required
+                  />
+                </div>
+              )}
 
-            {activeTab === "quality" && (
               <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ราคาบวกเพิ่ม (฿)</label>
+                <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                  {activeTab === "type" ? "คำอธิบายเสื้อ" : activeTab === "size" ? "รายละเอียดรอบอก" : "รายละเอียดคุณภาพผ้า"}
+                </label>
                 <input
-                  type="number"
-                  min="0"
-                  placeholder="เช่น 50"
-                  value={newPrice}
-                  onChange={e => setNewPrice(parseInt(e.target.value) || 0)}
+                  type="text"
+                  placeholder={activeTab === "type" ? "เช่น เสื้อโปโลพิมพ์แถบเท่ๆ" : activeTab === "size" ? "เช่น อก 38\"" : "เช่น นุ่มพิเศษ ทนทาน ไม่ย้วยง่าย"}
+                  value={newDesc}
+                  onChange={e => setNewDesc(e.target.value)}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
                 />
               </div>
-            )}
 
-            <div className="md:col-span-3 flex justify-end gap-3 mt-2">
-              <button
-                type="button"
-                onClick={() => setShowAddForm(false)}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="submit"
-                disabled={submitting}
-                className="px-5 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center gap-1.5"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin" />
-                    <span>กำลังบันทึก...</span>
-                  </>
-                ) : (
-                  <>
-                    <Check size={14} />
-                    <span>บันทึกตัวเลือก</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+              {activeTab === "quality" && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">ราคาบวกเพิ่ม (฿)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    placeholder="เช่น 50"
+                    value={newPrice}
+                    onChange={e => setNewPrice(parseInt(e.target.value) || 0)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3 pt-4 border-t mt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowAddForm(false)}
+                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-all"
+                >
+                  ยกเลิก
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="px-5 py-2.5 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 rounded-xl shadow-md disabled:opacity-50 transition-all flex items-center gap-1.5"
+                >
+                  {submitting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>กำลังบันทึก...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={14} />
+                      <span>บันทึกตัวเลือก</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
-      {/* Tab Switcher & Search Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-3 rounded-2xl shadow-sm border border-slate-150">
+      {/* 3-Column Grid Cards (Acts as filter tabs) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         
-        {/* Tab Buttons */}
-        <div className="flex bg-slate-100 p-1.5 rounded-xl max-w-lg">
-          <button
-            onClick={() => { setActiveTab("type"); setShowAddForm(false); }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "type"
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            <Grid size={15} />
-            <span>ประเภทเสื้อ</span>
-          </button>
-          
-          <button
-            onClick={() => { setActiveTab("size"); setShowAddForm(false); }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "size"
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            <Ruler size={15} />
-            <span>จัดการ Size</span>
-          </button>
-          
-          <button
-            onClick={() => { setActiveTab("quality"); setShowAddForm(false); }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-all ${
-              activeTab === "quality"
-                ? "bg-white text-slate-900 shadow-sm"
-                : "text-slate-500 hover:text-slate-900"
-            }`}
-          >
-            <Layers size={15} />
-            <span>จัดการคุณภาพเสื้อ</span>
-          </button>
+        {/* Card 1: Shirt Types */}
+        <div 
+          onClick={() => { setActiveTab("type"); setShowAddForm(false); }}
+          className={`p-6 rounded-3xl cursor-pointer transition-all ${
+            activeTab === "type"
+              ? "bg-slate-900 text-white shadow-lg active:scale-98"
+              : "bg-white text-slate-800 hover:shadow-md"
+          }`}
+        >
+          <div className="flex justify-between items-start">
+            <div className={`p-3 rounded-2xl ${activeTab === "type" ? "bg-white/10 text-white" : "bg-indigo-50 text-indigo-650"}`}>
+              <Grid size={22} />
+            </div>
+            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+              activeTab === "type" ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"
+            }`}>
+              {types.filter(x => x.isActive).length} / {types.length} ใช้งาน
+            </span>
+          </div>
+          <div className="mt-5 space-y-1">
+            <h3 className="text-md font-bold">ประเภทเสื้อ (Types)</h3>
+            <p className={`text-xs leading-relaxed ${activeTab === "type" ? "text-slate-300" : "text-slate-400"}`}>
+              สเปกหมวดหมู่หลัก เช่น เสื้อยืด, โปโล, เสื้อกันหนาวฮู้ดดี้
+            </p>
+          </div>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full md:w-72">
-          <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
-            <Search size={16} />
-          </span>
-          <input
-            type="text"
-            placeholder="ค้นหาตัวเลือกในลิสต์..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder-slate-400 outline-none focus:border-indigo-500 focus:bg-white transition-all"
-          />
+        {/* Card 2: Sizes */}
+        <div 
+          onClick={() => { setActiveTab("size"); setShowAddForm(false); }}
+          className={`p-6 rounded-3xl cursor-pointer transition-all ${
+            activeTab === "size"
+              ? "bg-slate-900 text-white shadow-lg active:scale-98"
+              : "bg-white text-slate-800 hover:shadow-md"
+          }`}
+        >
+          <div className="flex justify-between items-start">
+            <div className={`p-3 rounded-2xl ${activeTab === "size" ? "bg-white/10 text-white" : "bg-indigo-50 text-indigo-650"}`}>
+              <Ruler size={22} />
+            </div>
+            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+              activeTab === "size" ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"
+            }`}>
+              {sizes.filter(x => x.isActive).length} / {sizes.length} ใช้งาน
+            </span>
+          </div>
+          <div className="mt-5 space-y-1">
+            <h3 className="text-md font-bold">ขนาดเสื้อ (Sizes)</h3>
+            <p className={`text-xs leading-relaxed ${activeTab === "size" ? "text-slate-300" : "text-slate-400"}`}>
+              ขนาดไซส์มาตรฐานอ้างอิงรอบอก เช่น S, M, L, XL, 2XL
+            </p>
+          </div>
         </div>
+
+        {/* Card 3: Qualities */}
+        <div 
+          onClick={() => { setActiveTab("quality"); setShowAddForm(false); }}
+          className={`p-6 rounded-3xl cursor-pointer transition-all ${
+            activeTab === "quality"
+              ? "bg-slate-900 text-white shadow-lg active:scale-98"
+              : "bg-white text-slate-800 hover:shadow-md"
+          }`}
+        >
+          <div className="flex justify-between items-start">
+            <div className={`p-3 rounded-2xl ${activeTab === "quality" ? "bg-white/10 text-white" : "bg-indigo-50 text-indigo-650"}`}>
+              <Layers size={22} />
+            </div>
+            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${
+              activeTab === "quality" ? "bg-white/15 text-white" : "bg-slate-100 text-slate-500"
+            }`}>
+              {qualities.filter(x => x.isActive).length} / {qualities.length} ใช้งาน
+            </span>
+          </div>
+          <div className="mt-5 space-y-1">
+            <h3 className="text-md font-bold">คุณภาพเนื้อผ้า (Qualities)</h3>
+            <p className={`text-xs leading-relaxed ${activeTab === "quality" ? "text-slate-300" : "text-slate-400"}`}>
+              เกรดคุณภาพเนื้อผ้าและตัวเลือกราคาบวกเพิ่มเสริมการผลิต
+            </p>
+          </div>
+        </div>
+
       </div>
 
+
+
       {/* Main Spec List Panel */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-150 overflow-hidden">
+      <div className="bg-white rounded-3xl shadow-sm overflow-hidden">
         
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4 text-slate-400">
@@ -696,6 +728,24 @@ export default function CatalogManagement() {
           </div>
         </div>
       )}
+
+      {/* Floating Action Button (FAB) */}
+      <button
+        onClick={() => {
+          setShowAddForm(true);
+          setNewName("");
+          setNewCode("");
+          setNewDesc("");
+          setNewPrice(0);
+        }}
+        className="fixed bottom-8 right-8 z-40 flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-2xl transition-all active:scale-95 hover:scale-105 cursor-pointer group"
+        title="เพิ่มสเปกใหม่"
+      >
+        <Plus size={24} />
+        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-300 ease-in-out text-sm font-bold whitespace-nowrap">
+          เพิ่มสเปกใหม่
+        </span>
+      </button>
 
     </div>
   );

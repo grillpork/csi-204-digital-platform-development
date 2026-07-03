@@ -4,14 +4,39 @@ import React, { useState, useRef, useEffect, useCallback, Suspense } from 'react
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Upload, ShoppingCart, CheckCircle2, Image as ImageIcon, ArrowLeft, Move, ZoomIn, ZoomOut, RotateCcw, Trash2, FlipHorizontal2 } from 'lucide-react';
-import { mockProducts } from '@/app/data/products';
-
 const DEFAULT_PRINT_ZONE = { x: 0.27, y: 0.20, w: 0.46, h: 0.70 };
 
 function CustomShirtPageContent() {
   const searchParams = useSearchParams();
   const productId = parseInt(searchParams.get('id')) || 1;
-  const product = mockProducts.find((p) => p.id === productId) || mockProducts[0];
+  const [product, setProduct] = useState({
+    id: 1,
+    name: "เสื้อยืดสีขาว รุ่นคลาสสิก",
+    image: "/img/white-t-shirt/wh-t-shirt-cover.jpg",
+    templateImgFront: "/img/white-t-shirt/template/wh-t-shirt-TEM-f-removebg.png",
+    templateImgBack: "/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png",
+  });
+
+  useEffect(() => {
+    if (!productId) return;
+    let active = true;
+    fetch(`/api/products/${productId}`)
+      .then(res => res.json())
+      .then(json => {
+        if (active && json.success && json.data) {
+          const dbProd = json.data;
+          setProduct({
+            id: dbProd.id,
+            name: dbProd.name,
+            image: dbProd.images?.[0] || "/img/white-t-shirt/wh-t-shirt-cover.jpg",
+            templateImgFront: dbProd.images?.[0] || "/img/white-t-shirt/template/wh-t-shirt-TEM-f-removebg.png",
+            templateImgBack: dbProd.images?.[1] || dbProd.images?.[0] || "/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png",
+          });
+        }
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [productId]);
 
   const [viewSide, setViewSide] = useState('front');
 
