@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Send, Key, ShoppingCart, Upload, Store, User, BookOpen, ChevronRight, Copy } from 'lucide-react';
+import { Send, Key, ShoppingCart, Upload, Store, User, BookOpen, ChevronRight, CreditCard, ShieldAlert } from 'lucide-react';
 
 const apiGroups = [
   {
@@ -14,98 +14,21 @@ const apiGroups = [
         path: "/api/auth/register",
         desc: "ลงทะเบียนสมาชิกใหม่ในระบบ (Customer / Creator)",
         body: { email: "user@example.com", password: "password123", name: "John Doe" },
-        res: { message: "ลงทะเบียนเสร็จสมบูรณ์", userId: 123 }
+        res: { message: "ลงทะเบียนเสร็จสมบูรณ์", userId: "cuid-12345" }
       },
       {
         method: "POST",
         path: "/api/auth/login",
-        desc: "เข้าสู่ระบบและรับ JWT Token หรือตั้งค่าเซสชัน",
+        desc: "เข้าสู่ระบบเพื่อรับ Session Token ทาง HTTP-Only Cookie",
         body: { email: "user@example.com", password: "password123" },
-        res: { success: true, token: "eyJhbGciOiJIUzI1NiIsInR..." }
-      }
-    ]
-  },
-  {
-    id: "products",
-    name: "Products (ข้อมูลสินค้า)",
-    icon: BookOpen,
-    endpoints: [
-      {
-        method: "GET",
-        path: "/api/products",
-        desc: "ดึงรายการสินค้าเสื้อยืดทั้งหมดบน Marketplace (รองรับการกรองตามหมวดหมู่/ขนาด/สี)",
-        body: null,
-        res: { data: [{ id: 1, name: "Minimalist T-Shirt", price: 350, image: "url..." }] }
+        res: { success: true }
       },
       {
         method: "POST",
-        path: "/api/products",
-        desc: "ลงทะเบียนสร้างรายการสินค้าใหม่ (เฉพาะผู้ดูแลระบบและ Creators)",
-        body: { name: "Custom Graphic Tee", price: 390, category: "T-Shirt", image: "temp-url..." },
-        res: { success: true, productId: 88 }
-      }
-    ]
-  },
-  {
-    id: "cart",
-    name: "Shopping Cart (ตะกร้าสินค้า)",
-    icon: ShoppingCart,
-    endpoints: [
-      {
-        method: "GET",
-        path: "/api/cart",
-        desc: "ดึงรายการสินค้าในตะกร้าช็อปปิ้งของผู้ใช้ปัจจุบัน",
+        path: "/api/auth/logout",
+        desc: "ออกจากระบบและเคลียร์ Session Token",
         body: null,
-        res: { items: [{ productId: "1-Black-M", quantity: 2, price: 350 }] }
-      },
-      {
-        method: "POST",
-        path: "/api/cart",
-        desc: "เพิ่มหรือปรับปรุงรายการสินค้าลงในตะกร้า",
-        body: { productId: "1-Black-M", quantity: 1 },
-        res: { success: true, totalItems: 3 }
-      },
-      {
-        method: "DELETE",
-        path: "/api/cart/[productId]",
-        desc: "ลบสินค้าชิ้นที่ระบุออกจากตะกร้า",
-        body: null,
-        res: { success: true, message: "ลบสินค้าในตะกร้าแล้ว" }
-      }
-    ]
-  },
-  {
-    id: "custom-upload",
-    name: "Custom Designs (ระบบสั่งสกรีนเสื้อ)",
-    icon: Upload,
-    endpoints: [
-      {
-        method: "POST",
-        path: "/api/custom-upload",
-        desc: "อัปโหลดรูปภาพอาร์ตเวิร์คและส่งพิกัดตำแหน่งสกรีนเพื่อสร้างคำสั่งซื้อ Custom",
-        body: { file: "Binary/FormData", size: "A4", technique: "DFT", color: "White" },
-        res: { success: true, mockupUrl: "url-to-generated-mockup...", orderId: 789 }
-      }
-    ]
-  },
-  {
-    id: "seller",
-    name: "Seller & Shop (ข้อมูลร้านค้า)",
-    icon: Store,
-    endpoints: [
-      {
-        method: "GET",
-        path: "/api/seller/profile",
-        desc: "ดึงข้อมูลโปรไฟล์ของร้านค้าและประวัติการขายของ Creator",
-        body: null,
-        res: { shopName: "Studio Design", totalSales: 15400, productsCount: 12 }
-      },
-      {
-        method: "POST",
-        path: "/api/seller/register",
-        desc: "สมัครเปิดร้านค้า Creator และส่งข้อมูล KYC เพื่อเริ่มสะสมรายได้",
-        body: { idCard: "1100xxxxxxxx", bankAccount: "123-4-56789-0", bankName: "SCB" },
-        res: { status: "pending", message: "ส่งข้อมูลยืนยันตัวตนแล้ว รอการอนุมัติจากผู้ดูแล" }
+        res: { success: true }
       }
     ]
   },
@@ -119,13 +42,158 @@ const apiGroups = [
         path: "/api/user/profile",
         desc: "ดึงข้อมูลส่วนตัวของผู้ใช้ปัจจุบันที่เข้าสู่ระบบอยู่",
         body: null,
-        res: { email: "user@example.com", name: "John Doe", role: "Customer" }
+        res: { user: { id: "cuid...", name: "John Doe", email: "user@example.com", phone: "0812345678", address: "123 Main St...", role: "Customer" } }
       },
       {
-        method: "PUT",
+        method: "PATCH",
         path: "/api/user/profile",
-        desc: "แก้ไขข้อมูลส่วนตัวและที่อยู่จัดส่ง",
-        body: { name: "Johnathan Doe", address: "123 Main St, Bangkok" },
+        desc: "แก้ไขข้อมูลส่วนตัว ที่อยู่ และตรวจสอบเบอร์โทรศัพท์ (10 หลักขึ้นต้นด้วย 0)",
+        res: { user: { name: "Johnathan Doe", phone: "0812345678", address: "456 Sukhumvit Rd..." } }
+      }
+    ]
+  },
+  {
+    id: "products",
+    name: "Products (สินค้าและดีไซน์สาธารณะ)",
+    icon: BookOpen,
+    endpoints: [
+      {
+        method: "GET",
+        path: "/api/products",
+        desc: "ดึงรายการสินค้าเสื้อยืดทั้งหมดที่ผ่านการอนุมัติและวางขายทั่วไป",
+        body: null,
+        res: { success: true, data: [{ id: 1, name: "เสื้อยืดคลาสสิก", price: 370, images: ["/img..."] }] }
+      },
+      {
+        method: "GET",
+        path: "/api/products/[id]",
+        desc: "ดึงรายละเอียดสินค้าชิ้นที่กำหนดแยกตามรหัส ID",
+        body: null,
+        res: { success: true, data: { id: 1, name: "เสื้อยืดคลาสสิก", price: 370, colors: ["White", "Black"] } }
+      }
+    ]
+  },
+  {
+    id: "cart",
+    name: "Shopping Cart (ตะกร้าสินค้า)",
+    icon: ShoppingCart,
+    endpoints: [
+      {
+        method: "GET",
+        path: "/api/cart",
+        desc: "ดึงรายการสินค้าในตะกร้าช็อปปิ้งของผู้ใช้ปัจจุบัน",
+        body: null,
+        res: { data: [{ id: 10, productId: 1, quantity: 2, size: "M", color: "White" }] }
+      },
+      {
+        method: "POST",
+        path: "/api/cart",
+        desc: "เพิ่มรายการสินค้าลงในตะกร้า หรืออัปเดตจำนวนสินค้า",
+        res: { success: true, data: [{ productId: 1, quantity: 2 }] }
+      },
+      {
+        method: "DELETE",
+        path: "/api/cart/[productId]?size=M&color=White",
+        desc: "ลบสินค้าชิ้นย่อยที่ระบุไซส์และสีออกจากตะกร้า",
+        body: null,
+        res: { success: true, data: [] }
+      },
+      {
+        method: "DELETE",
+        path: "/api/cart",
+        desc: "ล้างสินค้าทั้งหมดในตะกร้าของผู้ใช้",
+        body: null,
+        res: { success: true }
+      }
+    ]
+  },
+  {
+    id: "custom-designs",
+    name: "Customizer & Designs (การออกแบบเสื้อ)",
+    icon: Upload,
+    endpoints: [
+      {
+        method: "POST",
+        path: "/api/custom-upload",
+        desc: "อัปโหลดภาพลายสกรีนดิบ (PNG/JPG) เพื่อบันทึกเข้าเซิร์ฟเวอร์",
+        body: "FormData (designImage: File)",
+        res: { imageUrl: "/uploads/file-name.png" }
+      },
+      {
+        method: "POST",
+        path: "/api/designs",
+        desc: "บันทึกแบบเสื้อยืดที่ประกอบเสร็จใหม่ (is_custom: true, status: DRAFT)",
+        body: { name: "ลายแมวกวัก", baseProductId: 1, color: "White", sizes: ["M", "L"], overlay_image: "/uploads/f.png", overlay_position_x: 150, overlay_position_y: 200, overlay_size: 120, printSide: "front", screenSize: "A4", printTechnique: "DFT" },
+        res: { data: { id: 5, name: "ลายแมวกวัก", approvalStatus: "DRAFT" } }
+      },
+      {
+        method: "PATCH",
+        path: "/api/designs",
+        desc: "แก้ไขรายละเอียดแบบร่างการออกแบบเสื้อผ้า",
+        body: { id: 5, name: "ลายแมวกวัก (แก้ไข)", color: "Black" },
+        res: { data: { id: 5, name: "ลายแมวกวัก (แก้ไข)" } }
+      },
+      {
+        method: "POST",
+        path: "/api/designs/submit",
+        desc: "ส่งร่างแบบเสื้อให้แอดมินตรวจสอบเพื่อเปิดการวางขาย (PENDING)",
+        body: { id: 5 },
+        res: { data: { id: 5, approvalStatus: "PENDING" } }
+      },
+      {
+        method: "DELETE",
+        path: "/api/designs/submit",
+        desc: "ถอนคำขอที่กำลังรออนุมัติให้กลับเป็นแบบร่าง (DRAFT)",
+        body: { id: 5 },
+        res: { data: { id: 5, approvalStatus: "DRAFT" } }
+      }
+    ]
+  },
+  {
+    id: "checkout",
+    name: "Checkout & Omise (การชำระเงิน)",
+    icon: CreditCard,
+    endpoints: [
+      {
+        method: "POST",
+        path: "/api/checkout",
+        desc: "เริ่มทำรายการสั่งซื้อ หักสต็อก และเรียกเก็บเงินผ่าน Omise (รองรับ card / transfer)",
+        body: { paymentMethod: "transfer", shippingAddress: "123 Main St...", cardToken: "tokn_test..." },
+        res: { success: true, qrCodeUrl: "https://api.omise.co...", authorizeUri: "https://..." }
+      },
+      {
+        method: "POST",
+        path: "/api/webhooks/omise",
+        desc: "Webhook รับการแจ้งเตือนจาก Omise เมื่อลูกค้าแสกนจ่ายเงินเรียบร้อยแล้ว",
+        body: { key: "charge.complete", data: { id: "chrg_test..." } },
+        res: { received: true, verified: true }
+      }
+    ]
+  },
+  {
+    id: "admin",
+    name: "Admin Backend (ระบบหลังบ้านแอดมิน)",
+    icon: Store,
+    endpoints: [
+      {
+        method: "GET",
+        path: "/api/admin/designs",
+        desc: "ดึงรายการออกแบบ Custom ทั้งหมดเพื่อตรวจคุณภาพ",
+        body: null,
+        res: { data: [{ id: 5, name: "ลายแมวกวัก", approvalStatus: "PENDING" }] }
+      },
+      {
+        method: "PATCH",
+        path: "/api/admin/designs",
+        desc: "อนุมัติเปิดขายพร้อมกำหนดราคาขาย/สต็อก หรือปฏิเสธพร้อมระบุเหตุผล",
+        body: { id: 5, status: "APPROVED", price: 390, stock: 100 },
+        res: { data: { id: 5, approvalStatus: "APPROVED", price: 390 } }
+      },
+      {
+        method: "DELETE",
+        path: "/api/admin/designs",
+        desc: "ลบรายการลายออกแบบออกจากระบบ (ลบไฟล์และฐานข้อมูล)",
+        body: { id: 5 },
         res: { success: true }
       }
     ]
@@ -139,7 +207,7 @@ export default function ApiDocsPage() {
     switch (method) {
       case "GET": return "bg-blue-50 text-blue-700 border-blue-200";
       case "POST": return "bg-green-50 text-green-700 border-green-200";
-      case "PUT": return "bg-amber-50 text-amber-700 border-amber-200";
+      case "PATCH": return "bg-amber-50 text-amber-700 border-amber-200";
       case "DELETE": return "bg-red-50 text-red-700 border-red-200";
       default: return "bg-slate-50 text-slate-700 border-slate-200";
     }
@@ -181,59 +249,41 @@ export default function ApiDocsPage() {
           })}
         </div>
 
-        {/* Right Side Endpoint Cards */}
-        <div className="flex-1 min-w-0 w-full space-y-6">
-          <div className="border-b border-slate-100 pb-3 mb-2 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900">{activeGroup.name}</h2>
-            <span className="text-xs text-slate-400 font-medium">
-              {activeGroup.endpoints.length} Endpoints
-            </span>
-          </div>
-
+        {/* Right Side Endpoint List */}
+        <div className="flex-1 w-full space-y-6">
           {activeGroup.endpoints.map((ep, idx) => (
-            <div 
-              key={idx} 
-              className="bg-slate-50 border border-slate-200 rounded-2xl p-6 transition-all shadow-sm"
-            >
+            <div key={idx} className="border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white hover:shadow-md transition-shadow">
               {/* Endpoint Header */}
-              <div className="flex flex-col md:flex-row md:items-center gap-3 mb-4">
-                <span className={`inline-flex items-center justify-center font-mono text-[11px] font-bold px-2.5 py-1 border rounded-lg ${getMethodBadgeClass(ep.method)}`}>
-                  {ep.method}
-                </span>
-                <span className="font-mono text-sm font-semibold text-slate-800 bg-white border border-slate-200/60 px-3 py-1 rounded-lg">
-                  {ep.path}
-                </span>
+              <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className={`px-3 py-1 text-xs font-extrabold border rounded-lg font-mono ${getMethodBadgeClass(ep.method)}`}>
+                    {ep.method}
+                  </span>
+                  <span className="font-mono font-bold text-slate-900 break-all">{ep.path}</span>
+                </div>
+                <span className="text-xs font-semibold text-slate-500">{ep.desc}</span>
               </div>
 
-              {/* Endpoint Description */}
-              <p className="text-xs text-slate-600 mb-6 font-medium">
-                {ep.desc}
-              </p>
-
-              {/* Request & Response Schemas */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Request Schema */}
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Request Body (JSON)</span>
-                  <div className="bg-slate-900 rounded-xl p-4 overflow-x-auto min-h-[100px] flex items-center">
-                    {ep.body ? (
-                      <pre className="text-xs text-blue-400 font-mono w-full">
-                        {JSON.stringify(ep.body, null, 2)}
-                      </pre>
-                    ) : (
-                      <span className="text-xs text-slate-500 font-mono italic">No Request Body</span>
-                    )}
-                  </div>
+              {/* Payload/Response Details */}
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/10">
+                {/* Request Body */}
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Request Body</h4>
+                  {ep.body ? (
+                    <pre className="bg-slate-900 text-blue-400 font-mono text-xs p-4 rounded-xl overflow-x-auto max-h-60 leading-relaxed">
+                      {JSON.stringify(ep.body, null, 2)}
+                    </pre>
+                  ) : (
+                    <div className="text-xs text-slate-400 py-2 italic">ไม่มีข้อมูล Body ใน HTTP Request</div>
+                  )}
                 </div>
 
-                {/* Response Schema */}
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">Success Response (JSON)</span>
-                  <div className="bg-slate-900 rounded-xl p-4 overflow-x-auto min-h-[100px]">
-                    <pre className="text-xs text-green-400 font-mono w-full">
-                      {JSON.stringify(ep.res, null, 2)}
-                    </pre>
-                  </div>
+                {/* Example Response */}
+                <div>
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Expected Response</h4>
+                  <pre className="bg-slate-900 text-emerald-400 font-mono text-xs p-4 rounded-xl overflow-x-auto max-h-60 leading-relaxed">
+                    {JSON.stringify(ep.res, null, 2)}
+                  </pre>
                 </div>
               </div>
             </div>

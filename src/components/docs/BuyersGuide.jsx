@@ -135,7 +135,7 @@ const BuyersGuide = () => {
           <div className="bg-slate-50 rounded-xl p-6 border border-slate-200 mb-6">
             <h3 className="font-semibold text-slate-800 mb-3 flex items-center gap-2">💳 ช่องทางการชำระเงิน</h3>
             <p className="text-[15px] leading-7 text-slate-600">
-              เรารองรับการชำระเงินผ่านหลายช่องทาง ไม่ว่าจะเป็น บัตรเครดิต/เดบิต (Visa, Mastercard), โอนเงินผ่านบัญชีธนาคาร, สแกน QR Code พร้อมเพย์ (PromptPay) และบริการเก็บเงินปลายทาง (COD) สำหรับยอดสั่งซื้อไม่เกิน 3,000 บาท
+              เรารองรับการชำระเงินออนไลน์อย่างปลอดภัยผ่านระบบ Omise Gateway ซึ่งสามารถเลือกชำระได้ผ่าน <strong>บัตรเครดิต/เดบิต (Visa, Mastercard, JCB)</strong> หรือสแกน <strong>QR Code พร้อมเพย์ (PromptPay)</strong>
             </p>
           </div>
           

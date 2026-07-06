@@ -142,8 +142,8 @@ const SystemGuide = () => {
           </h2>
           <ul className="space-y-3 text-[15px] leading-7 text-slate-600 list-disc list-inside">
             <li><strong>Stateful Cart:</strong> ตะกร้าสินค้าถูกจัดการ State ทั้งใน Local Storage (เพื่อให้ผู้ใช้ยังเห็นของในตะกร้าแม้ออกจากเว็บ) และ Sync เข้า Database เมื่อผู้ใช้ Login</li>
-            <li><strong>Payment Integration:</strong> เชื่อมต่อ API ของ Payment Gateway เพื่อความปลอดภัยสูงสุด รองรับ Webhook เพื่ออัปเดตสถานะออเดอร์เป็น "ชำระเงินสำเร็จ" ทันทีที่ระบบธนาคารยืนยัน (Real-time Sync)</li>
-            <li><strong>Revenue Splitting System:</strong> ทุกครั้งที่มีการสั่งซื้อเสื้อจากหมวด Marketplace ระบบจะบันทึก Transaction แยกสองฝั่ง คือ "ยอดรวมสำหรับบริษัท" และ "ส่วนแบ่ง Markup สำหรับ Creator" ซึ่งเงินจะเข้ากระเป๋า Creator อัตโนมัติเมื่อสถานะออเดอร์เปลี่ยนเป็น "จัดส่งแล้ว"</li>
+            <li><strong>Payment Integration:</strong> เชื่อมต่อ API ของ Omise Payment Gateway (รองรับ Credit Card และ PromptPay) รองรับ Webhook (/api/webhooks/omise) เพื่ออัปเดตสถานะออเดอร์เป็น "PAID" ทันทีที่การจ่ายเงินสำเร็จ</li>
+            <li><strong>Order Status Tracking:</strong> ติดตามสถานะตั้งแต่ PENDING_PAYMENT, PAID, SHIPPED, จนถึง COMPLETED เพื่อให้ลูกค้าและแอดมินอัปเดตสถานะการขนส่งได้เรียลไทม์</li>
           </ul>
         </div>
 
@@ -385,14 +385,14 @@ const SystemGuide = () => {
               </ul>
             </div>
 
-            {/* 7.4 การถอนรายได้และ KYC */}
+            {/* 7.4 การอนุมัติผลงานโดยผู้ดูแลระบบ */}
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-800 mb-3">7.4 ระบบยืนยันตัวตน (KYC) และการถอนเงิน</h3>
+              <h3 className="text-lg font-semibold text-slate-800 mb-3">7.4 ระบบการตรวจสอบและอนุมัติผลงาน</h3>
               <p className="text-[15px] leading-7 text-slate-600">
-                เราต้องการลดอุปสรรคของการเริ่มต้นลงทะเบียน ดังนั้น **นักออกแบบสามารถสมัครสมาชิก อัปโหลดผลงาน และเริ่มวางขายได้ทันทีโดยยังไม่ต้องผ่านขั้นตอนยืนยันตัวตน** ในช่วงแรก
+                เพื่อควบคุมคุณภาพของสินค้าบนแพลตฟอร์ม **แบบเสื้อยืดที่ถูกออกแบบใหม่ทั้งหมดจะถูกตั้งค่าเป็นแบบร่าง (DRAFT)** ในช่วงแรก และหลังจากที่นักออกแบบยืนยันความถูกต้องแล้วจะถูกส่งเข้าคิวรอตรวจ (PENDING)
               </p>
-              <div className="mt-3 p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-sm">
-                📌 <strong>เงื่อนไขการยืนยันตัวตน:</strong> ระบบจะบังคับให้ทำรายการยืนยันตัวตน (Know Your Customer: KYC) ด้วย **บัตรประชาชนและข้อมูลบัญชีธนาคาร** เฉพาะในขั้นตอนที่กดส่งคำขอถอนเงินจริง (Withdrawal) จากกระเป๋าเท่านั้น เพื่อความถูกต้องทางบัญชีและความปลอดภัยสูงสุดด้านกฎหมายการเงิน
+              <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 text-sm">
+                📌 <strong>ขั้นตอนการอนุมัติ:</strong> ผู้ดูแลระบบ (Admin) จะตรวจลายสกรีน ขนาด และโหมดสี ผ่าน Admin Dashboard เมื่ออนุมัติ (APPROVED) สินค้าจะขึ้นวางขายสู่หน้าร้านหลักแบบสาธารณะทันทีพร้อมสต็อกที่กำหนด
               </div>
             </div>
           </div>
