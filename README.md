@@ -1,3 +1,10 @@
+## ผู้พัฒนา
+
+- 67113735 Awirut Jiensakul
+- 67118021 Triopp Saibut
+- 67156767 Phakjira Deechoi
+- 67141535 Lalla Dodchare
+
 # CustomShirt
 
 ระบบร้านค้าออนไลน์ (E-commerce) สำหรับสั่งทำและสกรีนโลโก้ลงบนเสื้อยืด พัฒนาขึ้นเพื่อ **การศึกษารูปแบบการทำงานของระบบ E-commerce** ในรายวิชา CSI-204 Digital Platform Development
@@ -160,10 +167,156 @@ npm run lint    # ตรวจสอบโค้ดด้วย ESLint
 npm test        # รัน unit/integration test (jest)
 ```
 
-## ผู้พัฒนา
 
-- 67113735 Awirut Jiensakul
-- 67118021 Triopp Saibut
-- 67156767 Phakjira Deechoi
-- 67141535 Lalla Dodchare
-- 66083478 nanthamon supo
+flowchart TD
+    Start(["เข้าเว็บ"]) --> ViewProducts["ดูสินค้าในเว็บ (ไม่ต้อง Login)\n/shop"]
+    ViewProducts --> ChoosePath{"เลือกทาง"}
+
+    %% ═══════════════════════════════════════════
+    %% Flow A: ซื้อสินค้าที่มีคนลงขาย
+    %% ═══════════════════════════════════════════
+    ChoosePath -->|"ซื้อสินค้าปกติ"| ProductDetail["เข้าหน้ารายละเอียดสินค้า\n/product/[id]"]
+    ProductDetail --> AddCart["กด Add to Cart\n(เลือกสี / ไซส์ / จำนวน)"]
+    AddCart --> GuestCheck{"Login แล้ว?"}
+    GuestCheck -->|"ใช่"| SaveCartDB["บันทึกลง Cart ใน Database\nPOST /api/cart"]
+    GuestCheck -->|"ไม่"| SaveCartLocal["บันทึกลง Local Cart\n(Zustand + localStorage)"]
+    SaveCartDB --> CartDrawer["เปิดตะกร้าสินค้า (CartDrawer)\nเพิ่ม / ลบ / แก้ไขได้"]
+    SaveCartLocal --> CartDrawer
+
+    CartDrawer --> ClickCheckout{"กดปุ่มดำเนินการสั่งซื้อ"}
+    ClickCheckout --> CheckLoginCheckout{"Login แล้ว?"}
+    CheckLoginCheckout -->|"ไม่"| LoginPageA["หน้า Login / Register\n/login หรือ /register"]
+    LoginPageA --> SyncCart["syncCart: ส่ง Local Cart ทุกรายการ\nไปบันทึกใน DB แล้วดึงกลับ"]
+    SyncCart --> CheckoutForm
+    CheckLoginCheckout -->|"ใช่"| CheckoutForm["แสดงฟอร์ม Checkout\n(ที่อยู่จัดส่ง — ไม่บังคับกรอก)"]
+
+    CheckoutForm --> PaymentChoice{"เลือกวิธีชำระเงิน"}
+
+    %% Payment: Credit Card (Omise)
+    PaymentChoice -->|"บัตรเครดิต"| TokenizeCard["สร้าง Omise Token จากข้อมูลบัตร\n(Omise.js Frontend)"]
+    TokenizeCard --> CardCharge["POST /api/checkout\n(paymentMethod: card)"]
+    CardCharge --> CardResult{"ผลการชาร์จ?"}
+    CardResult -->|"successful"| CreateOrderPaid[("สร้าง Order สถานะ PAID\n+ Payment status: successful\n+ ลด stock + ล้างตะกร้า")]
+    CardResult -->|"pending (3DS)"| Redirect3DS["Redirect ไปหน้า 3D Secure\n(authorize_uri)"]
+    Redirect3DS --> WebhookVerify
+    CardResult -->|"failed"| PaymentFailed["แจ้งเตือน: การชำระเงินไม่สำเร็จ"]
+    PaymentFailed --> CheckoutForm
+
+    %% Payment: PromptPay QR (Omise)
+    PaymentChoice -->|"PromptPay QR"| PromptPayCharge["POST /api/checkout\n(paymentMethod: transfer)"]
+    PromptPayCharge --> CreateOrderPending[("สร้าง Order สถานะ PENDING_PAYMENT\n+ Payment status: pending\n+ QR Code URL + หมดเวลา 30 นาที\n+ ลด stock + ล้างตะกร้า")]
+    CreateOrderPending --> ShowQR["แสดง QR Code ให้สแกนจ่าย"]
+    ShowQR --> QRDecision{"ลูกค้าจะทำอะไร?"}
+    QRDecision -->|"สแกนจ่ายสำเร็จ"| WebhookVerify["Omise Webhook (charge.complete)\nPOST /api/webhooks/omise"]
+    QRDecision -->|"จ่ายทีหลัง"| PendingOrder["แจ้งเตือน: รอชำระเงิน\nดูได้ที่ประวัติออเดอร์"]
+
+    WebhookVerify --> VerifyCharge{"ตรวจสอบกับ Omise API โดยตรง\n(status, currency, amount)"}
+    VerifyCharge -->|"ยืนยันสำเร็จ"| UpdateToPaid["อัปเดต Order → PAID\nPayment → successful"]
+    VerifyCharge -->|"ออเดอร์ยกเลิก/หมดเวลาแล้ว"| PaidAfterClosed["บันทึก paid_after_closed\n(ต้อง review refund)"]
+
+    CreateOrderPaid --> OrderSuccess(["สั่งซื้อสำเร็จ ✓"])
+    UpdateToPaid --> OrderSuccess
+
+    %% ═══════════════════════════════════════════
+    %% Order Status State Machine (Admin)
+    %% ═══════════════════════════════════════════
+    OrderSuccess --> AdminDashboard["Admin Dashboard จัดการคำสั่งซื้อ\n/dashboard/order"]
+    AdminDashboard --> StatusUpdate["เปลี่ยนสถานะออเดอร์\nPATCH /api/admin/orders"]
+    StatusUpdate --> TransitionCheck{"ตรวจสอบ allowedTransitions\n(ห้ามย้อนกลับสถานะ)"}
+
+    TransitionCheck --> AllowedPaths["PENDING → PENDING_PAYMENT / CANCELLED\nPENDING_PAYMENT → PAID / PAYMENT_EXPIRED / CANCELLED\nPAID → PROCESSING / SHIPPED / COMPLETED / CANCELLED\nPROCESSING → SHIPPED / COMPLETED / CANCELLED\nSHIPPED → COMPLETED / CANCELLED\nCOMPLETED ✗ เปลี่ยนไม่ได้\nCANCELLED ✗ เปลี่ยนไม่ได้\nPAYMENT_EXPIRED ✗ เปลี่ยนไม่ได้"]
+
+    %% ═══════════════════════════════════════════
+    %% Payment Expiry (เช็คอัตโนมัติ)
+    %% ═══════════════════════════════════════════
+    PendingOrder -.->|"หมดเวลา 30 นาที"| ExpireCheck["GET /api/orders\nเช็ค payments.expires_at ≤ now"]
+    ExpireCheck --> AutoExpire["อัปเดต Order → PAYMENT_EXPIRED\nคืน stock ทุกรายการ\nPayment → expired"]
+
+    %% ═══════════════════════════════════════════
+    %% ดูประวัติออเดอร์
+    %% ═══════════════════════════════════════════
+    OrderSuccess -.->|"ลูกค้าเปิดดู"| OrderHistory["ประวัติคำสั่งซื้อ\n/profile/orders\n(สีสถานะแยกชัดเจน 8 สี)"]
+
+    %% ═══════════════════════════════════════════
+    %% Flow B: ออกแบบเสื้อ Custom
+    %% ═══════════════════════════════════════════
+    ChoosePath -->|"ออกแบบเสื้อสกรีน Custom"| CustomPage["หน้าออกแบบ Custom\n/custom?productId=X\n(ไม่ต้อง Login)\nอัปโหลดลาย / เลือกสี / ตั้งชื่อแบบ\nไซส์ S-XXL อัตโนมัติ / เลือกด้านหน้า-หลัง\nขนาดสกรีน / เทคนิคสกรีน"]
+
+    CustomPage --> SaveDesign{"กดบันทึก (ต้อง Login)"}
+    SaveDesign --> CheckLoginCustom{"Login แล้ว?"}
+    CheckLoginCustom -->|"ไม่"| LoginPageB["หน้า Login / Register"]
+    LoginPageB --> CustomPage
+    CheckLoginCustom -->|"ใช่"| UploadImages["อัปโหลดภาพ overlay + composite\nPOST /api/custom-upload"]
+    UploadImages --> SaveChoice{"เลือกวิธีบันทึก"}
+
+    SaveChoice -->|"บันทึกแบบร่าง"| SaveDraft["POST /api/designs\napprovalStatus: DRAFT\nis_public: false"]
+    SaveChoice -->|"ส่งให้แอดมินตรวจ"| SaveAndSubmit["POST /api/designs → POST /api/designs/submit\napprovalStatus: PENDING\nis_public: false"]
+
+    SaveDraft --> MyDesigns["หน้าแบบเสื้อของฉัน\n/profile/products"]
+    SaveAndSubmit --> AdminReview
+
+    %% ═══════════════════════════════════════════
+    %% Admin Design Review
+    %% ═══════════════════════════════════════════
+    MyDesigns -->|"กดส่งตรวจ (DRAFT/REJECTED)"| SubmitReview["POST /api/designs/submit\napprovalStatus → PENDING"]
+    SubmitReview --> AdminReview
+
+    MyDesigns -->|"กดถอนคำขอ (PENDING)"| RetractDraft["DELETE /api/designs/submit\napprovalStatus → DRAFT"]
+    RetractDraft --> MyDesigns
+
+    AdminReview["Admin ตรวจสอบแบบเสื้อ\n/dashboard/designs\nPATCH /api/admin/designs"]
+    AdminReview -->|"อนุมัติ (ตั้งราคา + สต็อก)"| Approved["approvalStatus: APPROVED\nis_public: true\nสินค้าขึ้นหน้าร้าน"]
+    Approved --> ViewProducts
+    AdminReview -->|"ไม่อนุมัติ (ระบุเหตุผล)"| Rejected["approvalStatus: REJECTED\nrejectionReason: '...'\nis_public: false"]
+    Rejected --> MyDesigns
+
+    MyDesigns -->|"กดแก้ไข (DRAFT/REJECTED)"| CustomPage
+
+    %% ═══════════════════════════════════════════
+    %% Side Features
+    %% ═══════════════════════════════════════════
+    subgraph SideFeatures["Side Features (ต้อง Login)"]
+        ProfileMgmt["โปรไฟล์: ดู/แก้ชื่อ/เบอร์โทร/ที่อยู่/bio/รูปโปรไฟล์\n/profile + /profile/edit\nPATCH /api/user/profile + POST /api/user/avatar"]
+        FavoritePage["รายการโปรด\n/profile/favorites\nPOST /api/favorites + DELETE /api/favorites"]
+        RevenuePage["รายได้จากผลงานออกแบบ\n/profile/revenue\nGET /api/user/revenue"]
+    end
+
+    %% ═══════════════════════════════════════════
+    %% Admin Features
+    %% ═══════════════════════════════════════════
+    subgraph AdminFeatures["Admin Dashboard (ต้อง Login + Role Admin)"]
+        AdminOverview["หน้า Overview\n/dashboard/overview"]
+        AdminOrders["จัดการคำสั่งซื้อ\n/dashboard/order"]
+        AdminDesigns["ตรวจแบบเสื้อ\n/dashboard/designs"]
+        AdminCatalog["จัดการแม่แบบสินค้า\n/dashboard/catalog"]
+        AdminRevenue["จัดการรายได้\n/dashboard/revenue"]
+    end
+
+    %% ═══════════════════════════════════════════
+    %% Infrastructure / External
+    %% ═══════════════════════════════════════════
+    subgraph Infra["Infrastructure / External"]
+        DB[("Neon PostgreSQL\nvia Prisma ORM")]
+        ImgStorage[("Image Storage\npublic/uploads/custom")]
+        OmiseAPI["Omise Payment Gateway\n(Credit Card + PromptPay)"]
+    end
+
+    SaveCartDB --> DB
+    SyncCart --> DB
+    CardCharge --> OmiseAPI
+    PromptPayCharge --> OmiseAPI
+    WebhookVerify --> OmiseAPI
+    CreateOrderPaid --> DB
+    CreateOrderPending --> DB
+    UploadImages --> ImgStorage
+    SaveDraft --> DB
+    SaveAndSubmit --> DB
+    LoginPageA --> DB
+    LoginPageB --> DB
+    FavoritePage --> DB
+    OrderHistory --> DB
+    ProfileMgmt --> DB
+    RevenuePage --> DB
+    AdminOrders --> DB
+    AdminDesigns --> DB
+    AdminCatalog --> DB
