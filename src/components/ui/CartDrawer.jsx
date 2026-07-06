@@ -6,10 +6,12 @@ import { useProductStore } from "../../store/product";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { formatThaiPhone } from "@/lib/phone";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CartDrawer({ size = 24, className = "" }) {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useAuth();
 
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -151,9 +153,7 @@ export default function CartDrawer({ size = 24, className = "" }) {
         },
         body: JSON.stringify({
           paymentMethod,
-          shippingName,
           shippingAddress,
-          shippingPhone,
           cardToken,
         }),
       });
@@ -297,13 +297,26 @@ export default function CartDrawer({ size = 24, className = "" }) {
             <span className="text-sm">ยอดรวมทั้งหมด:</span>
             <span className="text-lg">฿{cartTotal.toLocaleString("th-TH")}</span>
           </div>
-          <button 
-            className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={cart.length === 0}
-            onClick={() => setIsCheckoutOpen(true)}
-          >
-            ดำเนินการสั่งซื้อ
-          </button>
+          {user ? (
+            <button 
+              className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={cart.length === 0}
+              onClick={() => setIsCheckoutOpen(true)}
+            >
+              ดำเนินการสั่งซื้อ
+            </button>
+          ) : (
+            <button 
+              className="w-full bg-slate-900 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={cart.length === 0}
+              onClick={() => {
+                closeAll();
+                router.push("/login");
+              }}
+            >
+              เข้าสู่ระบบเพื่อสั่งซื้อ
+            </button>
+          )}
         </div>
 
         {/* Sub Drawer (Checkout Form) */}
@@ -331,35 +344,8 @@ export default function CartDrawer({ size = 24, className = "" }) {
               <div className="space-y-3">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">ที่อยู่จัดส่ง</h3>
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">ชื่อผู้รับ</label>
-                  <input
-                    type="text"
-                    required
-                    value={shippingName}
-                    onChange={(e) => setShippingName(e.target.value)}
-                    placeholder="ชื่อ-นามสกุล"
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-hidden focus:border-slate-900 transition-colors"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-slate-600 mb-1">เบอร์โทรศัพท์</label>
-                  <input
-                    type="tel"
-                    required
-                    value={shippingPhone}
-                    onChange={(e) => setShippingPhone(formatThaiPhone(e.target.value))}
-                    placeholder="095-807-2692"
-                    inputMode="numeric"
-                    pattern="0[0-9]{2}-[0-9]{3}-[0-9]{4}"
-                    minLength={12}
-                    maxLength={12}
-                    className="w-full px-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-hidden focus:border-slate-900 transition-colors"
-                  />
-                </div>
-                <div>
                   <label className="block text-xs font-medium text-slate-600 mb-1">ที่อยู่สำหรับการจัดส่ง</label>
                   <textarea
-                    required
                     rows={3}
                     value={shippingAddress}
                     onChange={(e) => setShippingAddress(e.target.value)}

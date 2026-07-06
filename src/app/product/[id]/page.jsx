@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Star, ShoppingCart, ArrowLeft, Heart, Share2, Truck, ShieldCheck, RefreshCcw } from "lucide-react";
 import { useProductStore } from "@/store/product";
@@ -17,11 +17,13 @@ const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
 
 export default function ProductDetailPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState(colors[0].name);
   const [selectedSize, setSelectedSize] = useState("M");
   const [quantity, setQuantity] = useState(1);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const addToCart = useProductStore((state) => state.addToCart);
 
@@ -69,9 +71,9 @@ export default function ProductDetailPage() {
     }
   }, [product]);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!product) return;
-    addToCart(product, quantity, selectedSize, selectedColor);
+    await addToCart(product, quantity, selectedSize, selectedColor);
   };
 
   if (loading) {
@@ -108,6 +110,10 @@ export default function ProductDetailPage() {
     ? product.sizes
     : sizes;
 
+  const images = product.images && product.images.length > 0
+    ? product.images
+    : [product.image || "/placeholder.png"];
+
   return (
     <div className="min-h-screen bg-white text-gray-900 font-sans pb-20">
       
@@ -129,7 +135,7 @@ export default function ProductDetailPage() {
           <div className="w-full lg:w-1/2">
             <div className="bg-gray-100 rounded-3xl overflow-hidden aspect-[4/5] relative group">
               <img 
-                src={product.image} 
+                src={images[activeImageIndex]} 
                 alt={product.name} 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -137,12 +143,16 @@ export default function ProductDetailPage() {
                 <Heart size={20} />
               </button>
             </div>
-            {/* Gallery Thumbnails (จำลอง) */}
+            {/* Gallery Thumbnails */}
             <div className="flex gap-4 mt-4">
-              {[1, 2, 3].map((_, idx) => (
-                <div key={idx} className={`w-24 h-24 rounded-xl overflow-hidden cursor-pointer border-2 ${idx === 0 ? "border-black" : "border-transparent"}`}>
-                  <img src={product.image} className="w-full h-full object-cover" alt="thumbnail" />
-                </div>
+              {images.map((img, idx) => (
+                <button 
+                  key={idx} 
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={`w-24 h-24 rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${idx === activeImageIndex ? "border-black scale-105 shadow-sm" : "border-transparent hover:border-gray-300"}`}
+                >
+                  <img src={img} className="w-full h-full object-cover" alt={`thumbnail ${idx + 1}`} />
+                </button>
               ))}
             </div>
           </div>

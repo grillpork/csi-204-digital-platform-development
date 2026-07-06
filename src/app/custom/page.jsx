@@ -9,6 +9,7 @@ const DEFAULT_PRINT_ZONE = { x: 0.27, y: 0.20, w: 0.46, h: 0.70 };
 function CustomShirtPageContent() {
   const searchParams = useSearchParams();
   const productId = parseInt(searchParams.get('id')) || 1;
+  const designIdQuery = searchParams.get('designId');
   const [product, setProduct] = useState({
     id: 1,
     name: "เสื้อยืดสีขาว รุ่นคลาสสิก",
@@ -18,12 +19,12 @@ function CustomShirtPageContent() {
   });
 
   useEffect(() => {
-    if (!productId) return;
+    if (!productId || designIdQuery) return;
     let active = true;
     fetch(`/api/products/${productId}`)
       .then(res => res.json())
       .then(json => {
-        if (active && json.success && json.data) {
+        if (active && json.data) {
           const dbProd = json.data;
           setProduct({
             id: dbProd.id,
@@ -36,7 +37,7 @@ function CustomShirtPageContent() {
       })
       .catch(() => {});
     return () => { active = false; };
-  }, [productId]);
+  }, [productId, designIdQuery]);
 
   const [viewSide, setViewSide] = useState('front');
 
@@ -80,12 +81,14 @@ function CustomShirtPageContent() {
 
   // Edit mode states
   const [editDesignId, setEditDesignId] = useState(null);
+  const [designName, setDesignName] = useState('');
   const [existingImageUrl, setExistingImageUrl] = useState('');
   const [existingOverlayUrl, setExistingOverlayUrl] = useState('');
 
-  const designIdQuery = searchParams.get('designId');
 
-  // Load the correct base product template when editing a design
+
+
+
   useEffect(() => {
     if (designIdQuery) {
       fetch(`/api/designs?id=${designIdQuery}`)
@@ -94,6 +97,7 @@ function CustomShirtPageContent() {
           if (j.data) {
             const d = j.data;
             setEditDesignId(d.id);
+            if (d.name) setDesignName(d.name);
             setExistingImageUrl(d.images[0] || '');
             setExistingOverlayUrl(d.overlay_image || '');
             if (d.colors && d.colors[0]) setShirtColor(d.colors[0]);
@@ -104,20 +108,19 @@ function CustomShirtPageContent() {
             // Load the correct base product template
             if (d.base_product_id) {
               fetch(`/api/products/${d.base_product_id}`)
-                .then((res) => res.json())
+                .then((r) => r.json())
                 .then((json) => {
-                  if (json.success && json.data) {
-                    const dbProd = json.data;
+                  if (json.data) {
+                    const bp = json.data;
                     setProduct({
-                      id: dbProd.id,
-                      name: dbProd.name,
-                      image: dbProd.images?.[0] || "/img/white-t-shirt/wh-t-shirt-cover.jpg",
-                      templateImgFront: dbProd.images?.[0] || "/img/white-t-shirt/template/wh-t-shirt-TEM-f-removebg.png",
-                      templateImgBack: dbProd.images?.[1] || dbProd.images?.[0] || "/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png",
+                      id: bp.id,
+                      name: bp.name,
+                      image: bp.images?.[0] || "/img/white-t-shirt/wh-t-shirt-cover.jpg",
+                      templateImgFront: bp.images?.[0] || "/img/white-t-shirt/template/wh-t-shirt-TEM-f-removebg.png",
+                      templateImgBack: bp.images?.[1] || bp.images?.[0] || "/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png",
                     });
                   }
-                })
-                .catch((err) => console.error("Error loading base product:", err));
+                });
             }
 
             // Load Front side design
@@ -478,7 +481,7 @@ function CustomShirtPageContent() {
 
       const payload = {
         id: editDesignId,
-        name: editDesignId ? `${product.name} — แบบของฉัน (แก้ไข)` : `${product.name} — แบบของฉัน`,
+        name: designName.trim() || (editDesignId ? `${product.name} — แบบของฉัน (แก้ไข)` : `${product.name} — แบบของฉัน`),
         description: `เสื้อออกแบบเอง สี ${shirtColor} ไซส์ ${shirtSize} สกรีน ${screenSize} (${printTechnique})`,
         images: imagesArray,
         overlay_image: finalOverlayFrontUrl,
@@ -697,6 +700,18 @@ function CustomShirtPageContent() {
           <div className="w-full lg:w-80 p-6 md:p-8 bg-slate-50/50 flex flex-col justify-between">
             <div>
               <h2 className="text-xl font-semibold mb-6">2. รายละเอียดเสื้อ</h2>
+
+              {/* Design Name */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-slate-600 mb-2">ตั้งชื่อแบบเสื้อ</label>
+                <input
+                  type="text"
+                  value={designName}
+                  onChange={(e) => setDesignName(e.target.value)}
+                  placeholder="เช่น ลายแมวกวักนำโชค"
+                  className="mt-1 block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 bg-white ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-blue-500 sm:text-sm outline-hidden"
+                />
+              </div>
 
               {/* Upload */}
               <div className="mb-6">

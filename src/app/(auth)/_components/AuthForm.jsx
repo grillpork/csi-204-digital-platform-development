@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { useProductStore } from "@/store/product";
 import { Mail, Lock, User, Eye, EyeOff, LogIn, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -44,6 +45,12 @@ export default function AuthForm({ mode }) {
       }
 
       await refresh();
+      try {
+        const syncCart = useProductStore.getState().syncCart;
+        if (syncCart) await syncCart();
+      } catch (syncErr) {
+        console.error("Cart sync error during login:", syncErr);
+      }
       if (!localStorage.getItem("pagesViewed")) {
         localStorage.setItem("pagesViewed", "[]");
       }
