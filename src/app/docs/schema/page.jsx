@@ -22,6 +22,8 @@ const schemas = [
       { name: "password", type: "String", desc: "รหัสผ่านที่เข้ารหัสผ่าน bcrypt" },
       { name: "address", type: "String (Nullable)", desc: "ที่อยู่จัดส่งของลูกค้า" },
       { name: "phone", type: "String (Nullable)", desc: "เบอร์โทรศัพท์ติดต่อ" },
+      { name: "bio", type: "String (Nullable)", desc: "ประวัติส่วนตัว/แนะนำตัว" },
+      { name: "avatarUrl", type: "String (Nullable)", desc: "รูปโปรไฟล์ผู้ใช้งาน" },
       { name: "roleId", type: "Int", desc: "เชื่อมโยงรหัสสิทธิ์ผู้ใช้ (Foreign Key -> Role.id)" },
       { name: "isSeller", type: "Boolean", desc: "สถานะเป็นผู้ขาย/นักออกแบบ (Default: false)" },
       { name: "shopName", type: "String (Nullable)", desc: "ชื่อร้านค้าสำหรับแสดงในหน้าร้าน" },
@@ -29,7 +31,7 @@ const schemas = [
     ]
   },
   {
-    name: "Product (ข้อมูลสินค้า)",
+    name: "Product (ข้อมูลสินค้า/ลายออกแบบ)",
     dbTable: "products",
     fields: [
       { name: "id", type: "Int", desc: "รหัสสินค้าหลัก (Primary Key, Auto-increment)" },
@@ -38,11 +40,68 @@ const schemas = [
       { name: "price", type: "Int", desc: "ราคาขายสินค้า (หน่วยบาท)" },
       { name: "category", type: "Category (Enum)", desc: "หมวดหมู่ประเภทเสื้อ เช่น TSHIRT, POLO, HOODIE" },
       { name: "images", type: "String[]", desc: "อาร์เรย์รายการลิงก์รูปภาพสินค้า/Mockup" },
-      { name: "colors", type: "String[]", desc: "อาร์เรย์รหัสสีเสื้อที่รองรับการสกรีน (เช่น #ffffff)" },
+      { name: "colors", type: "String[]", desc: "อาร์เรย์รหัสสีเสื้อที่รองรับการสกรีน (เช่น White, Black)" },
       { name: "sizes", type: "Size[] (Enum)", desc: "อาร์เรย์ขนาดเสื้อที่รองรับ (XS, S, M, L, XL, XXL)" },
       { name: "stock", type: "Int", desc: "จำนวนสินค้าคงเหลือ (Default: 0)" },
       { name: "sellerId", type: "String", desc: "รหัสร้านผู้ขาย (Foreign Key -> User.id)" },
-      { name: "createdAt", type: "DateTime", desc: "วันที่เริ่มวางขายสินค้า" }
+      { name: "createdAt", type: "DateTime", desc: "วันที่เริ่มต้นบันทึกข้อมูล" },
+      { name: "is_custom", type: "Boolean", desc: "ระบุว่าเป็นลายที่ออกแบบเองหรือไม่ (Default: false)" },
+      { name: "base_product_id", type: "Int (Nullable)", desc: "รหัสสินค้าตั้งต้นที่นำมาออกแบบ" },
+      { name: "overlay_image", type: "String (Nullable)", desc: "รูปภาพสกรีนลายด้านหน้า" },
+      { name: "overlay_position_x", type: "Float (Nullable)", desc: "ตำแหน่งพิกัด X ลายสกรีนหน้า" },
+      { name: "overlay_position_y", type: "Float (Nullable)", desc: "ตำแหน่งพิกัด Y ลายสกรีนหน้า" },
+      { name: "overlay_size", type: "Float (Nullable)", desc: "ขนาดของลายสกรีนหน้า" },
+      { name: "overlay_image_back", type: "String (Nullable)", desc: "รูปภาพสกรีนลายด้านหลัง" },
+      { name: "overlay_position_x_back", type: "Float (Nullable)", desc: "ตำแหน่งพิกัด X ลายสกรีนหลัง" },
+      { name: "overlay_position_y_back", type: "Float (Nullable)", desc: "ตำแหน่งพิกัด Y ลายสกรีนหลัง" },
+      { name: "overlay_size_back", type: "Float (Nullable)", desc: "ขนาดของลายสกรีนหลัง" },
+      { name: "print_side", type: "String (Nullable)", desc: "ด้านของเสื้อที่สกรีน (front, back, both)" },
+      { name: "screen_size", type: "String (Nullable)", desc: "ขนาดหน้าจอพิมพ์สกรีน (เช่น A4, A3)" },
+      { name: "print_technique", type: "String (Nullable)", desc: "เทคนิคที่ใช้พิมพ์สกรีน (เช่น DFT, DTG)" },
+      { name: "is_public", type: "Boolean", desc: "ระบุว่านำขึ้นแสดงบนหน้าร้านหลักหรือไม่" },
+      { name: "approvalStatus", type: "ApprovalStatus (Enum)", desc: "สถานะการตรวจงาน (DRAFT, PENDING, APPROVED, REJECTED)" },
+      { name: "rejectionReason", type: "String (Nullable)", desc: "เหตุผลกรณีถูกปฏิเสธแบบลายเสื้อ" }
+    ]
+  },
+  {
+    name: "Order (ข้อมูลคำสั่งซื้อ)",
+    dbTable: "orders",
+    fields: [
+      { name: "id", type: "String", desc: "รหัสใบสั่งซื้อ (Primary Key, CUID)" },
+      { name: "userId", type: "String", desc: "รหัสผู้สั่งซื้อ (Foreign Key -> User.id)" },
+      { name: "status", type: "OrderStatus (Enum)", desc: "สถานะสั่งซื้อ (เช่น PENDING, PAID, SHIPPED, CANCELLED)" },
+      { name: "total_amount", type: "Int", desc: "ยอดสุทธิที่ต้องชำระ (บาท)" },
+      { name: "shippingAddress", type: "String", desc: "ที่อยู่จัดส่งสินค้า" },
+      { name: "phone", type: "String (Nullable)", desc: "เบอร์โทรผู้รับ" },
+      { name: "createdAt", type: "DateTime", desc: "วันที่ทำรายการสั่งซื้อ" }
+    ]
+  },
+  {
+    name: "OrderItem (รายการย่อยสินค้าในออเดอร์)",
+    dbTable: "order_items",
+    fields: [
+      { name: "id", type: "Int", desc: "รหัสรายการสั่งซื้อย่อย (Primary Key, Auto-increment)" },
+      { name: "orderId", type: "String", desc: "รหัสอ้างอิงใบสั่งซื้อหลัก (Foreign Key -> Order.id)" },
+      { name: "productId", type: "Int", desc: "รหัสสินค้าหรือลายเสื้อที่ซื้อ (Foreign Key -> Product.id)" },
+      { name: "quantity", type: "Int", desc: "จำนวนชิ้นที่สั่งซื้อ" },
+      { name: "price", type: "Int", desc: "ราคาต่อหน่วย ณ วันสั่งซื้อ" },
+      { name: "size", type: "String", desc: "ขนาดไซส์เสื้อยืดที่สั่งซื้อ (เช่น M, L)" },
+      { name: "color", type: "String", desc: "รหัสสีเสื้อที่สั่งซื้อ (เช่น White, Black)" }
+    ]
+  },
+  {
+    name: "payments (ประวัติและธุรกรรมการชำระเงิน)",
+    dbTable: "payments",
+    fields: [
+      { name: "id", type: "String", desc: "รหัสการเรียกเก็บเงินของ Omise (Primary Key, Charge ID)" },
+      { name: "order_id", type: "String", desc: "รหัสอ้างอิงคำสั่งซื้อ (Foreign Key -> Order.id, Unique)" },
+      { name: "amount", type: "Int", desc: "ยอดเงินรวมชำระเงิน (หน่วยสตางค์)" },
+      { name: "method", type: "String", desc: "ช่องทางชำระเงิน (card หรือ transfer)" },
+      { name: "status", type: "String", desc: "สถานะชำระเงินของ Omise เช่น successful, pending" },
+      { name: "transaction_id", type: "String (Nullable)", desc: "รหัสทำรายการชำระเงินผ่านธนาคารปลายทาง" },
+      { name: "qr_code_url", type: "String (Nullable)", desc: "ลิงก์รูปภาพ QR Code พร้อมเพย์กรณีเลือกพร้อมเพย์" },
+      { name: "expires_at", type: "DateTime (Nullable)", desc: "วันหมดอายุในการแสกนชำระเงินพร้อมเพย์" },
+      { name: "paid_at", type: "DateTime (Nullable)", desc: "วันที่ทำการหักยอดชำระเงินสำเร็จ" }
     ]
   },
   {
@@ -63,6 +122,8 @@ const schemas = [
       { name: "cartId", type: "Int", desc: "เชื่อมโยงตะกร้าหลัก (Foreign Key -> Cart.id)" },
       { name: "productId", type: "Int", desc: "รหัสสินค้าที่เลือกสกรีน" },
       { name: "quantity", type: "Int", desc: "จำนวนสินค้าที่กดสั่งซื้อในตะกร้า" },
+      { name: "size", type: "String", desc: "ขนาดไซส์เสื้อยืดที่สั่งซื้อ (เช่น M, L)" },
+      { name: "color", type: "String", desc: "รหัสสีเสื้อที่สั่งซื้อ (เช่น White, Black)" },
       { name: "addedAt", type: "DateTime", desc: "วันที่นำสินค้าชิ้นนี้ลงตะกร้า" }
     ]
   },
@@ -91,60 +152,84 @@ const schemas = [
 ];
 
 const rawPrisma = `generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["prismaSchemaFolder"]
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Role {
-  id    Int     @id @default(autoincrement())
-  name  String  @unique
+  id    Int    @id @default(autoincrement())
+  name  String @unique
   users User[]
 
   @@map("roles")
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        String     @id @default(cuid())
   name      String
-  email     String   @unique
+  email     String     @unique
   password  String
   address   String?
   phone     String?
-  roleId    Int      @default(1)
-  role      Role     @relation(fields: [roleId], references: [id])
-  isSeller  Boolean  @default(false) @map("is_seller")
-  shopName  String?  @map("shop_name")
-  products  Product[]
+  bio       String?
+  avatarUrl String?    @map("avatar")
+  roleId    Int        @default(1)
+  isSeller  Boolean    @default(false) @map("is_seller")
+  shopName  String?    @map("shop_name")
+  createdAt DateTime   @default(now()) @map("created_at")
   cart      Cart?
   favorites Favorite[]
-  createdAt DateTime @default(now()) @map("created_at")
+  orders    Order[]
+  products  Product[]
+  role      Role       @relation(fields: [roleId], references: [id])
 
   @@map("users")
 }
 
-model Cart {
-  id        Int        @id @default(autoincrement())
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+model Product {
+  id                 Int            @id @default(autoincrement())
+  name               String
+  description        String
+  price              Int
+  category           Category
+  images             String[]
+  colors             String[]
+  sizes              Size[]
+  stock              Int            @default(0)
+  sellerId           String
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+  is_custom          Boolean        @default(false)
+  base_product_id    Int?
+  overlay_image      String?
+  overlay_position_x Float?
+  overlay_position_y Float?
+  overlay_size       Float?
+  overlay_image_back      String?
+  overlay_position_x_back Float?
+  overlay_position_y_back Float?
+  overlay_size_back       Float?
+  print_side         String?
+  screen_size        String?
+  print_technique    String?
+  is_public          Boolean        @default(false)
+  approvalStatus     ApprovalStatus @default(DRAFT) @map("approval_status")
+  submittedAt        DateTime?      @map("submitted_at")
+  reviewedAt         DateTime?      @map("reviewed_at")
+  reviewedById       String?        @map("reviewed_by_id")
+  rejectionReason    String?        @map("rejection_reason")
+  favorites          Favorite[]
+  orderItems         OrderItem[]
+  cartItems          CartItem[]
+  seller             User           @relation(fields: [sellerId], references: [id])
 
-  @@map("carts")
-}
-
-model CartItem {
-  id        Int      @id @default(autoincrement())
-  cartId    Int
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  productId Int
-  quantity  Int
-  addedAt   DateTime @default(now())
-
-  @@map("cart_items")
+  @@unique([id, sellerId])
+  @@map("products")
 }
 
 enum Size {
@@ -164,36 +249,67 @@ enum Category {
   TANK_TOP
 }
 
-model Product {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  price       Int
-  category    Category
-  images      String[]
-  colors      String[]
-  sizes       Size[]
-  stock       Int      @default(0)
-  sellerId    String
-  seller      User     @relation(fields: [sellerId], references: [id])
-  favorites   Favorite[]
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  @@unique([id, sellerId])
-  @@map("products")
+enum ApprovalStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
 }
 
-model Favorite {
-  id        Int      @id @default(autoincrement())
-  userId    String   @map("user_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  productId Int      @map("product_id")
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now()) @map("created_at")
+model Order {
+  id              String      @id @default(cuid())
+  userId          String      @map("user_id")
+  status          OrderStatus @default(PENDING)
+  total_amount    Int
+  shippingAddress String      @map("shipping_address")
+  phone           String?
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  items           OrderItem[]
+  user            User        @relation(fields: [userId], references: [id])
+  payments        payments?
+  shipping        Shipping?
 
-  @@unique([userId, productId])
-  @@map("favorites")
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   String  @map("order_id")
+  productId Int     @map("product_id")
+  quantity  Int
+  price     Int
+  size      String  @default("M")
+  color     String  @default("White")
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PENDING_PAYMENT
+  PAYMENT_EXPIRED
+  PAID
+  PROCESSING
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+model payments {
+  id             String    @id
+  order_id       String    @unique
+  amount         Int
+  method         String
+  status         String
+  transaction_id String?
+  paid_at        DateTime?
+  qr_code_url    String?
+  expires_at     DateTime?
+  created_at     DateTime  @default(now())
+  orders         Order     @relation(fields: [order_id], references: [id], onDelete: Cascade)
 }
 
 model Shipping {
@@ -203,8 +319,83 @@ model Shipping {
   trackingNumber String   @map("tracking_number")
   status         String   @default("PENDING")
   updatedAt      DateTime @updatedAt @map("updated_at")
+  order          Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
   @@map("shippings")
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int
+  size      String   @default("M")
+  color     String   @default("White")
+  addedAt   DateTime @default(now())
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId, size, color])
+  @@map("cart_items")
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    String   @map("user_id")
+  productId Int      @map("product_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+model ShirtType {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g. เสื้อยืด, เสื้อโปโล, เสื้อฮู้ด
+  code        String   @unique // e.g. TSHIRT, POLO, HOODIE
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("shirt_types")
+}
+
+model ShirtSize {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g. S, M, L, XL
+  code        String   @unique // e.g. S, M, L, XL
+  chestSize   String?  // e.g. อก 38"
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("shirt_sizes")
+}
+
+model ShirtQuality {
+  id          Int      @id @default(autoincrement())
+  name        String   // e.g. Cotton 100%, Semi-Premium, Premium
+  description String?  // e.g. ผ้าหนานุ่ม สกรีนพรีเมียม
+  price       Int      @default(0) // Extra price adjustment
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("shirt_qualities")
 }
 `;
 

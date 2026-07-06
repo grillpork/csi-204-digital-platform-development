@@ -19,7 +19,7 @@ const CreatorsGuide = () => {
     );
 
     const sections = document.querySelectorAll(
-      '#open-store, #design-guidelines, #copyright, #revenue-share, #payouts, #marketing-tips'
+      '#open-store, #design-guidelines, #copyright, #revenue-share, #marketing-tips'
     );
     sections.forEach((section) => observer.observe(section));
 
@@ -29,12 +29,11 @@ const CreatorsGuide = () => {
   }, []);
 
   const toc = [
-    { id: 'open-store', title: '1. วิธีการเปิดร้านค้า (Creator Store)' },
+    { id: 'open-store', title: '1. วิธีการลงทะเบียนสินค้า (Creator Shop)' },
     { id: 'design-guidelines', title: '2. มาตรฐานการออกแบบ (Design Guidelines)' },
     { id: 'copyright', title: '3. นโยบายลิขสิทธิ์ทรัพย์สินทางปัญญา' },
     { id: 'revenue-share', title: '4. ส่วนแบ่งรายได้ (Revenue Share)' },
-    { id: 'payouts', title: '5. รอบการถอนเงิน (Payouts)' },
-    { id: 'marketing-tips', title: '6. เคล็ดลับการเพิ่มยอดขาย' },
+    { id: 'marketing-tips', title: '5. เคล็ดลับการเพิ่มยอดขาย' },
   ];
 
   return (
@@ -48,21 +47,20 @@ const CreatorsGuide = () => {
         </div>
         
         <p className="text-[15px] leading-7 text-slate-500 mb-10">
-          ยินดีต้อนรับศิลปินและนักออกแบบทุกท่านเข้าสู่ครอบครัว The Shirtsy! เราคือพื้นที่สำหรับปลดปล่อยความคิดสร้างสรรค์ของคุณให้กลายเป็นสินค้าที่จับต้องได้และสร้างรายได้แบบ Passive Income คู่มือฉบับนี้รวบรวมข้อมูลทุกอย่างที่คุณต้องรู้ ตั้งแต่การสมัคร ไปจนถึงเคล็ดลับการตั้งราคาและการทำโปรโมชั่น
+          ยินดีต้อนรับศิลปินและนักออกแบบทุกท่านเข้าสู่ครอบครัว The Shirtsy! เราคือพื้นที่สำหรับปลดปล่อยความคิดสร้างสรรค์ของคุณให้กลายเป็นสินค้าที่จับต้องได้และสร้างรายได้จากการจำหน่ายผลงาน คู่มือฉบับนี้รวบรวมข้อมูลทุกอย่างที่คุณต้องรู้ ตั้งแต่กระบวนการส่งแบบเสื้อ ไปจนถึงโครงสร้างการรับส่วนแบ่งรายได้
         </p>
 
         {/* Section 1 */}
         <div className="mb-12 pt-4" id="open-store">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-4">1. วิธีการเปิดร้านค้า (Creator Store)</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-4">1. วิธีการลงทะเบียนสินค้า (Creator Shop)</h2>
           <p className="text-[15px] leading-7 text-slate-600 mb-4">
-            เริ่มต้นธุรกิจสายออกแบบของคุณได้ง่ายๆ ไม่มีค่าใช้จ่ายในการสมัครใดๆ ทั้งสิ้น:
+            เริ่มต้นการขายลายออกแบบของคุณได้ง่ายๆ ไม่มีค่าใช้จ่ายในการลงทะเบียนใดๆ ทั้งสิ้น:
           </p>
           <ul className="space-y-3 text-[15px] leading-7 text-slate-600 list-decimal list-inside mb-4">
-            <li><strong>สมัครสมาชิก:</strong> สร้างบัญชีผู้ใช้ทั่วไปบน The Shirtsy หรือเข้าสู่ระบบด้วยอีเมลเดิมของคุณ</li>
-            <li><strong>ยืนยันตัวตน:</strong> ไปที่เมนูโปรไฟล์ เลือก "สมัครเป็น Creator" ระบบจะขอให้คุณกรอกข้อมูลยืนยันตัวตน เช่น ชื่อนามสกุลจริง (เพื่อป้องกันการแอบอ้าง)</li>
-            <li><strong>ตั้งชื่อและตกแต่งร้านค้า:</strong> กรอกชื่อร้าน (Store Name), คำอธิบายร้านค้าสั้นๆ (Bio), รวมไปถึงการอัปโหลดรูปโปรไฟล์ (Profile Picture) และภาพปก (Cover Image) เพื่อสร้างแบรนดิ้งให้ตัวเอง</li>
-            <li><strong>ตั้งค่าการรับเงิน:</strong> ผูกบัญชีธนาคารสำหรับรับส่วนแบ่งรายได้ ตรวจสอบชื่อบัญชีให้ตรงกับชื่อผู้สมัคร</li>
-            <li><strong>อัปโหลดผลงานชิ้นแรก:</strong> เมื่อได้รับการอนุมัติบัญชี (ปกติไม่เกิน 24 ชม.) คุณก็สามารถคลิก "สร้างสินค้าใหม่" เพื่ออัปโหลดลาย กะตำแหน่งบนเสื้อจำลอง (Mockup) ตั้งชื่อสินค้าและกำหนดราคาขายได้ทันที!</li>
+            <li><strong>สมัครสมาชิก:</strong> สร้างบัญชีผู้ใช้บนเว็บไซต์ The Shirtsy และเข้าสู่ระบบ</li>
+            <li><strong>ออกแบบและบันทึกร่าง:</strong> ไปที่เมนู "ออกแบบเสื้อ" (Customizer) อัปโหลดภาพลายสกรีน ตั้งชื่อ และกดบันทึกแบบร่าง (DRAFT)</li>
+            <li><strong>ส่งขออนุมัติ:</strong> เมื่อพอใจการจัดวางแล้ว กดส่งให้ผู้ดูแลระบบตรวจสอบ (PENDING)</li>
+            <li><strong>การอนุมัติและวางขาย:</strong> ผู้ดูแลระบบจะตรวจสอบความคมชัดและลิขสิทธิ์ของภาพ เมื่ออนุมัติแล้วจะกำหนดราคาขายและสต็อกเริ่มต้นเพื่อวางขายแบบสาธารณะทันที!</li>
           </ul>
         </div>
 
@@ -74,7 +72,7 @@ const CreatorsGuide = () => {
           </p>
           <ul className="space-y-3 text-[15px] leading-7 text-slate-600 list-disc list-inside">
             <li><strong>รูปแบบไฟล์:</strong> บังคับใช้เฉพาะ <strong>.PNG แบบไม่มีพื้นหลัง (Transparent Background)</strong> เพื่อเวลาลูกค้านำลายไปวางบนเสื้อสีอื่น จะได้ไม่มีสีพื้นหลังสี่เหลี่ยมติดไปด้วย</li>
-            <li><strong>ขนาดและความละเอียด:</strong> แนะนำขนาดอาร์ตเวิร์คที่ 2400 x 3200 พิกเซล (สำหรับสกรีนเต็มหน้าอก/แผ่นหลัง) ที่ความละเอียด 300 DPI เพื่อความคมชัดสูงสุด ไม่เบลอ ไม่แตก</li>
+            <li><strong>ขนาดและความละเอียด:</strong> แนะนำขนาดอาร์ตเวิร์คที่ 2400 x 3200 พิกเซล (สำหรับสกรีนเต็มหน้าอก/แผ่นหลัง) ที่ความละเอียด 300 DPI เพื่อความคมชัดสูงสุด</li>
             <li><strong>โหมดสี (Color Profile):</strong> แนะนำให้ใช้โหมด <strong>CMYK</strong> หรือ <strong>sRGB</strong> ในโปรแกรมออกแบบ (เช่น Photoshop, Illustrator, Procreate) *หมายเหตุ: โปรดระวังการใช้สีนีออนสว่างจัดจ้าน เนื่องจากเวลาสกรีนจริงลงเนื้อผ้า สีอาจจะดรอปลงประมาณ 5-10%</li>
             <li><strong>เทคนิคการใช้สี:</strong> หลีกเลี่ยงการทำ "ขอบกึ่งโปร่งแสง (Semi-transparent Edge)" หรือเอฟเฟกต์ Glow/Drop Shadow ที่ฟุ้งและจางมากๆ เพราะเครื่องพิมพ์เสื้ออาจจะตีความสีโปร่งแสงเป็นเม็ดสีทึบหรือพิมพ์ออกมาไม่เนียนเท่าที่ควร</li>
           </ul>
@@ -89,7 +87,7 @@ const CreatorsGuide = () => {
           <ul className="space-y-3 text-[15px] leading-7 text-slate-600 list-disc list-inside">
             <li><strong>ผลงานต้องเป็นของคุณเอง:</strong> อาร์ตเวิร์คที่นำมาลงขายต้องเป็นผลงานที่คุณวาดขึ้นเอง หรือมีสิทธิ์ในการใช้เชิงพาณิชย์ (Commercial Use) อย่างถูกต้อง</li>
             <li><strong>ห้ามละเมิดเครื่องหมายการค้า:</strong> ไม่อนุญาตให้นำโลโก้แบรนด์ดัง ตัวการ์ตูน ภาพยนตร์ หรือศิลปินที่มีลิขสิทธิ์ (Fan Art เชิงพาณิชย์) มาขาย หากไม่ได้รับอนุญาตเป็นลายลักษณ์อักษรจากเจ้าของสิทธิ์</li>
-            <li><strong>การรายงานการละเมิด:</strong> หากทางเราได้รับแจ้ง (DMCA Takedown) หรือตรวจพบว่ามีการคัดลอกผลงาน สินค้าชิ้นนั้นจะถูกลบออกจากระบบทันที และหากกระทำผิดซ้ำ บัญชี Creator จะถูกระงับและริบรายได้ทั้งหมด</li>
+            <li><strong>การรายงานการละเมิด:</strong> หากทางเราได้รับแจ้ง (DMCA Takedown) หรือตรวจพบว่ามีการคัดลอกผลงาน สินค้าชิ้นนั้นจะถูกระงับจากการขายทันที</li>
           </ul>
         </div>
 
@@ -97,40 +95,24 @@ const CreatorsGuide = () => {
         <div className="mb-12 pt-4" id="revenue-share">
           <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-4">4. ส่วนแบ่งรายได้ (Revenue Share)</h2>
           <p className="text-[15px] leading-7 text-slate-600 mb-4">
-            โครงสร้างการแบ่งรายได้ของเราออกแบบมาให้ยุติธรรมที่สุด คุณมีอิสระในการกำหนด <strong>กำไรสุทธิ (Markup)</strong> ที่ต้องการต่อเสื้อหนึ่งตัว:
+            โครงสร้างการแบ่งรายได้ของแพลตฟอร์มกำหนดไว้อย่างชัดเจนและยุติธรรมสำหรับนักออกแบบ:
           </p>
           <div className="bg-slate-50 rounded-xl p-6 border border-slate-200 mb-6">
-            <h3 className="font-semibold text-slate-800 mb-3">สูตรคำนวณราคาขายหน้าเว็บ:</h3>
-            <p className="text-[15px] leading-7 text-blue-700 font-medium bg-blue-50 p-3 rounded-lg border border-blue-200 text-center text-lg font-bold">
-              [ราคาต้นทุนเสื้อ + ค่าพิมพ์] + [กำไรที่คุณกำหนด] = [ราคาขาย]
+            <h3 className="font-semibold text-slate-800 mb-3">ส่วนแบ่งรายได้สำหรับ Creator:</h3>
+            <p className="text-[15px] leading-7 text-emerald-700 font-medium bg-emerald-50 p-3 rounded-lg border border-emerald-200 text-center text-lg font-bold">
+              คุณจะได้รับส่วนแบ่งรายได้สุทธิ 20% จากยอดขายเสื้อที่มีลายพิมพ์ของคุณ
             </p>
           </div>
           <ul className="space-y-3 text-[15px] leading-7 text-slate-600 list-disc list-inside">
-            <li><strong>ราคาต้นทุน (Base Cost):</strong> เป็นราคาคงที่ที่ครอบคลุมค่าเสื้อเปล่า, ค่าหมึกสกรีน, และค่าดำเนินการแพ็กจัดส่ง (สมมติ: 190 บาท สำหรับเสื้อยืดไซส์ปกติ)</li>
-            <li><strong>กำไรของคุณ (Markup):</strong> คุณสามารถกำหนดได้อิสระ (เช่น กำหนด 100 บาท)</li>
-            <li><strong>ราคาขาย (Retail Price):</strong> ระบบจะนำสองส่วนมาบวกกัน (190 + 100 = 290 บาท) และแสดงเป็นราคาขายหน้าร้าน</li>
-            <li>คุณจะได้รับกำไร 100 บาท เต็มๆ ต่อการขายเสื้อ 1 ตัว! (ระบบอาจจะมีการหักค่าธรรมเนียมธุรกรรมจาก Payment Gateway (ประมาณ 3-5%) ตามยอดขายจริง)</li>
-            <li>เราจัดการเรื่องสต๊อกเสื้อ ผลิต แพ็ก และจัดส่งให้ลูกค้าทั้งหมด หน้าที่ของคุณมีเพียง <strong>สร้างสรรค์ผลงาน</strong> เท่านั้น!</li>
+            <li><strong>ตัวอย่างการคำนวณ:</strong> หากเสื้อยืดลายออกแบบของคุณขายในราคา 370 บาท คุณจะได้รับส่วนแบ่ง 74 บาท ต่อหนึ่งตัวที่จำหน่ายได้</li>
+            <li><strong>การจัดการสต็อกและการผลิต:</strong> แพลตฟอร์มจะดูแลสต็อกเสื้อเปล่า ควบคุมคุณภาพงานพิมพ์ จัดส่ง และบริการลูกค้าทั้งหมดโดยที่นักออกแบบไม่ต้องกังวล</li>
+            <li><strong>การตรวจสอบยอดขาย:</strong> คุณสามารถตรวจสอบยอดจำหน่าย จำนวนชิ้น และยอดส่วนแบ่งรายสะสมแบบเรียลไทม์ได้ตลอดเวลาทางหน้าประวัติรายได้ในหน้าโปรไฟล์</li>
           </ul>
         </div>
 
         {/* Section 5 */}
-        <div className="mb-12 pt-4" id="payouts">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-4">5. รอบการถอนเงิน (Payouts)</h2>
-          <p className="text-[15px] leading-7 text-slate-600 mb-4">
-            ยอดเงินจะเข้าสู่กระเป๋าเงิน (Wallet) ของ Creator อัตโนมัติเมื่อคำสั่งซื้อนั้นมีสถานะ <strong>"จัดส่งสำเร็จและลูกค้าได้รับสินค้าแล้ว"</strong> เพื่อป้องกันปัญหาสินค้าตีกลับ
-          </p>
-          <ul className="space-y-3 text-[15px] leading-7 text-slate-600 list-disc list-inside">
-            <li><strong>ยอดเงินขั้นต่ำสำหรับการถอน (Minimum Payout):</strong> 500 บาท ขึ้นไป</li>
-            <li><strong>รอบการโอนเงินอัตโนมัติ:</strong> ระบบจะโอนเงินเข้าบัญชีธนาคารที่คุณผูกไว้โดยอัตโนมัติ ทุกวันที่ <strong>1 และ 16 ของทุกเดือน</strong></li>
-            <li><strong>การถอนเงินด่วน (Manual Payout):</strong> หากมีความจำเป็นต้องใช้เงิน คุณสามารถกดขอถอนเงินก่อนรอบได้ โดยจะใช้เวลาตรวจสอบและโอนเงินภายใน 1-3 วันทำการ (มีค่าธรรมเนียมการโอน 15 บาท/ครั้ง)</li>
-            <li>สามารถเช็กยอดขายรายวัน ยอดเงินสะสม และประวัติการถอนเงินได้ตลอดเวลาที่เมนู Creator Dashboard</li>
-          </ul>
-        </div>
-
-        {/* Section 6 */}
         <div className="mb-12 pt-4" id="marketing-tips">
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-4">6. เคล็ดลับการเพิ่มยอดขาย</h2>
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900 mb-4">5. เคล็ดลับการเพิ่มยอดขาย</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-slate-50 rounded-xl p-5 border border-slate-200">
               <h4 className="font-semibold text-slate-800 mb-2">📣 โปรโมทบน Social Media</h4>
