@@ -85,14 +85,7 @@ function CustomShirtPageContent() {
 
   const designIdQuery = searchParams.get('designId');
 
-  // Keep product in sync with 'id' parameter changes if not editing a design
-  useEffect(() => {
-    if (!designIdQuery) {
-      const p = mockProducts.find((x) => x.id === productId) || mockProducts[0];
-      setProduct(p);
-    }
-  }, [productId, designIdQuery]);
-
+  // Load the correct base product template when editing a design
   useEffect(() => {
     if (designIdQuery) {
       fetch(`/api/designs?id=${designIdQuery}`)
@@ -110,8 +103,21 @@ function CustomShirtPageContent() {
 
             // Load the correct base product template
             if (d.base_product_id) {
-              const bp = mockProducts.find(p => p.id === d.base_product_id);
-              if (bp) setProduct(bp);
+              fetch(`/api/products/${d.base_product_id}`)
+                .then((res) => res.json())
+                .then((json) => {
+                  if (json.success && json.data) {
+                    const dbProd = json.data;
+                    setProduct({
+                      id: dbProd.id,
+                      name: dbProd.name,
+                      image: dbProd.images?.[0] || "/img/white-t-shirt/wh-t-shirt-cover.jpg",
+                      templateImgFront: dbProd.images?.[0] || "/img/white-t-shirt/template/wh-t-shirt-TEM-f-removebg.png",
+                      templateImgBack: dbProd.images?.[1] || dbProd.images?.[0] || "/img/white-t-shirt/template/wh-t-shirt-TEM-b-removebg.png",
+                    });
+                  }
+                })
+                .catch((err) => console.error("Error loading base product:", err));
             }
 
             // Load Front side design
