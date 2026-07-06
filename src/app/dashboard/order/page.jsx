@@ -18,6 +18,17 @@ const labels = {
   CANCELLED: "ยกเลิก"
 };
 
+const selectColors = {
+  PENDING: "bg-yellow-50 border-yellow-200 text-yellow-800 focus:ring-yellow-500 focus:border-yellow-500",
+  PENDING_PAYMENT: "bg-amber-50 border-amber-200 text-amber-800 focus:ring-amber-500 focus:border-amber-500",
+  PAYMENT_EXPIRED: "bg-slate-50 border-slate-200 text-slate-400 focus:ring-slate-500 focus:border-slate-500",
+  PAID: "bg-emerald-50 border-emerald-200 text-emerald-800 focus:ring-emerald-500 focus:border-emerald-500",
+  PROCESSING: "bg-blue-50 border-blue-200 text-blue-800 focus:ring-blue-500 focus:border-blue-500",
+  SHIPPED: "bg-indigo-50 border-indigo-200 text-indigo-800 focus:ring-indigo-500 focus:border-indigo-500",
+  COMPLETED: "bg-green-50 border-green-200 text-green-800 focus:ring-green-500 focus:border-green-500",
+  CANCELLED: "bg-rose-50 border-rose-200 text-rose-800 focus:ring-rose-500 focus:border-rose-500"
+};
+
 const getStatusIcon = (status) => {
   switch (status) {
     case "PENDING": return AlertCircle;
@@ -138,11 +149,27 @@ export default function AdminOrders() {
         <select 
           value={status} 
           onChange={e => update(record.id, e.target.value)} 
-          className="bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-xl px-2 py-1.5 focus:border-indigo-500 outline-none transition-all cursor-pointer font-semibold w-full max-w-[120px]"
+          className={`border text-xs rounded-xl px-2 py-1.5 outline-none transition-all cursor-pointer font-bold w-full max-w-[120px] ${selectColors[status] || "bg-slate-50 border-slate-200 text-slate-700"}`}
         >
-          {Object.entries(labels).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
+          {Object.entries(labels).map(([k, v]) => {
+            const allowedTransitions = {
+              PENDING: ["PENDING", "PENDING_PAYMENT", "CANCELLED"],
+              PENDING_PAYMENT: ["PENDING_PAYMENT", "PAID", "PAYMENT_EXPIRED", "CANCELLED"],
+              PAYMENT_EXPIRED: ["PAYMENT_EXPIRED"],
+              PAID: ["PAID", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"],
+              PROCESSING: ["PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"],
+              SHIPPED: ["SHIPPED", "COMPLETED", "CANCELLED"],
+              COMPLETED: ["COMPLETED"],
+              CANCELLED: ["CANCELLED"]
+            };
+            const validStates = allowedTransitions[status] || [];
+            const isDisabled = !validStates.includes(k);
+            return (
+              <option key={k} value={k} disabled={isDisabled}>
+                {v}
+              </option>
+            );
+          })}
         </select>
       )
     }

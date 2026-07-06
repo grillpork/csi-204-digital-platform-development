@@ -482,7 +482,7 @@ function CustomShirtPageContent() {
       const payload = {
         id: editDesignId,
         name: designName.trim() || (editDesignId ? `${product.name} — แบบของฉัน (แก้ไข)` : `${product.name} — แบบของฉัน`),
-        description: `เสื้อออกแบบเอง สี ${shirtColor} ไซส์ ${shirtSize} สกรีน ${screenSize} (${printTechnique})`,
+        description: `เสื้อออกแบบเอง สี ${shirtColor} สกรีน ${screenSize} (${printTechnique})`,
         images: imagesArray,
         overlay_image: finalOverlayFrontUrl,
         overlay_position_x: hasFront ? overlayPosFront.x : null,
@@ -495,7 +495,7 @@ function CustomShirtPageContent() {
         baseProductId: productId,
         category: 'TSHIRT',
         color: shirtColor,
-        sizes: [shirtSize === '2XL' ? 'XXL' : shirtSize],
+        sizes: ["S", "M", "L", "XL", "XXL"],
         printSide: viewSide,
         screenSize,
         printTechnique
@@ -745,21 +745,7 @@ function CustomShirtPageContent() {
                 </div>
               </div>
 
-              {/* Shirt Size */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-600 mb-2">ไซส์เสื้อ</label>
-                <select
-                  value={shirtSize}
-                  onChange={(e) => setShirtSize(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 bg-white ring-1 ring-inset ring-slate-200 focus:ring-2 focus:ring-blue-500 sm:text-sm"
-                >
-                  <option value="S">S (อก 34&quot;)</option>
-                  <option value="M">M (อก 38&quot;)</option>
-                  <option value="L">L (อก 42&quot;)</option>
-                  <option value="XL">XL (อก 46&quot;)</option>
-                  <option value="2XL">2XL (อก 50&quot;)</option>
-                </select>
-              </div>
+
 
               {/* Screen Size */}
               <div className="mb-6">

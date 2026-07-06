@@ -5,14 +5,14 @@ import Link from "next/link";
 
 const labels = { PENDING: "รอยืนยัน", PENDING_PAYMENT: "รอชำระเงิน", PAYMENT_EXPIRED: "หมดเวลาชำระ", PAID: "ชำระแล้ว", PROCESSING: "กำลังผลิต", SHIPPED: "กำลังจัดส่ง", COMPLETED: "สำเร็จ", CANCELLED: "ยกเลิก" };
 const statusColors = {
-  PENDING: "bg-amber-100 text-amber-800",
-  PENDING_PAYMENT: "bg-amber-100 text-amber-800",
-  PAYMENT_EXPIRED: "bg-black text-white",
-  PAID: "bg-green-100 text-green-800",
-  PROCESSING: "bg-green-100 text-green-800",
-  SHIPPED: "bg-green-100 text-green-800",
-  COMPLETED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800"
+  PENDING: "bg-yellow-100 text-yellow-800 border border-yellow-200",
+  PENDING_PAYMENT: "bg-amber-100 text-amber-800 border border-amber-200",
+  PAYMENT_EXPIRED: "bg-slate-100 text-slate-500 border border-slate-200",
+  PAID: "bg-emerald-100 text-emerald-800 border border-emerald-200",
+  PROCESSING: "bg-blue-100 text-blue-800 border border-blue-200",
+  SHIPPED: "bg-indigo-100 text-indigo-800 border border-indigo-200",
+  COMPLETED: "bg-green-100 text-green-800 border border-green-200",
+  CANCELLED: "bg-rose-100 text-rose-800 border border-rose-200"
 };
 async function body(response){const text=await response.text();try{return text?JSON.parse(text):{}}catch{return{}}}
 
