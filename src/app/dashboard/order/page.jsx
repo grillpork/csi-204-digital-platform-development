@@ -151,9 +151,25 @@ export default function AdminOrders() {
           onChange={e => update(record.id, e.target.value)} 
           className={`border text-xs rounded-xl px-2 py-1.5 outline-none transition-all cursor-pointer font-bold w-full max-w-[120px] ${selectColors[status] || "bg-slate-50 border-slate-200 text-slate-700"}`}
         >
-          {Object.entries(labels).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
-          ))}
+          {Object.entries(labels).map(([k, v]) => {
+            const allowedTransitions = {
+              PENDING: ["PENDING", "PENDING_PAYMENT", "CANCELLED"],
+              PENDING_PAYMENT: ["PENDING_PAYMENT", "PAID", "PAYMENT_EXPIRED", "CANCELLED"],
+              PAYMENT_EXPIRED: ["PAYMENT_EXPIRED"],
+              PAID: ["PAID", "PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"],
+              PROCESSING: ["PROCESSING", "SHIPPED", "COMPLETED", "CANCELLED"],
+              SHIPPED: ["SHIPPED", "COMPLETED", "CANCELLED"],
+              COMPLETED: ["COMPLETED"],
+              CANCELLED: ["CANCELLED"]
+            };
+            const validStates = allowedTransitions[status] || [];
+            const isDisabled = !validStates.includes(k);
+            return (
+              <option key={k} value={k} disabled={isDisabled}>
+                {v}
+              </option>
+            );
+          })}
         </select>
       )
     }

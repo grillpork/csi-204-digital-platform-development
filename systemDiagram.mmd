@@ -1,98 +1,152 @@
-flowchart LR
-    Start(["เข้าเว็บ"]) --> ViewProducts["ดูสินค้าในเว็บ (ไม่ต้อง Login)"]
+flowchart TD
+    Start(["เข้าเว็บ"]) --> ViewProducts["ดูสินค้าในเว็บ (ไม่ต้อง Login)\n/shop"]
     ViewProducts --> ChoosePath{"เลือกทาง"}
 
+    %% ═══════════════════════════════════════════
     %% Flow A: ซื้อสินค้าที่มีคนลงขาย
-    ChoosePath -->|"ซื้อสินค้าที่มีคนลงขาย"| AddCart["กด Add to Cart"]
-    AddCart --> CheckLoginCart{"Login แล้ว?"}
-    CheckLoginCart -->|"ไม่"| LoginPage["Login / Register"]
-    LoginPage --> AddCart
-    CheckLoginCart -->|"ใช่"| CheckStock1{"สต็อกพอ?"}
-    CheckStock1 -->|"ไม่พอ"| StockError["แจ้งเตือนสต็อกไม่พอ"]
-    StockError --> ViewProducts
-    CheckStock1 -->|"พอ"| CartPage["ตะกร้าสินค้า (เพิ่ม/ลบ/แก้ไข)"]
-    CartPage --> Checkout["Checkout"]
-    Checkout --> CheckStock2{"เช็คสต็อกซ้ำก่อนจ่าย"}
-    CheckStock2 -->|"ไม่พอ"| StockError
-    CheckStock2 -->|"พอ"| PaymentChoice{"เลือกวิธีชำระ"}
+    %% ═══════════════════════════════════════════
+    ChoosePath -->|"ซื้อสินค้าปกติ"| ProductDetail["เข้าหน้ารายละเอียดสินค้า\n/product/[id]"]
+    ProductDetail --> AddCart["กด Add to Cart\n(เลือกสี / ไซส์ / จำนวน)"]
+    AddCart --> GuestCheck{"Login แล้ว?"}
+    GuestCheck -->|"ใช่"| SaveCartDB["บันทึกลง Cart ใน Database\nPOST /api/cart"]
+    GuestCheck -->|"ไม่"| SaveCartLocal["บันทึกลง Local Cart\n(Zustand + localStorage)"]
+    SaveCartDB --> CartDrawer["เปิดตะกร้าสินค้า (CartDrawer)\nเพิ่ม / ลบ / แก้ไขได้"]
+    SaveCartLocal --> CartDrawer
 
-    %% Payment: COD
-    PaymentChoice -->|"COD เก็บเงินปลายทาง"| CreateOrder[("สร้าง Order ใน DB")]
+    CartDrawer --> ClickCheckout{"กดปุ่มดำเนินการสั่งซื้อ"}
+    ClickCheckout --> CheckLoginCheckout{"Login แล้ว?"}
+    CheckLoginCheckout -->|"ไม่"| LoginPageA["หน้า Login / Register\n/login หรือ /register"]
+    LoginPageA --> SyncCart["syncCart: ส่ง Local Cart ทุกรายการ\nไปบันทึกใน DB แล้วดึงกลับ"]
+    SyncCart --> CheckoutForm
+    CheckLoginCheckout -->|"ใช่"| CheckoutForm["แสดงฟอร์ม Checkout\n(ที่อยู่จัดส่ง — ไม่บังคับกรอก)"]
 
-    %% Payment: QR PromptPay
-    PaymentChoice -->|"QR PromptPay"| QROption{"จ่ายตอนนี้หรือทีหลัง?"}
-    QROption -->|"จ่ายตอนนี้"| QRNow["แสดง QR → scan → ยืนยันการชำระ"]
-    QROption -->|"จ่ายทีหลัง (Pending)"| CreateOrder
-    QRNow --> CreateOrder
+    CheckoutForm --> PaymentChoice{"เลือกวิธีชำระเงิน"}
 
-    %% Order fulfillment
-    CreateOrder --> AdminQueue["ออเดอร์เข้า Admin Dashboard"]
-    AdminQueue --> AdminFulfill["Admin จัดการผลิต/แพ็ค/จัดส่ง"]
-    AdminFulfill --> Shipped["กดจัดส่งแล้ว (Tracking Number)"]
-    Shipped --> EndFlow(["จบ Flow"])
+    %% Payment: Credit Card (Omise)
+    PaymentChoice -->|"บัตรเครดิต"| TokenizeCard["สร้าง Omise Token จากข้อมูลบัตร\n(Omise.js Frontend)"]
+    TokenizeCard --> CardCharge["POST /api/checkout\n(paymentMethod: card)"]
+    CardCharge --> CardResult{"ผลการชาร์จ?"}
+    CardResult -->|"successful"| CreateOrderPaid[("สร้าง Order สถานะ PAID\n+ Payment status: successful\n+ ลด stock + ล้างตะกร้า")]
+    CardResult -->|"pending (3DS)"| Redirect3DS["Redirect ไปหน้า 3D Secure\n(authorize_uri)"]
+    Redirect3DS --> WebhookVerify
+    CardResult -->|"failed"| PaymentFailed["แจ้งเตือน: การชำระเงินไม่สำเร็จ"]
+    PaymentFailed --> CheckoutForm
 
-    %% Order side actions (dashed)
-    CreateOrder -.->|"ดูประวัติ/Tracking"| OrderHistory["ดูประวัติออเดอร์ + Tracking"]
-    CreateOrder -.->|"ยกเลิก Pending Order"| CancelOrder["ยกเลิก Order + คืน stock"]
-    CancelOrder --> ViewProducts
-    CreateOrder -.->|"แผนอนาคต"| FutureNotify["Notification"]
+    %% Payment: PromptPay QR (Omise)
+    PaymentChoice -->|"PromptPay QR"| PromptPayCharge["POST /api/checkout\n(paymentMethod: transfer)"]
+    PromptPayCharge --> CreateOrderPending[("สร้าง Order สถานะ PENDING_PAYMENT\n+ Payment status: pending\n+ QR Code URL + หมดเวลา 30 นาที\n+ ลด stock + ล้างตะกร้า")]
+    CreateOrderPending --> ShowQR["แสดง QR Code ให้สแกนจ่าย"]
+    ShowQR --> QRDecision{"ลูกค้าจะทำอะไร?"}
+    QRDecision -->|"สแกนจ่ายสำเร็จ"| WebhookVerify["Omise Webhook (charge.complete)\nPOST /api/webhooks/omise"]
+    QRDecision -->|"จ่ายทีหลัง"| PendingOrder["แจ้งเตือน: รอชำระเงิน\nดูได้ที่ประวัติออเดอร์"]
 
-    %% Custom Design entry (ไม่ต้อง Login)
-    ChoosePath -->|"ออกแบบ Custom เอง"| CustomDesign["หน้าออกแบบ Custom (เลือกภาพ/สี/ไซส์/Sleeve) ไม่ต้อง Login"]
-    CustomDesign --> ChooseAction{"จะทำอะไรกับลายนี้?"}
+    WebhookVerify --> VerifyCharge{"ตรวจสอบกับ Omise API โดยตรง\n(status, currency, amount)"}
+    VerifyCharge -->|"ยืนยันสำเร็จ"| UpdateToPaid["อัปเดต Order → PAID\nPayment → successful"]
+    VerifyCharge -->|"ออเดอร์ยกเลิก/หมดเวลาแล้ว"| PaidAfterClosed["บันทึก paid_after_closed\n(ต้อง review refund)"]
 
-    %% Flow B1: พรีออเดอร์ใช้เอง
-    ChooseAction -->|"พรีออเดอร์ใช้เอง"| ConfirmPreorder["กดยืนยันพรีออเดอร์"]
-    ConfirmPreorder --> CheckLoginB1{"Login แล้ว?"}
-    CheckLoginB1 -->|"ไม่"| LoginPage2["Login / Register (ไม่เก็บ state ที่ออกแบบไว้)"]
-    LoginPage2 --> CustomDesign
-    CheckLoginB1 -->|"ใช่"| CalcPrice["คำนวณราคาอัตโนมัติ (Base price + ตัวเลือก)"]
-    CalcPrice --> CartPage
+    CreateOrderPaid --> OrderSuccess(["สั่งซื้อสำเร็จ ✓"])
+    UpdateToPaid --> OrderSuccess
 
-    %% Flow B2: โพสขาย
-    ChooseAction -->|"โพสขาย"| CheckLoginB2{"Login แล้ว?"}
-    CheckLoginB2 -->|"ไม่"| LoginPage3["Login / Register (ไม่เก็บ state ที่ออกแบบไว้)"]
-    LoginPage3 --> CustomDesign
-    CheckLoginB2 -->|"ใช่"| SaveDraft[("บันทึกร่าง (isPublic: false)\nUser ลงแค่ลายเสื้อ")]
-    SaveDraft --> AdminReview{"Admin ตรวจสอบลาย + ตั้งราคา/สต็อก (Pricing)"}
-    AdminReview -->|"อนุมัติ"| Published["สินค้าขึ้น Marketplace (isPublic: true)"]
-    Published --> ViewProducts
-    AdminReview -->|"ไม่อนุมัติ"| Feedback["ส่งคำแนะนำกลับ User"]
-    Feedback --> EditDraft["User แก้ไข Draft เดิม"]
-    EditDraft --> SaveDraft
-    AdminReview -->|"user ถอนคำขอ"| RetractDraft["ถอนคำขออนุมัติ → กลับเป็น Draft"]
-    RetractDraft --> SellerDash
+    %% ═══════════════════════════════════════════
+    %% Order Status State Machine (Admin)
+    %% ═══════════════════════════════════════════
+    OrderSuccess --> AdminDashboard["Admin Dashboard จัดการคำสั่งซื้อ\n/dashboard/order"]
+    AdminDashboard --> StatusUpdate["เปลี่ยนสถานะออเดอร์\nPATCH /api/admin/orders"]
+    StatusUpdate --> TransitionCheck{"ตรวจสอบ allowedTransitions\n(ห้ามย้อนกลับสถานะ)"}
 
-    %% Side features (ขนาน ไม่อยู่บน Main Flow)
-    subgraph SideFeatures["Side Features (ขนาน ไม่อยู่ใน Main Flow)"]
-        ProfileMgmt["โปรไฟล์: ดู/แก้ข้อมูล + รูปโปรไฟล์ (ต้อง Login)"]
-        Favorite["กด Favorite / นำออกจากรายการโปรด (ต้อง Login)"]
-        BecomeSeller["กดสมัครเป็น Seller (isSeller=true ทันที)"]
-        BecomeSeller -.->|"ลิงก์: อยากลงทะเบียนรับเงินไหม"| RevenueReg["หน้าลงทะเบียนรับส่วนแบ่งรายได้"]
-        RevenueReg --> KYCCheck{"KYC ผ่านแล้ว?"}
-        KYCCheck -->|"ยังไม่ผ่าน"| KYCVerify["ยืนยันตัวตน (บัตรประชาชน + บัญชีธนาคาร)"]
-        KYCVerify --> KYCCheck
-        KYCCheck -->|"ผ่านแล้ว"| RevenueActive["รับส่วนแบ่งรายได้ได้"]
-        BecomeSeller --> SellerDash["Seller Dashboard: ดูร่าง / สินค้าที่ลงขายไว้"]
+    TransitionCheck --> AllowedPaths["PENDING → PENDING_PAYMENT / CANCELLED\nPENDING_PAYMENT → PAID / PAYMENT_EXPIRED / CANCELLED\nPAID → PROCESSING / SHIPPED / COMPLETED / CANCELLED\nPROCESSING → SHIPPED / COMPLETED / CANCELLED\nSHIPPED → COMPLETED / CANCELLED\nCOMPLETED ✗ เปลี่ยนไม่ได้\nCANCELLED ✗ เปลี่ยนไม่ได้\nPAYMENT_EXPIRED ✗ เปลี่ยนไม่ได้"]
+
+    %% ═══════════════════════════════════════════
+    %% Payment Expiry (เช็คอัตโนมัติ)
+    %% ═══════════════════════════════════════════
+    PendingOrder -.->|"หมดเวลา 30 นาที"| ExpireCheck["GET /api/orders\nเช็ค payments.expires_at ≤ now"]
+    ExpireCheck --> AutoExpire["อัปเดต Order → PAYMENT_EXPIRED\nคืน stock ทุกรายการ\nPayment → expired"]
+
+    %% ═══════════════════════════════════════════
+    %% ดูประวัติออเดอร์
+    %% ═══════════════════════════════════════════
+    OrderSuccess -.->|"ลูกค้าเปิดดู"| OrderHistory["ประวัติคำสั่งซื้อ\n/profile/orders\n(สีสถานะแยกชัดเจน 8 สี)"]
+
+    %% ═══════════════════════════════════════════
+    %% Flow B: ออกแบบเสื้อ Custom
+    %% ═══════════════════════════════════════════
+    ChoosePath -->|"ออกแบบเสื้อสกรีน Custom"| CustomPage["หน้าออกแบบ Custom\n/custom?productId=X\n(ไม่ต้อง Login)\nอัปโหลดลาย / เลือกสี / ตั้งชื่อแบบ\nไซส์ S-XXL อัตโนมัติ / เลือกด้านหน้า-หลัง\nขนาดสกรีน / เทคนิคสกรีน"]
+
+    CustomPage --> SaveDesign{"กดบันทึก (ต้อง Login)"}
+    SaveDesign --> CheckLoginCustom{"Login แล้ว?"}
+    CheckLoginCustom -->|"ไม่"| LoginPageB["หน้า Login / Register"]
+    LoginPageB --> CustomPage
+    CheckLoginCustom -->|"ใช่"| UploadImages["อัปโหลดภาพ overlay + composite\nPOST /api/custom-upload"]
+    UploadImages --> SaveChoice{"เลือกวิธีบันทึก"}
+
+    SaveChoice -->|"บันทึกแบบร่าง"| SaveDraft["POST /api/designs\napprovalStatus: DRAFT\nis_public: false"]
+    SaveChoice -->|"ส่งให้แอดมินตรวจ"| SaveAndSubmit["POST /api/designs → POST /api/designs/submit\napprovalStatus: PENDING\nis_public: false"]
+
+    SaveDraft --> MyDesigns["หน้าแบบเสื้อของฉัน\n/profile/products"]
+    SaveAndSubmit --> AdminReview
+
+    %% ═══════════════════════════════════════════
+    %% Admin Design Review
+    %% ═══════════════════════════════════════════
+    MyDesigns -->|"กดส่งตรวจ (DRAFT/REJECTED)"| SubmitReview["POST /api/designs/submit\napprovalStatus → PENDING"]
+    SubmitReview --> AdminReview
+
+    MyDesigns -->|"กดถอนคำขอ (PENDING)"| RetractDraft["DELETE /api/designs/submit\napprovalStatus → DRAFT"]
+    RetractDraft --> MyDesigns
+
+    AdminReview["Admin ตรวจสอบแบบเสื้อ\n/dashboard/designs\nPATCH /api/admin/designs"]
+    AdminReview -->|"อนุมัติ (ตั้งราคา + สต็อก)"| Approved["approvalStatus: APPROVED\nis_public: true\nสินค้าขึ้นหน้าร้าน"]
+    Approved --> ViewProducts
+    AdminReview -->|"ไม่อนุมัติ (ระบุเหตุผล)"| Rejected["approvalStatus: REJECTED\nrejectionReason: '...'\nis_public: false"]
+    Rejected --> MyDesigns
+
+    MyDesigns -->|"กดแก้ไข (DRAFT/REJECTED)"| CustomPage
+
+    %% ═══════════════════════════════════════════
+    %% Side Features
+    %% ═══════════════════════════════════════════
+    subgraph SideFeatures["Side Features (ต้อง Login)"]
+        ProfileMgmt["โปรไฟล์: ดู/แก้ชื่อ/เบอร์โทร/ที่อยู่/bio/รูปโปรไฟล์\n/profile + /profile/edit\nPATCH /api/user/profile + POST /api/user/avatar"]
+        FavoritePage["รายการโปรด\n/profile/favorites\nPOST /api/favorites + DELETE /api/favorites"]
+        RevenuePage["รายได้จากผลงานออกแบบ\n/profile/revenue\nGET /api/user/revenue"]
     end
 
+    %% ═══════════════════════════════════════════
+    %% Admin Features
+    %% ═══════════════════════════════════════════
+    subgraph AdminFeatures["Admin Dashboard (ต้อง Login + Role Admin)"]
+        AdminOverview["หน้า Overview\n/dashboard/overview"]
+        AdminOrders["จัดการคำสั่งซื้อ\n/dashboard/order"]
+        AdminDesigns["ตรวจแบบเสื้อ\n/dashboard/designs"]
+        AdminCatalog["จัดการแม่แบบสินค้า\n/dashboard/catalog"]
+        AdminRevenue["จัดการรายได้\n/dashboard/revenue"]
+    end
+
+    %% ═══════════════════════════════════════════
     %% Infrastructure / External
+    %% ═══════════════════════════════════════════
     subgraph Infra["Infrastructure / External"]
-        DB[("Neon PostgreSQL via Prisma")]
-        ImgStorage[("Local Disk: public/images, public/uploads/custom")]
+        DB[("Neon PostgreSQL\nvia Prisma ORM")]
+        ImgStorage[("Image Storage\npublic/uploads/custom")]
+        OmiseAPI["Omise Payment Gateway\n(Credit Card + PromptPay)"]
     end
 
-    LoginPage --> DB
-    LoginPage2 --> DB
-    LoginPage3 --> DB
-    CartPage --> DB
-    CheckStock1 --> DB
-    CheckStock2 --> DB
+    SaveCartDB --> DB
+    SyncCart --> DB
+    CardCharge --> OmiseAPI
+    PromptPayCharge --> OmiseAPI
+    WebhookVerify --> OmiseAPI
+    CreateOrderPaid --> DB
+    CreateOrderPending --> DB
+    UploadImages --> ImgStorage
     SaveDraft --> DB
-    SaveDraft --> ImgStorage
-    CreateOrder --> DB
-    SellerDash --> DB
-    CustomDesign --> ImgStorage
-    Favorite --> DB
+    SaveAndSubmit --> DB
+    LoginPageA --> DB
+    LoginPageB --> DB
+    FavoritePage --> DB
     OrderHistory --> DB
     ProfileMgmt --> DB
+    RevenuePage --> DB
+    AdminOrders --> DB
+    AdminDesigns --> DB
+    AdminCatalog --> DB
