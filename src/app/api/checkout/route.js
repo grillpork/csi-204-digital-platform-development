@@ -37,15 +37,8 @@ export async function POST(request) {
       cardToken,
     } = await request.json();
 
-    if (!shippingName || !shippingAddress || !shippingPhone) {
-      return NextResponse.json(
-        { error: "กรุณากรอกข้อมูลการจัดส่งให้ครบถ้วน" },
-        { status: 400 }
-      );
-    }
-    if (!isValidThaiPhone(shippingPhone)) {
-      return NextResponse.json({ error: "เบอร์โทรศัพท์ต้องอยู่ในรูปแบบ 095-807-2692" }, { status: 400 });
-    }
+    // validation of shipping details (shippingAddress is now optional and Name/Phone are removed)
+    const finalAddress = shippingAddress ? String(shippingAddress).trim() : "";
 
     // 1. ดึงสินค้าในตะกร้าของ User
     const cart = await prisma.cart.findUnique({
@@ -185,8 +178,8 @@ export async function POST(request) {
           userId: me.id,
           status: orderStatus,
           total_amount: grandTotal,
-          shippingAddress: `${shippingName}\n${shippingAddress}`,
-          phone: phoneDigits(shippingPhone),
+          shippingAddress: finalAddress,
+          phone: null,
           items: {
             create: orderItemsData.map((item) => ({
               productId: item.productId,

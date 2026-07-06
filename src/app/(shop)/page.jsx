@@ -174,7 +174,7 @@ export default function ProductsPage() {
 
   // กดแล้วเพิ่ม สินค้า เข้าตะกร้า
   const handleAddCustomPrint = async () => {
-    const result = await addToCart({
+    await addToCart({
       id: "custom-print",
       name: "เสื้อสกรีนลายตามสั่ง",
       price: 390,
@@ -182,9 +182,6 @@ export default function ProductsPage() {
         ? URL.createObjectURL(uploadedFile)
         : "https://josephineco.com/cdn/shop/files/6217024316_010_1.jpg?v=1773234174&width=2048",
     });
-    if (result?.needLogin) {
-      router.push("/login");
-    }
   };
 
   // กดแล้วเปิด Modal ให้เลือกไซส์ก่อนเพิ่มลงตะกร้า
@@ -201,11 +198,8 @@ export default function ProductsPage() {
   const confirmAddToCart = async () => {
     if (!sizeModalProduct) return;
     const color = sizeModalProduct.colors?.[0] || 'White';
-    const result = await addToCart(sizeModalProduct, 1, selectedModalSize, color);
+    await addToCart(sizeModalProduct, 1, selectedModalSize, color);
     setSizeModalProduct(null);
-    if (result?.needLogin) {
-      router.push("/login");
-    }
   };
 
   return (
