@@ -168,6 +168,7 @@ npm test        # รัน unit/integration test (jest)
 ```
 
 
+```mermaid
 flowchart TD
     Start(["เข้าเว็บ"]) --> ViewProducts["ดูสินค้าในเว็บ (ไม่ต้อง Login)\n/shop"]
     ViewProducts --> ChoosePath{"เลือกทาง"}
@@ -320,3 +321,4 @@ flowchart TD
     AdminOrders --> DB
     AdminDesigns --> DB
     AdminCatalog --> DB
+```
