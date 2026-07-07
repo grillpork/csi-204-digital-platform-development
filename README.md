@@ -7,6 +7,10 @@
 
 # CustomShirt
 
+🌐 **Website URL (Live Demo):** [https://csi-204-digital-platform-developmen.vercel.app](https://csi-204-digital-platform-developmen.vercel.app/)
+
+---
+
 ระบบร้านค้าออนไลน์ (E-commerce) สำหรับสั่งทำและสกรีนโลโก้ลงบนเสื้อยืด พัฒนาขึ้นเพื่อ **การศึกษารูปแบบการทำงานของระบบ E-commerce** ในรายวิชา CSI-204 Digital Platform Development
 
 ## วัตถุประสงค์ของโปรเจกต์
