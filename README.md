@@ -172,6 +172,7 @@ npm test        # รัน unit/integration test (jest)
 ```
 
 
+<<<<<<< Updated upstream
 ## แผนภาพการทำงานของระบบ (System Diagrams)
 
 ### 1. แผนภาพแสดงการใช้งานระบบ (Use Case Diagram)
@@ -657,3 +658,9 @@ flowchart TD
     AdminDesigns --> DB
     AdminCatalog --> DB
 ```
+=======
+- 67113735 Awirut Jiensakul
+- 67118021 Triopp Saibut
+- 67156767 Phakjira Deechoi
+- 67141535 Lalla Dodchare
+>>>>>>> Stashed changes
