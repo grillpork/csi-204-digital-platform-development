@@ -53,6 +53,11 @@ const DocsLayout = ({ children }) => {
                                 </Link>
                             </li>
                             <li>
+                                <Link href="/docs/wireframe-homepage" className={getLinkClass("/docs/wireframe-homepage")}>
+                                    แบบร่างหน้าแรก (Wireframe)
+                                </Link>
+                            </li>
+                            <li>
                                 <Link href="/docs/api" className={getLinkClass("/docs/api")}>
                                     รายละเอียด API (API Routes)
                                 </Link>
