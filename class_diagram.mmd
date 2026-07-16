@@ -1,0 +1,176 @@
+classDiagram
+    class User {
+        +String id
+        +String name
+        +String email
+        +String password
+        +String? address
+        +String? phone
+        +String? bio
+        +String? avatarUrl
+        +Int roleId
+        +Boolean isSeller
+        +String? shopName
+        +DateTime createdAt
+    }
+
+    class Role {
+        +Int id
+        +String name
+    }
+
+    class Product {
+        +Int id
+        +String name
+        +String description
+        +Int price
+        +Category category
+        +String[] images
+        +String[] colors
+        +Size[] sizes
+        +Int stock
+        +String sellerId
+        +DateTime createdAt
+        +DateTime updatedAt
+        +Boolean is_custom
+        +Int? base_product_id
+        +String? overlay_image
+        +Float? overlay_position_x
+        +Float? overlay_position_y
+        +Float? overlay_size
+        +String? print_side
+        +String? screen_size
+        +String? print_technique
+        +Boolean is_public
+        +ApprovalStatus approvalStatus
+        +DateTime? submittedAt
+        +DateTime? reviewedAt
+        +String? reviewedById
+        +String? rejectionReason
+    }
+
+    class Cart {
+        +Int id
+        +String userId
+        +DateTime createdAt
+        +DateTime updatedAt
+    }
+
+    class CartItem {
+        +Int id
+        +Int cartId
+        +Int productId
+        +Int quantity
+        +DateTime addedAt
+    }
+
+    class Favorite {
+        +Int id
+        +String userId
+        +Int productId
+        +DateTime createdAt
+    }
+
+    class Order {
+        +String id
+        +String userId
+        +OrderStatus status
+        +Int total_amount
+        +String shippingAddress
+        +String? phone
+        +DateTime createdAt
+        +DateTime updatedAt
+    }
+
+    class OrderItem {
+        +Int id
+        +String orderId
+        +Int productId
+        +Int quantity
+        +Int price
+    }
+
+    class Payments {
+        +String id
+        +String order_id
+        +Int amount
+        +String method
+        +String status
+        +String? transaction_id
+        +DateTime? paid_at
+        +String? qr_code_url
+        +DateTime? expires_at
+        +DateTime created_at
+    }
+
+    class Shipping {
+        +Int id
+        +String orderId
+        +String carrier
+        +String trackingNumber
+        +String status
+        +DateTime updatedAt
+    }
+
+    class Category {
+        <<enumeration>>
+        TSHIRT
+        POLO
+        HOODIE
+        LONG_SLEEVE
+        TANK_TOP
+    }
+
+    class Size {
+        <<enumeration>>
+        XS
+        S
+        M
+        L
+        XL
+        XXL
+    }
+
+    class ApprovalStatus {
+        <<enumeration>>
+        DRAFT
+        PENDING
+        APPROVED
+        REJECTED
+    }
+
+    class OrderStatus {
+        <<enumeration>>
+        PENDING
+        PENDING_PAYMENT
+        PAYMENT_EXPIRED
+        PAID
+        PROCESSING
+        SHIPPED
+        COMPLETED
+        CANCELLED
+    }
+
+    %% ── Relationships ──────────────────────────────
+    Role "1" --> "many" User : has
+
+    User "1" --> "0..1" Cart : owns
+    User "1" --> "many" Favorite : marks
+    User "1" --> "many" Order : places
+    User "1" --> "many" Product : sells
+
+    Cart "1" --> "many" CartItem : contains
+    Product "1" --> "many" CartItem : referenced by
+
+    Product "1" --> "many" Favorite : favorited as
+
+    Order "1" --> "many" OrderItem : contains
+    Product "1" --> "many" OrderItem : referenced by
+
+    Order "1" --> "0..1" Payments : has
+    Order "1" --> "0..1" Shipping : has
+
+    Product ..> Category : uses
+    Product ..> Size : uses
+    Product ..> ApprovalStatus : uses
+    Order ..> OrderStatus : uses
