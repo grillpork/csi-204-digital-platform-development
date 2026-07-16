@@ -217,6 +217,19 @@ function CustomShirtPageContent() {
   const onFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
+      
+      const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        alert('ระบบรองรับเฉพาะไฟล์รูปภาพประเภท PNG, JPG และ WebP เท่านั้น');
+        e.target.value = '';
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('ไฟล์ต้องมีขนาดไม่เกิน 10MB');
+        e.target.value = '';
+        return;
+      }
+
       setOverlayFile(file); // Store raw File object
       const reader = new FileReader();
       reader.addEventListener('load', () => {
@@ -420,7 +433,10 @@ function CustomShirtPageContent() {
           method: 'POST',
           body: rawFormData,
         });
-        if (!rawResponse.ok) throw new Error('Failed to upload raw front overlay image');
+        if (!rawResponse.ok) {
+          const errData = await rawResponse.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to upload raw front overlay image');
+        }
         const rawData = await rawResponse.json();
         finalOverlayFrontUrl = rawData.imageUrl;
       }
@@ -433,7 +449,10 @@ function CustomShirtPageContent() {
           method: 'POST',
           body: rawFormData,
         });
-        if (!rawResponse.ok) throw new Error('Failed to upload raw back overlay image');
+        if (!rawResponse.ok) {
+          const errData = await rawResponse.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to upload raw back overlay image');
+        }
         const rawData = await rawResponse.json();
         finalOverlayBackUrl = rawData.imageUrl;
       }
@@ -453,7 +472,10 @@ function CustomShirtPageContent() {
           method: 'POST',
           body: formData,
         });
-        if (!response.ok) throw new Error('Failed to upload front preview image');
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to upload front preview image');
+        }
         const data = await response.json();
         imagesArray.push(data.imageUrl);
       }
@@ -470,7 +492,10 @@ function CustomShirtPageContent() {
           method: 'POST',
           body: formData,
         });
-        if (!response.ok) throw new Error('Failed to upload back preview image');
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to upload back preview image');
+        }
         const data = await response.json();
         imagesArray.push(data.imageUrl);
       }
@@ -536,19 +561,6 @@ function CustomShirtPageContent() {
     <div className="min-h-screen bg-slate-50 text-slate-900">
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Breadcrumbs */}
-        <nav className="flex text-sm text-slate-500 mb-8 items-center gap-2">
-          <Link href="/" className="hover:text-slate-950 transition-colors flex items-center gap-1">
-            <ArrowLeft size={16} /> กลับสู่หน้าหลัก
-          </Link>
-          <span>/</span>
-          <Link href={`/product/${product.id}`} className="hover:text-slate-950 transition-colors">
-            {product.name}
-          </Link>
-          <span>/</span>
-          <span className="text-slate-950 font-medium">ออกแบบเอง</span>
-        </nav>
-
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mb-3">
             ออกแบบเสื้อ — {product.name}
@@ -733,7 +745,7 @@ function CustomShirtPageContent() {
                     onChange={onFileChange}
                   />
                 </label>
-                <p className="text-xs text-slate-400 mt-2 text-center">รองรับ PNG, JPG, GIF สูงสุด 10MB</p>
+                 <p className="text-xs text-slate-400 mt-2 text-center">รองรับ PNG, JPG, WebP สูงสุด 10MB</p>
               </div>
 
               {/* Color */}

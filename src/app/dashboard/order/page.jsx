@@ -219,7 +219,7 @@ export default function AdminOrders() {
           columns={columns} 
           dataSource={filteredItems} 
           rowKey="id" 
-          pagination={{ pageSize: 10, position: ['bottomCenter'] }}
+          pagination={{ pageSize: 10, placement: 'bottomCenter' }}
           scroll={{ x: 'max-content' }}
         />
       </div>

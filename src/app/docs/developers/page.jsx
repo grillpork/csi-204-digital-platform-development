@@ -1,58 +1,44 @@
 "use client";
 
 import React from 'react';
-import { Mail, Code2, Layers, Cpu, Database } from 'lucide-react';
+import { Code2, Layers, Cpu, Database } from 'lucide-react';
 
 const developers = [
   {
     id: 1,
-    name: "นักพัฒนาคนที่ 1",
-    role: "Full Stack Developer",
-    bio: "รับผิดชอบการออกแบบโครงสร้างสถาปัตยกรรม Frontend (Next.js) และการจัดการระบบ State ในหน้าสั่งออกแบบเสื้อผ้า (Custom Designer)",
-    skills: ["Next.js", "React.js", "Zustand", "Tailwind CSS"],
-    email: "dev1@example.com",
-    github: "github.com",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&auto=format&fit=crop"
+    name: "อวิรุทธิ์ เจียรสกุล (67113735)",
+    role: "Full-Stack Developer",
+    bio: "ร่วมกับสมาชิกในทีมออกแบบ พัฒนา และดูแลระบบในส่วนของ Frontend (Next.js), การจัดการสถานะ (State) ของเครื่องมือสั่งออกแบบเสื้อสกรีน และพัฒนาระบบร่วมกันตั้งแต่หน้าบ้านจนถึงหลังบ้าน",
+    skills: ["PostgreSQL", "Prisma ORM", "Neon Database", "Cloudflare R2", "AWS S3"],
+    github: "github.com/AwirutJr",
+    avatar: "/image-team/67113735.jpg"
   },
   {
     id: 2,
-    name: "นักพัฒนาคนที่ 2",
-    role: "Full Stack Developer",
-    bio: "ดูแลรับผิดชอบระบบหลังบ้าน (Backend Route Handlers) และความปลอดภัยของระบบยืนยันตัวตน (JWT Authentication / NextAuth)",
-    skills: ["Node.js", "NextAuth", "JWT", "RESTful API"],
-    email: "dev2@example.com",
-    github: "github.com",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=256&auto=format&fit=crop"
+    name: "ไตรภพ สายบุตร (67118021)",
+    role: "Full-Stack Developer",
+    bio: "ร่วมกับสมาชิกในทีมออกแบบและเชื่อมโยงโครงสร้างฐานข้อมูลเชิงสัมพันธ์ (PostgreSQL บน Neon Serverless), วางระบบจัดเก็บรูปภาพผ่าน Cloud Object Storage และร่วมพัฒนาระบบในส่วนงานต่างๆ",
+    skills: ["Next.js", "React.js", "Zustand", "Tailwind CSS", "HTML Canvas"],
+    github: "github.com/grillpork",
+    avatar: "/image-team/67118021.jpg"
   },
   {
     id: 3,
-    name: "นักพัฒนาคนที่ 3",
-    role: "Full Stack Developer",
-    bio: "ออกแบบฐานข้อมูลเชิงสัมพันธ์ (PostgreSQL) การจัดการข้อมูลความคมชัดของอาร์ตเวิร์ค และระบบจัดการคลังเสื้อ (Inventory Management)",
-    skills: ["PostgreSQL", "Prisma ORM", "Neon Database", "SQL"],
-    email: "dev3@example.com",
-    github: "github.com",
-    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=256&auto=format&fit=crop"
+    name: "ภัคจิรา ดีช่วย (67156767)",
+    role: "Full-Stack Developer",
+    bio: "ร่วมกับสมาชิกในทีมพัฒนาระบบรักษาความปลอดภัยและยืนยันตัวตน (JWT Session Cookie), ตลอดจนเขียนฟังก์ชันหน้าจอควบคุมข้อมูลสมาชิกและร่วมพัฒนาฟีเจอร์ส่วนอื่นๆ ร่วมกัน",
+    skills: ["React.js", "JWT Session", "Responsive UI", "CSS Flexbox/Grid"],
+    github: "github.com/phakjiradee",
+    avatar: "/image-team/67156767.jpg"
   },
   {
     id: 4,
-    name: "นักพัฒนาคนที่ 4",
-    role: "Full Stack Developer",
-    bio: "จัดการระบบคำนวณราคาขาย (Pricing Service) การคำนวณแบ่งส่วนรายได้กำไร (Revenue Sharing) และเชื่อมโยงระบบตะกร้าสินค้า",
-    skills: ["Zustand State", "Checkout Logic", "Pricing Algorithm", "UI/UX"],
-    email: "dev4@example.com",
-    github: "github.com",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=256&auto=format&fit=crop"
-  },
-  {
-    id: 5,
-    name: "นักพัฒนาคนที่ 5",
-    role: "Full Stack Developer",
-    bio: "ดูแลรับผิดชอบระบบบริการยืนยันตัวตนผู้ใช้ (KYC), การถอนเงินรายได้ (Withdrawal Process) และระบบติดตามขนส่งสินค้า (Tracking Number)",
-    skills: ["KYC Integration", "Payment Webhooks", "Logistics API", "Cloud Storage"],
-    email: "dev5@example.com",
-    github: "github.com",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=256&auto=format&fit=crop"
+    name: "ลัลน์ลลิต โดดชารี (67141535)",
+    role: "Full-Stack Developer",
+    bio: "ร่วมกับสมาชิกในทีมออกแบบ RESTful API Routes (Product CRUD, Seller Center), วางตรรกะเชื่อมโยงตะกร้าสินค้ากับ Database และรวมระบบทั้งหมดให้เข้ากันได้อย่างสมบูรณ์",
+    skills: ["Node.js", "Next.js Route Handlers", "Product CRUD API", "Cart DB Sync", "REST API"],
+    github: "github.com/Lalla-Dodchare",
+    avatar: "/image-team/67141535.jpg"
   }
 ];
 
@@ -63,7 +49,7 @@ export default function DevelopersPage() {
       <div className="mb-10">
         <h1 className="text-4xl font-bold tracking-tight text-slate-900 mb-4">ทีมผู้พัฒนา (Developer Team)</h1>
         <p className="text-[15px] leading-7 text-slate-500 max-w-2xl">
-          กลุ่มผู้พัฒนาแพลตฟอร์ม The Shirtsy ประกอบด้วยนักพัฒนาฟูลสแต็ก 5 ท่านที่รับผิดชอบร่วมกันในการออกแบบ พัฒนา และดูแลความปลอดภัยของระบบทั้งหมด
+          กลุ่มผู้พัฒนาแพลตฟอร์ม The Shirtsy ประกอบด้วยนักพัฒนาฟูลสแต็ก 4 ท่านที่รับผิดชอบร่วมกันในการออกแบบ พัฒนา และดูแลความปลอดภัยของระบบทั้งหมด
         </p>
       </div>
 
@@ -114,11 +100,7 @@ export default function DevelopersPage() {
             </div>
 
             {/* Bottom Contact Links */}
-            <div className="pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-              <span className="flex items-center gap-1.5 hover:text-slate-900 transition-colors cursor-pointer">
-                <Mail className="w-3.5 h-3.5" />
-                {dev.email}
-              </span>
+            <div className="pt-4 border-t border-slate-200 flex items-center justify-end text-xs text-slate-500">
               <a 
                 href={`https://${dev.github}`} 
                 target="_blank" 

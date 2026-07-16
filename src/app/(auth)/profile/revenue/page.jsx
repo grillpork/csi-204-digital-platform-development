@@ -124,7 +124,7 @@ export default function UserRevenuePage() {
           <div className="text-center py-10">
             <Package size={48} className="mx-auto text-slate-300 mb-3" />
             <p className="text-slate-500 font-medium">คุณยังไม่มียอดขายสินค้า</p>
-            <Link href="/seller/products/new" className="text-indigo-600 hover:underline text-sm font-semibold mt-2 inline-block">
+            <Link href="/custom" className="text-indigo-600 hover:underline text-sm font-semibold mt-2 inline-block">
               สร้างผลงานใหม่เพื่อเพิ่มยอดขาย!
             </Link>
           </div>
