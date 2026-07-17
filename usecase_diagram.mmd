@@ -1,12 +1,13 @@
-graph LR
-    %% ── Left Actor ───────────────────────────────
-    User(("🧍 User"))
+flowchart LR
+    %% ── Left Actors ──────────────────────────────
+    User(("User"))
+    Creator(("Creator\n(ฟีเจอร์เสริม\nของ User)"))
+    User -.->|"เปิดใช้ฟีเจอร์\nออกแบบ"| Creator
 
     %% ── System Boundary ──────────────────────────
-    subgraph System ["🛒 Shirtsty Shop"]
-        direction TB
-
-        %% Common
+    subgraph System ["The shirty"]
+        
+        %% ทั่วไป
         UC_Register(["สมัครสมาชิก"])
         UC_Login(["เข้าสู่ระบบ"])
         UC_Profile(["จัดการโปรไฟล์"])
@@ -18,18 +19,18 @@ graph LR
         UC_Cart(["จัดการตะกร้า"])
         UC_Checkout(["สั่งซื้อ / ชำระเงิน\n(COD / QR PromptPay)"])
         UC_Cancel(["ยกเลิก Pending Order"])
-        UC_Custom(["Custom Preorder\n(B1)"])
+        UC_Custom(["Custom Preorder (B1)"])
 
         %% ฝั่งออกแบบ/ขาย
         UC_Upload(["อัปโหลดลาย + เลือกสี/ไซส์"])
-        UC_Package(["เลือกแพ็กเกจสกรีน\n(DTF / DTG)"])
+        UC_Package(["เลือกแพ็กเกจสกรีน (DTF/DTG)"])
         UC_Draft(["บันทึกร่าง"])
         UC_Submit(["ส่งขออนุมัติ"])
         UC_Retract(["ถอนคำขออนุมัติ"])
         UC_Withdraw(["ถอนเงินรายได้"])
         UC_KYC(["ยืนยันตัวตน KYC"])
 
-        %% Admin
+        %% ฝั่งหลังบ้าน (Admin)
         UC_Review(["ตรวจสอบลาย\nอนุมัติ / ปฏิเสธ"])
         UC_Price(["กำหนดราคา / สต็อก"])
         UC_Publish(["เผยแพร่สินค้า\nบน Marketplace"])
@@ -48,10 +49,10 @@ graph LR
         UC_Cancel      -.->|"<<extend>>" | UC_OrderHistory
     end
 
-    %% ── Right Actor ──────────────────────────────
-    Admin(("🧍 Admin"))
+    %% ── Right Actor ───────────────────────
+    Admin(("Admin"))
 
-    %% ── User → Use Cases ─────────────────────────
+    %% ── User → Use Cases ────────
     User --> UC_Register
     User --> UC_Login
     User --> UC_Profile
@@ -62,12 +63,15 @@ graph LR
     User --> UC_Checkout
     User --> UC_Cancel
     User --> UC_Custom
-    User --> UC_Upload
-    User --> UC_Package
-    User --> UC_Draft
-    User --> UC_Submit
-    User --> UC_Retract
-    User --> UC_Withdraw
+
+    %% ── Creator → Use Cases ───────
+    Creator --> UC_Upload
+    Creator --> UC_Package
+    Creator --> UC_Draft
+    Creator --> UC_Submit
+    Creator --> UC_Retract
+    Creator --> UC_Withdraw
+    Creator --> UC_KYC
 
     %% ── Admin → Use Cases ────────────────────────
     Admin --> UC_Review
